@@ -10,12 +10,12 @@ import org.specs2.specification.BeforeExample
 import helpers._
 import org.bson.types.ObjectId
 
-import securesocial.core.{AuthenticationMethod, IdentityId}
+import securesocial.core.{SocialUser, AuthenticationMethod, IdentityId}
 
 
 @RunWith(classOf[JUnitRunner])
 class UserSpec extends Specification with BeforeExample {
-  val defaultUser = User(new ObjectId, IdentityId("id", "provider"), "Alex", "B", "Alex B.", None, None, AuthenticationMethod("method"), None, None, None)
+  val defaultUser = User(new ObjectId, SocialUser(IdentityId("id", "provider"), "Alex", "B", "Alex B.", None, None, AuthenticationMethod("method"), None, None, None))
 
   def before = new WithFakeApplication {
     UserDAO.remove(MongoDBObject.empty)
@@ -29,12 +29,12 @@ class UserSpec extends Specification with BeforeExample {
     }
 
     "be searchable by IdentityId" in new WithFakeApplication {
-      val foundUser = User.find(defaultUser.identityId).getOrElse(None)
+      val foundUser = User.find(defaultUser.identity.identityId).getOrElse(None)
       foundUser must equalTo(defaultUser)
     }
 
     "be deletable" in new WithFakeApplication {
-      User.delete(defaultUser.identityId)
+      User.delete(defaultUser.identity.identityId)
 
       User.all().size must equalTo(0)
     }
