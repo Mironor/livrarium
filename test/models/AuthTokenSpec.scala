@@ -14,7 +14,7 @@ import org.joda.time.DateTime
 
 
 @RunWith(classOf[JUnitRunner])
-class TokenSpec extends Specification with BeforeExample {
+class AuthTokenSpec extends Specification with BeforeExample {
   val defaultToken = Token("uuid", "email", DateTime.now, DateTime.now, isSignUp = false)
 
   def before = new WithFakeApplication {
