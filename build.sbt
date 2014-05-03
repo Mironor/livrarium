@@ -8,4 +8,6 @@ libraryDependencies ++= Seq(
   "ws.securesocial" %% "securesocial" % "2.1.3"
 )
 
+coffeescriptOptions := Seq("bare")
+
 play.Project.playScalaSettings
