@@ -3,29 +3,48 @@
 # ~~~~
 
 # Home page
-GET        /                    controllers.Application.index
+GET           /                              controllers.Application.index
 
 # Map static resources from the /public folder to the /assets URL path
-GET        /assets/*file        controllers.Assets.at(path="/public", file)
+GET           /assets/*file                  controllers.Assets.at(path="/public", file)
+
+# Actual service
+GET           /cloud                         controllers.Cloud.index
+GET           /cloud/menu                    controllers.Cloud.menu
+POST          /cloud/upload                  controllers.Cloud.upload
+
+GET           /book                          controllers.Book.index
+GET           /book/:id                      controllers.Book.info(id)
+GET           /book/read/:id                 controllers.Book.read(id)
+POST          /book/move/:id                 controllers.Book.move(id)
+POST          /book/toRead/:id               controllers.Book.toRead(id)
+POST          /book/update/:id               controllers.Book.update(id)
+POST          /book/archive/:id              controllers.Book.archive(id)
+DELETE        /book/:id                      controllers.Book.delete(id)
+
+GET           /search/:query                 controllers.Search.search(query)
+
+GET           /settings                      controllers.Settings.index
+POST          /settings/update               controllers.Settings.update
 
 # SecureSocial
 #   Login page
-GET     /login                      securesocial.controllers.LoginPage.login
-GET     /logout                     securesocial.controllers.LoginPage.logout
+GET           /login                         securesocial.controllers.LoginPage.login
+GET           /logout                        securesocial.controllers.LoginPage.logout
 
 #   User Registration and password handling
-GET     /signup                     securesocial.controllers.Registration.startSignUp
-POST    /signup                     securesocial.controllers.Registration.handleStartSignUp
-GET     /signup/:token              securesocial.controllers.Registration.signUp(token)
-POST    /signup/:token              securesocial.controllers.Registration.handleSignUp(token)
-GET     /reset                      securesocial.controllers.Registration.startResetPassword
-POST    /reset                      securesocial.controllers.Registration.handleStartResetPassword
-GET     /reset/:token               securesocial.controllers.Registration.resetPassword(token)
-POST    /reset/:token               securesocial.controllers.Registration.handleResetPassword(token)
-GET     /password                   securesocial.controllers.PasswordChange.page
-POST    /password                   securesocial.controllers.PasswordChange.handlePasswordChange
+GET           /signup                        securesocial.controllers.Registration.startSignUp
+POST          /signup                        securesocial.controllers.Registration.handleStartSignUp
+GET           /signup/:token                 securesocial.controllers.Registration.signUp(token)
+POST          /signup/:token                 securesocial.controllers.Registration.handleSignUp(token)
+GET           /reset                         securesocial.controllers.Registration.startResetPassword
+POST          /reset                         securesocial.controllers.Registration.handleStartResetPassword
+GET           /reset/:token                  securesocial.controllers.Registration.resetPassword(token)
+POST          /reset/:token                  securesocial.controllers.Registration.handleResetPassword(token)
+GET           /password                      securesocial.controllers.PasswordChange.page
+POST          /password                      securesocial.controllers.PasswordChange.handlePasswordChange
 
 #   Providers entry points
-GET     /authenticate/:provider     securesocial.controllers.ProviderController.authenticate(provider)
-POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
-GET     /not-authorized             securesocial.controllers.ProviderController.notAuthorized
+GET           /authenticate/:provider        securesocial.controllers.ProviderController.authenticate(provider)
+POST          /authenticate/:provider        securesocial.controllers.ProviderController.authenticateByPost(provider)
+GET           /not-authorized                securesocial.controllers.ProviderController.notAuthorized
