@@ -1,0 +1,6 @@
+{
+    "name": "livrarium",
+    "dependencies": {
+        "angular": "1.2.15"
+    }
+}
