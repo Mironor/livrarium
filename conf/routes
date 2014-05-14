@@ -13,14 +13,14 @@ GET           /cloud                         controllers.Cloud.index
 GET           /cloud/menu                    controllers.Cloud.menu
 POST          /cloud/upload                  controllers.Cloud.upload
 
-GET           /book                          controllers.Book.index
-GET           /book/:id                      controllers.Book.info(id)
-GET           /book/read/:id                 controllers.Book.read(id)
-POST          /book/move/:id                 controllers.Book.move(id)
-POST          /book/toRead/:id               controllers.Book.toRead(id)
-POST          /book/update/:id               controllers.Book.update(id)
-POST          /book/archive/:id              controllers.Book.archive(id)
-DELETE        /book/:id                      controllers.Book.delete(id)
+GET           /books                         controllers.Books.index
+GET           /books/:id                     controllers.Books.info(id)
+GET           /books/read/:id                controllers.Books.read(id)
+POST          /books/move/:id                controllers.Books.move(id)
+POST          /books/toRead/:id              controllers.Books.toRead(id)
+POST          /books/update/:id              controllers.Books.update(id)
+POST          /books/archive/:id             controllers.Books.archive(id)
+DELETE        /books/:id                     controllers.Books.delete(id)
 
 GET           /search/:query                 controllers.Search.search(query)
 
