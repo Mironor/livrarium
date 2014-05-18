@@ -5,6 +5,6 @@ import securesocial.core.SecureSocial
 
 object Search extends Controller with SecureSocial{
 
-  def search = TODO
+  def search(query: String) = TODO
 
 }

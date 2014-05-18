@@ -15,19 +15,18 @@ object Cloud extends Controller with SecureSocial {
 
   def upload = Action(parse.multipartFormData) {
     request =>
+      print(request.body.file("book"))
       request.body.file("book").map {
-        book => {
+        book =>
           val name = book.filename
           val fileType = book.contentType.getOrElse("")
 
           book.ref.moveTo(new File(s"/tmp/$name"))
 
           Book.create(name, fileType)
-
           Ok(Json.obj("error" -> ""))
-        }
       }.getOrElse {
-        Redirect(routes.Application.index()).flashing("error" -> "Missing file")
+        Ok(Json.obj("error" -> "Missing file"))
       }
 
   }

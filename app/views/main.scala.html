@@ -3,9 +3,17 @@
 <html>
     <head>
         <title>Livrarium</title>
-        <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+        <script src="@routes.Assets.at("js/app/libs/bower_dependencies/ng-file-upload/angular-file-upload-shim.js")"></script>
+        <script src="@routes.Assets.at("js/app/libs/bower_dependencies/angular/angular.js")"></script>
+        <script src="@routes.Assets.at("js/app/libs/bower_dependencies/ng-file-upload/angular-file-upload.js")"></script>
+        <script src="@routes.Assets.at("js/app/upload.js")"></script>
     </head>
-    <body ng-app ng-init="name='Livrarium'">
-        <h1>Hello {{name}}!</h1>
+    <body ng-app="myApp">
+        <div ng-controller="MyCtrl">
+            <input type="text" name="book" ng-model="myModelObj">
+            <input type="file" name="book" ng-file-select="onFileSelect($files)" >
+            <input type="file" name="book" ng-file-select="onFileSelect($files)" multiple>
+            <button ng-click="upload.abort()">Cancel Upload</button>
+        </div>
     </body>
 </html>

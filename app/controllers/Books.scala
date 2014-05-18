@@ -7,18 +7,18 @@ object Books extends Controller with SecureSocial{
 
   def index = TODO
 
-  def info = TODO
+  def info(id: String) = TODO
 
-  def read = TODO
+  def read(id: String) = TODO
 
-  def move = TODO
+  def move(id: String) = TODO
 
-  def toRead = TODO
+  def toRead(id: String) = TODO
 
-  def update = TODO
+  def update(id: String) = TODO
 
-  def archive = TODO
+  def archive(id: String) = TODO
 
-  def delete = TODO
+  def delete(id: String) = TODO
 
 }
