@@ -1,7 +1,7 @@
-//inject angular file upload directives and service.
-angular.module('myApp', ['angularFileUpload']);
-    angular.module('myApp').controller('MyCtrl', function($scope, $upload) {
-    $scope.onFileSelect = function($files) {
+angular.module('lvr.uploadButton', [
+    'angularFileUpload'
+]).controller('UploadButtonCtrl', function ($scope, $upload) {
+    $scope.onFileSelect = function ($files) {
         //$files: an array of files selected, each file has name, size, and type.
         for (var i = 0; i < $files.length; i++) {
             var file = $files[i];
@@ -16,9 +16,9 @@ angular.module('myApp', ['angularFileUpload']);
                 //fileFormDataName: myFile, //or a list of names for multiple files (html5).
                 /* customize how data is added to formData. See #40#issuecomment-28612000 for sample code */
                 //formDataAppender: function(formData, key, val){}
-            }).progress(function(evt) {
+            }).progress(function (evt) {
                 console.log('percent: ' + parseInt(100.0 * evt.loaded / evt.total));
-            }).success(function(data, status, headers, config) {
+            }).success(function (data, status, headers, config) {
                 // file is uploaded successfully
                 console.log(data);
             });
