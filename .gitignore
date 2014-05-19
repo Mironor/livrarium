@@ -12,4 +12,4 @@ dist
 /.project
 /RUNNING_PID
 /.settings
-/public/js/app/libs/bower_dependencies
+/public/js/libs/bower_dependencies
