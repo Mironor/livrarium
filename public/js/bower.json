@@ -1,6 +1,8 @@
 {
     "name": "livrarium",
     "dependencies": {
+        "less": "1.7.0",
+        "lesshat": "3.0.1",
         "angular": "1.2.15",
         "angular-route": "1.2.15",
         "angular-loader": "1.2.15",

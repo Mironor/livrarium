@@ -1,44 +1,69 @@
 <!DOCTYPE html>
 
 <html>
-    <head>
-        <title>Livrarium</title>
-        <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.4.2/pure-min.css">
-        <!--
-        <script src="@routes.Assets.at("js/libs/bower_dependencies/ng-file-upload/angular-file-upload-shim.js")"></script>
-        <script src="@routes.Assets.at("js/libs/bower_dependencies/angular/angular.js")"></script>
-        <script src="@routes.Assets.at("js/libs/bower_dependencies/ng-file-upload/angular-file-upload.js")"></script>
-        <script src="@routes.Assets.at("js/app/modules/upload-button/upload-button.js")"></script>
-        -->
-    </head>
-    <body>
-        <header>
-            <div id="logo"></div>
-            <div id="search"></div>
-            <div id="user"></div>
-        </header>
-        <div>
-            <div id="left-menu">
-                <div>
-                    <div class="upload-button"></div>
-                    <div class="settings-button"></div>
-                </div>
-                <ul>
-                    <li class="left-menu-option">All books</li>
-                    <li class="left-menu-option">Tree view</li>
-                    <li class="left-menu-option">Recent</li>
-                    <li class="left-menu-option">To-reads</li>
-                    <li class="left-menu-option">To-reads</li>
-                    <li class="left-menu-option">Archive</li>
-                </ul>
-            </div>
-            <div id="content">
-                <div class="content-view">
-                    <div class="content-header"></div>
-                    <div class="content-mosaic"></div>
-                </div>
-            </div>
+<head>
+    <title>Livrarium</title>
+    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.4.2/pure-min.css">
+    <script>
+        less = {
+            env: "development",
+            dumpLineNumbers: "comments"
+        }
+    </script>
+    <link rel="stylesheet/less" type="text/css" href="styles.less"/>
+    <script src="../public/js/libs/bower_dependencies/less/dist/less-1.7.0.js" type="text/javascript"></script>
+    <script>less.watch();</script>
+</head>
+<body>
+<header>
+    <div>
+        <div id="logo"><img src="../public/img/logo.png" alt="Livrarium"/></div>
+        <div id="search"><input type="text"/><a href="/search"></a></div>
+        <div id="user"><img src="../public/img/av.png" alt="current user"/></div>
+    </div>
+</header>
+<div id="main">
+    <div id="left-menu">
+        <div class="buttons">
+            <div class="upload pure-button"><i></i><span>upload books</span></div>
+            <div class="settings pure-button"><i></i></div>
         </div>
+        <ul class="items">
+            <li class="menu-root menu-item">All books</li>
 
-    </body>
+            <li class="menu-root menu-item menu-tree open">
+                <i></i>Books
+                <ul class="sub-folder">
+                    <li class="menu-item open">
+                        <i></i>Software engineering
+                        <ul class="sub-folder">
+                            <li class="menu-item">
+                                <i style="display: none"></i>JavaScript
+                            </li>
+                            <li class="menu-item">
+                                <i style="display: none"></i>Databases
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="menu-item">
+                        <i style="display: none"></i>Design
+                    </li>
+                </ul>
+            </li>
+
+            <li class="menu-root menu-item">Recent</li>
+            <li class="menu-root menu-item">To-reads</li>
+            <li class="menu-root menu-item">Archive</li>
+
+        </ul>
+    </div>
+    <div id="content">
+        <div class="content-view">
+            <div class="content-header"></div>
+            <div class="content-mosaic"></div>
+        </div>
+    </div>
+</div>
+
+</body>
 </html>
