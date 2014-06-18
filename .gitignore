@@ -13,3 +13,4 @@ dist
 /RUNNING_PID
 /.settings
 /public/js/libs/bower_dependencies
+/projectFilesBackup

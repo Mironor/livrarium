@@ -2,6 +2,7 @@
 
 @icons-background: "../public/img/icons-map.png";
 
+@white: #fff;
 @orange: #ff9900;
 @grey_light: #e9e9e9;
 @grey: #bcbcbf;
@@ -10,9 +11,30 @@
 
 @border-radius: 3px;
 
+@icons-font-name: "untitled-font-1";
+
 body {
   font-family: Arial, Helvetica sans-serif;
   color: @grey_dark;
+
+  input[type="checkbox"] {
+    display: none;
+  }
+
+  input[type="checkbox"] + span {
+    cursor: pointer;
+  }
+
+  input[type="checkbox"] + span:before {
+    padding-right: 4px;
+    font-family: @icons-font-name;
+    font-size: 19px;
+    content: "b";
+  }
+
+  input[type="checkbox"]:checked + span:before {
+    content: "1";
+  }
 }
 
 header {
@@ -56,6 +78,12 @@ header {
         background: @blue;
         .border-top-right-radius(@border-radius);
         .border-bottom-right-radius(@border-radius);
+
+        text-decoration: none;
+        line-height: 40px;
+        text-align: center;
+        color: @white;
+        font-size: 24px;
       }
     }
 
@@ -72,31 +100,31 @@ header {
 #main {
   margin: 35px 20px 0 20px;
 
+  @left-menu-width: 285px;
   #left-menu {
-    widows: 257px;
+    width: @left-menu-width;
+    float: left;
 
     .buttons {
       @height: 29px;
       height: @height;
 
+      i {
+        position: absolute;
+        display: block;
+        top: 0px;
+        color: @white;
+        font-size: 45px;
+      }
+
       .upload {
         position: relative;
         float: left;
-        width: 192px;
+        width: 215px;
         height: @height;
         padding: 8px;
         .border-radius(@border-radius);
         background: @orange;
-
-        i {
-          position: absolute;
-          display: block;
-          left: 10px;
-          top: 6px;
-          width: 44px;
-          height: 31px;
-          background: url(@icons-background) 0px 124px;
-        }
 
         span {
           color: #FFF;
@@ -106,21 +134,16 @@ header {
       }
       .settings {
         position: relative;
-        width: @height;
-        height: @height;
+        .size(@height);
         margin-left: 5px;
         padding: 8px;
         .border-radius(@border-radius);
         background: @orange;
 
         i {
-          position: absolute;
-          display: block;
-          left: 8px;
-          top: 6px;
-          width: 30px;
-          height: 30px;
-          background: url(@icons-background) -47px 124px;
+          font-size: 35px;
+          top: 4px;
+          left: 7px;
         }
       }
     }
@@ -128,30 +151,37 @@ header {
     ul {
       list-style: none;
       padding-left: 15px;
-      padding-top: 15px;
+      padding-top: 30px;
     }
 
     li {
       padding-top: 4px;
     }
 
-    li.menu-root{
+    li.menu-root {
       margin-top: 5px;
     }
 
     li.menu-item {
       position: relative;
-      padding-left: 13px;
+      padding-left: 18px;
+
+      i {
+        position: absolute;
+        display: block;
+        left: 0;
+        top: 7px;
+
+        font-size: 12px;
+
+      }
+
+      &.menu-tree i {
+        font-size: 12px;
+        left: 1px;
+      }
     }
-    li.menu-item > i {
-      position: absolute;
-      display: block;
-      width: 10px;
-      height: 10px;
-      left: 0;
-      top: 7px;
-      background: url(@icons-background) -8px 0px;
-    }
+
     li.menu-item.open > i {
       background-position: 0 0;
     }
@@ -161,5 +191,147 @@ header {
       padding-left: 10px;
     }
 
+  }
+
+  #content {
+    margin-left: @left-menu-width + 50px;
+
+    .icon-drop-down {
+      font-size: 15px;
+      position: relative;
+      top: 2px;
+      color: @grey;
+    }
+
+    .content-header {
+      width: 100%;
+      height: 33px;
+      padding-top: 15px;
+      border-top: @grey_light 1px solid;
+      border-bottom: @grey_light 1px solid;
+
+      .select-all-checkbox {
+        display: inline-block;
+        float: left;
+        color: @grey;
+        cursor: pointer;
+      }
+      .mosaic-sort {
+        float: left;
+        margin-left: 4px;
+        color: @orange;
+        cursor: pointer;
+        i {
+          color: @grey;
+        }
+      }
+      .buttons {
+        display: flex;
+        float: left;
+        margin-top: -3px;
+        margin-left: 30px;
+        justify-content: center;
+        align-items: center;
+        i.icon-button {
+          margin-left: 15px;
+          margin-right: 15px;
+          display: inline-block;
+          font-size: 25px;
+          cursor: pointer;
+        }
+        i.icon-drop-down {
+          top: 3px;
+        }
+        div {
+          display: inline-block;
+          position: relative;
+          cursor: pointer;
+
+          div{
+            position: absolute;
+            top: 30px;
+            width: 180px;
+          }
+        }
+      }
+      .display-mode {
+        position: relative;
+        float: right;
+        height: 40px;
+        margin-top: -4px;
+        i {
+          display: block;
+          float: left;
+          padding: 0 11px;
+          font-size: 27px;
+        }
+        .display-mode-highlight {
+          position: absolute;
+          top: -9px;
+          left: 50px; // 2px list
+          width: 45px;
+          height: 45px;
+          background: @grey_light;
+          .border-radius(@border-radius);
+          z-index: -1;
+        }
+      }
+    }
+
+    .content-mosaic {
+      padding: 30px 0px;
+
+      .files {
+        display: flex;
+
+        .file {
+          width: 176px;
+          height: 275px;
+          margin: 0 30px;
+
+          .thumbnail {
+            position: relative;
+            display: table-cell;
+            width: 176px;
+            height: 220px;
+            padding-top: 4px;
+
+            .border-radius(@border-radius);
+
+            text-align: center;
+            vertical-align: middle;
+          }
+
+          &.selected {
+
+            .thumbnail {
+              border: @grey 1px solid;
+              background: @grey;
+            }
+          }
+
+          .progressbar {
+            width: 100%;
+            height: 5px;
+            margin: 3px auto 0;
+            .display(flex);
+            flex-wrap: nowrap;
+            justify-content: center;
+
+            .bar {
+              height: 3px;
+              flex: 100 1 10px;
+              background: @grey_light;
+              margin: 0 3px;
+              .percent-complete {
+                background: @grey_dark;
+                height: 3px;
+              }
+            }
+
+          }
+        }
+      }
+    }
   }
 }
