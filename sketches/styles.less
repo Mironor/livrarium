@@ -15,6 +15,7 @@
 
 body {
   font-family: Arial, Helvetica sans-serif;
+  font-size: 15px;
   color: @grey_dark;
 
   input[type="checkbox"] {
@@ -40,40 +41,32 @@ body {
 header {
   background: @grey_light;
 
-  & > div {
-    position: relative;
+  &>div{
+    .display(flex);
     height: 73px;
     margin: 0 20px;
+    .justify-content(space-between);
+    .align-items(center);
 
-    #logo {
-      position: absolute;
-      left: 0;
-      top: 50%;
-      margin-top: -30px;
+    img{
+      .flex-shrink(0);
     }
 
     #search {
-      position: absolute;
+      .display(flex);
       width: 755px;
-      height: 30px;
-      left: 50%;
-      margin-left: -325px;
-      top: 50%;
-      margin-top: -18px;
+      padding: 0 20px;
+
       input {
-        float: left;
-        width: 590px;
         height: 30px;
-        margin: 0;
-        padding: 0;
+        .flex(1);
         border: 1px @grey solid;
         .border-top-left-radius(@border-radius);
         .border-bottom-left-radius(@border-radius);
       }
       a {
-        display: inline-block;
         width: 60px;
-        height: 32px;
+        height: 34px;
         margin-left: -1px;
         background: @blue;
         .border-top-right-radius(@border-radius);
@@ -86,24 +79,15 @@ header {
         font-size: 24px;
       }
     }
-
-    #user {
-      position: absolute;
-      right: 0;
-      top: 50%;
-      margin-top: -25px;
-    }
-
   }
 }
 
 #main {
+  .display(flex);
   margin: 35px 20px 0 20px;
 
-  @left-menu-width: 285px;
   #left-menu {
-    width: @left-menu-width;
-    float: left;
+    .flex(0 0 285px);
 
     .buttons {
       @height: 29px;
@@ -194,7 +178,8 @@ header {
   }
 
   #content {
-    margin-left: @left-menu-width + 50px;
+    .flex(1);
+    margin-left: 50px;
 
     .icon-drop-down {
       font-size: 15px;
@@ -247,7 +232,7 @@ header {
           position: relative;
           cursor: pointer;
 
-          div{
+          div {
             position: absolute;
             top: 30px;
             width: 180px;
@@ -282,10 +267,11 @@ header {
       padding: 30px 0px;
 
       .files {
-        display: flex;
+        .display(flex);
+        .flex-wrap(wrap);
 
         .file {
-          width: 176px;
+          .flex(0 0 176px);
           height: 275px;
           margin: 0 30px;
 
@@ -306,7 +292,7 @@ header {
 
             .thumbnail {
               border: @grey 1px solid;
-              background: @grey;
+              background: @grey_light;
             }
           }
 
