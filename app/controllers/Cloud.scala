@@ -1,13 +1,12 @@
 package controllers
 
 import play.api.mvc._
-import securesocial.core.SecureSocial
 import java.io.File
 
 import models.Book
 import play.api.libs.json.Json
 
-object Cloud extends Controller with SecureSocial {
+object Cloud extends Controller {
 
   def index = TODO
 

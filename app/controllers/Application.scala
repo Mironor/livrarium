@@ -1,12 +1,11 @@
 package controllers
 
 import play.api.mvc._
-import securesocial.core.SecureSocial
 
-object Application extends Controller with SecureSocial{
+object Application extends Controller{
 
   def index = Action {
-    Ok(views.html.main())
+    Ok(views.html.main)
   }
 
 }
