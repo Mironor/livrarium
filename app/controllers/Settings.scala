@@ -1,9 +1,8 @@
 package controllers
 
 import play.api.mvc._
-import securesocial.core.SecureSocial
 
-object Settings extends Controller with SecureSocial{
+object Settings extends Controller{
 
   def index = TODO
 
