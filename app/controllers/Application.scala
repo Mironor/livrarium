@@ -1,7 +1,5 @@
 package controllers
 
-import javax.inject.Inject
-
 import _root_.services.UserService
 import com.mohiva.play.silhouette.contrib.services.CachedCookieAuthenticator
 import com.mohiva.play.silhouette.core._
@@ -14,20 +12,22 @@ import models.User
 import org.bson.types.ObjectId
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc.Action
+import scaldi.{Injectable, Injector}
 
 import scala.concurrent.Future
 
 /**
  * The basic application controller.
- *
- * @param env The Silhouette environment.
  */
-class Application @Inject()(implicit val env: Environment[User, CachedCookieAuthenticator],
-                            val userService: UserService,
-                            val authInfoService: AuthInfoService,
-                            val avatarService: AvatarService,
-                            val passwordHasher: PasswordHasher)
-  extends Silhouette[User, CachedCookieAuthenticator] {
+class Application(implicit inj: Injector)
+  extends Silhouette[User, CachedCookieAuthenticator] with Injectable {
+
+  implicit val env = inject[Environment[User, CachedCookieAuthenticator]]
+
+  val userService = inject[UserService]
+  val authInfoService = inject[AuthInfoService]
+  val avatarService = inject[AvatarService]
+  val passwordHasher = inject[PasswordHasher]
 
   /**
    * Handles the index action.

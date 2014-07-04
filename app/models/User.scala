@@ -20,15 +20,13 @@ import scala.concurrent.Future
  * @param email Maybe the email of the authenticated provider.
  * @param avatarURL Maybe the avatar URL of the authenticated provider.
  */
-case class User(
-                 userID: ObjectId = new ObjectId(),
-                 loginInfo: LoginInfo,
-                 firstName: Option[String],
-                 lastName: Option[String],
-                 fullName: Option[String],
-                 email: Option[String],
-                 avatarURL: Option[String]
-                 ) extends Identity
+case class User(userID: ObjectId = new ObjectId(),
+                loginInfo: LoginInfo,
+                firstName: Option[String],
+                lastName: Option[String],
+                fullName: Option[String],
+                email: Option[String],
+                avatarURL: Option[String]) extends Identity
 
 object UserCollection extends SalatDAO[User, ObjectId](
   collection = MongoClient()(
@@ -38,7 +36,7 @@ object UserCollection extends SalatDAO[User, ObjectId](
 /**
  * Give access to the user object.
  */
-class UserDAO{
+class UserDAO {
 
   /**
    * Finds a user by its login info.
@@ -60,7 +58,7 @@ class UserDAO{
    * @param userID The ID of the user to find.
    * @return The found user or None if no user for the given ID could be found.
    */
-  def find(userID: ObjectId) = Future.successful(UserCollection.findOneById( userID))
+  def find(userID: ObjectId) = Future.successful(UserCollection.findOneById(userID))
 
   /**
    * Saves a user.
