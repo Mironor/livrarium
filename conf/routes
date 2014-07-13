@@ -4,21 +4,19 @@
 
 # Home page
 GET           /                                @controllers.Application.index
-GET           /signIn                          @controllers.Application.signIn
-GET           /signUp                          @controllers.Application.signUp
-GET           /signOut                         @controllers.Application.signOut
+GET           /sign-out                        @controllers.Application.signOut
 GET           /authenticate/:provider          @controllers.Application.socialAuthenticationHandler(provider)
 POST          /authenticate/credentials        @controllers.Application.credentialsAuthenticationHandler
-POST          /signUp                          @controllers.Application.signUpHandler
+POST          /sign-up                         @controllers.Application.signUpHandler
 
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                    controllers.Assets.at(path="/public", file)
 GET           /webjars/*file                   controllers.WebJarAssets.at(file)
 
 # Actual service
-GET           /cloud                           controllers.Cloud.index
-GET           /cloud/menu                      controllers.Cloud.menu
-POST          /cloud/upload                    controllers.Cloud.upload
+GET           /cloud                           @controllers.Cloud.index
+GET           /cloud/menu                      @controllers.Cloud.menu
+POST          /cloud/upload                    @controllers.Cloud.upload
 
 GET           /books                           controllers.Books.index
 GET           /books/:id                       controllers.Books.info(id)

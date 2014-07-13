@@ -1,30 +1,36 @@
-@(user: models.User)
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Livrarium</title>
+        <meta charset="utf-8">
+        <base href="/">
 
-@main("Silhouette - Home", Some(user)) {
-    <div class="user col-md-6 col-md-offset-3">
-        <div class="row">
-            <hr class="col-md-12" />
-            <h4 class="col-md-8">Welcome, you are now signed in!</h4>
-            <div class="col-md-4 text-right">
-                <img src="@user.avatarURL.getOrElse(routes.Assets.at("images/silhouette.png"))" style="height:40px;" />
-            </div>
-            <hr class="col-md-12" />
-        </div>
-        <div class="row data">
-            <div class="col-md-12">
-                <div class="row">
-                    <p class="col-md-6"><strong>First name:</strong></p><p class="col-md-6">@user.firstName.getOrElse("None")</p>
-                </div>
-                <div class="row">
-                    <p class="col-md-6"><strong>Last name:</strong></p><p class="col-md-6">@user.lastName.getOrElse("None")</p>
-                </div>
-                <div class="row">
-                    <p class="col-md-6"><strong>Full name:</strong></p><p class="col-md-6">@user.fullName.getOrElse("None")</p>
-                </div>
-                <div class="row">
-                    <p class="col-md-6"><strong>Email:</strong></p><p class="col-md-6">@user.email.getOrElse("None")</p>
-                </div>
-            </div>
-        </div>
-    </div>
-}
+        <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.4.2/pure-min.css">
+        <script>
+        less = {
+        env : "development",
+        dumpLineNumbers : "comments"
+        }
+        </script>
+        <link href="https://fontastic.s3.amazonaws.com/xDpa9byoYm8jR7PTJscRkT/icons.css" rel="stylesheet">
+        <link rel="stylesheet/less" type="text/css" href="@routes.Assets.at("styles/login.less")"/>
+        <script src="@routes.Assets.at("js/libs/bower_dependencies/less/dist/less-1.7.0.js")" type="text/javascript"></script>
+
+        <script>/*less.watch() ;*/</script>
+
+        <script src="@routes.Assets.at("js/libs/bower_dependencies/angular/angular.js")"></script>
+        <script src="@routes.Assets.at("js/libs/bower_dependencies/angular-ui-router/release/angular-ui-router.js")"></script>
+
+        <script src="@routes.Assets.at("js/app/app.js")"></script>
+        <script src="@routes.Assets.at("js/app/modules/common/constants.js")"></script>
+        <script src="@routes.Assets.at("js/app/modules/common/identity.js")"></script>
+
+        <script src="@routes.Assets.at("js/app/modules/sign-in/sign-in.js")"></script>
+        <script src="@routes.Assets.at("js/app/modules/sign-up/sign-up.js")"></script>
+
+    </head>
+    <body ng-app="lvr" ui-view>
+
+
+    </body>
+</html>

@@ -1,14 +1,27 @@
 package controllers
 
-import play.api.mvc._
 import java.io.File
 
-import models.Book
+import com.mohiva.play.silhouette.contrib.services.CachedCookieAuthenticator
+import com.mohiva.play.silhouette.core.{Environment, Silhouette}
+import models.{Book, User}
 import play.api.libs.json.Json
+import play.api.mvc._
+import scaldi.{Injectable, Injector}
 
-object Cloud extends Controller {
+import scala.concurrent.Future
 
-  def index = TODO
+class Cloud(implicit inj: Injector)
+  extends Silhouette[User, CachedCookieAuthenticator] with Injectable {
+
+  implicit val env = inject[Environment[User, CachedCookieAuthenticator]]
+
+  def index = UserAwareAction.async { implicit request =>
+    request.identity match {
+      case Some(user) => Future.successful(Ok(views.html.index()))
+      case None => Future.successful(Redirect(routes.Application.index()))
+    }
+  }
 
   def menu = TODO
 

@@ -1,6 +1,6 @@
 package modules
 
-import controllers.Application
+import controllers.{Cloud, Application}
 import scaldi.Module
 
 /**
@@ -9,4 +9,5 @@ import scaldi.Module
  */
 class WebModule extends Module{
   binding to new Application
+  binding to new Cloud
 }

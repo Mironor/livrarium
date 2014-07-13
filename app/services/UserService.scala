@@ -45,9 +45,6 @@ class UserService(implicit inj: Injector)  extends IdentityService[User] with In
     userDAO.find(profile.loginInfo).flatMap {
       case Some(user) => // Update user with profile
         userDAO.save(user.copy(
-          firstName = profile.firstName,
-          lastName = profile.lastName,
-          fullName = profile.fullName,
           email = profile.email,
           avatarURL = profile.avatarURL
         ))
@@ -55,9 +52,6 @@ class UserService(implicit inj: Injector)  extends IdentityService[User] with In
         userDAO.save(User(
           userID = new ObjectId(),
           loginInfo = profile.loginInfo,
-          firstName = profile.firstName,
-          lastName = profile.lastName,
-          fullName = profile.fullName,
           email = profile.email,
           avatarURL = profile.avatarURL
         ))

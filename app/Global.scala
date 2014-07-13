@@ -26,7 +26,7 @@ object Global extends GlobalSettings with ScaldiSupport with SecuredSettings wit
    * @return The result to send to the client.
    */
   override def onNotAuthenticated(request: RequestHeader, lang: Lang): Option[Future[Result]] = {
-    Some(Future.successful(Redirect(routes.Application.signIn)))
+    Some(Future.successful(Redirect(routes.Application.index())))
   }
 
   /**
@@ -39,6 +39,6 @@ object Global extends GlobalSettings with ScaldiSupport with SecuredSettings wit
    * @return The result to send to the client.
    */
   override def onNotAuthorized(request: RequestHeader, lang: Lang): Option[Future[Result]] = {
-    Some(Future.successful(Redirect(routes.Application.signIn).flashing("error" -> Messages("access.denied"))))
+    Some(Future.successful(Redirect(routes.Application.index()).flashing("error" -> Messages("access.denied"))))
   }
 }

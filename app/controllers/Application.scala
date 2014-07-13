@@ -3,15 +3,20 @@ package controllers
 import _root_.services.UserService
 import com.mohiva.play.silhouette.contrib.services.CachedCookieAuthenticator
 import com.mohiva.play.silhouette.core._
-import com.mohiva.play.silhouette.core.exceptions.AuthenticationException
+import com.mohiva.play.silhouette.core.exceptions.{AccessDeniedException, AuthenticationException}
 import com.mohiva.play.silhouette.core.providers._
-import com.mohiva.play.silhouette.core.services.{AvatarService, AuthInfoService}
+import com.mohiva.play.silhouette.core.services.{AuthInfoService, AvatarService}
 import com.mohiva.play.silhouette.core.utils.PasswordHasher
 import forms._
 import models.User
 import org.bson.types.ObjectId
 import play.api.libs.concurrent.Execution.Implicits._
-import play.api.mvc.Action
+
+import play.api.libs.json.Reads._
+import play.api.libs.json._
+import play.api.libs.functional.syntax._
+
+import play.api.mvc.{Action, BodyParsers}
 import scaldi.{Injectable, Injector}
 
 import scala.concurrent.Future
@@ -29,36 +34,20 @@ class Application(implicit inj: Injector)
   val avatarService = inject[AvatarService]
   val passwordHasher = inject[PasswordHasher]
 
+  implicit val CredentialsReads: Reads[Credentials] = (
+    (JsPath \ "email").read[String] (email keepAnd minLength[String](5)) and
+      (JsPath \ "password").read[String](minLength[String](2))
+    )(Credentials.apply _)
+
   /**
    * Handles the index action.
    *
    * @return The result to display.
    */
-  def index = SecuredAction.async { implicit request =>
-    Future.successful(Ok(views.html.index(request.identity)))
-  }
-
-  /**
-   * Handles the Sign In action.
-   *
-   * @return The result to display.
-   */
-  def signIn = UserAwareAction.async { implicit request =>
+  def index = UserAwareAction.async { implicit request =>
     request.identity match {
-      case Some(user) => Future.successful(Redirect(routes.Application.index))
-      case None => Future.successful(Ok(views.html.signIn(SignInForm.form)))
-    }
-  }
-
-  /**
-   * Handles the Sign Up action.
-   *
-   * @return The result to display.
-   */
-  def signUp = UserAwareAction.async { implicit request =>
-    request.identity match {
-      case Some(user) => Future.successful(Redirect(routes.Application.index))
-      case None => Future.successful(Ok(views.html.signUp(SignUpForm.form)))
+      case Some(user) => Future.successful(Redirect(routes.Cloud.index()))
+      case None => Future.successful(Ok(views.html.index()))
     }
   }
 
@@ -77,22 +66,28 @@ class Application(implicit inj: Injector)
    *
    * @return The result to display.
    */
-  def credentialsAuthenticationHandler = Action.async { implicit request => SignInForm.form.bindFromRequest.fold(
+  def credentialsAuthenticationHandler = Action.async (BodyParsers.parse.json) { implicit request =>
 
-    formWithErrors => Future.successful(BadRequest(views.html.signIn(formWithErrors))),
+    val userCredentials = request.body.validate[Credentials]
 
-    userCredentials => credentialsAuthentication(userCredentials).flatMap { loginInfo =>
-      userService.retrieve(loginInfo).flatMap {
-        case Some(user) => env.authenticatorService.create(user).map {
-          case Some(authenticator) =>
-            env.eventBus.publish(LoginEvent(user, request, request2lang))
-            env.authenticatorService.send(authenticator, Redirect(routes.Application.index))
-          case None => throw new AuthenticationException("Couldn't create an authenticator")
+    userCredentials match {
+      case credentials: JsSuccess[Credentials] => credentialsAuthentication(credentials.get).flatMap { loginInfo =>
+        userService.retrieve(loginInfo).flatMap {
+          case Some(user) => env.authenticatorService.create(user).map {
+            case Some(authenticator) =>
+              env.eventBus.publish(LoginEvent(user, request, request2lang))
+              env.authenticatorService.send(authenticator, Ok(Json.obj("identity" -> user.email)))
+            case None => throw new AuthenticationException("Couldn't create an authenticator")
+          }
+          case None => Future.failed(new AuthenticationException("Couldn't find user"))
         }
-        case None => Future.failed(new AuthenticationException("Couldn't find user"))
+      } recover {
+        case e: AccessDeniedException => BadRequest(Json.obj("errors" -> JsString("Access denied")))
+        case e: AuthenticationException => BadRequest(Json.obj("errors" -> JsString("Not authorised")))
       }
-    }.recoverWith(exceptionHandler)
-  )
+      case errors: JsError => Future.successful(BadRequest(Json.obj("errors" -> JsError.toFlatJson(errors))))
+    }
+
   }
 
   def credentialsAuthentication(userCredentials: Credentials) = env.providers.get(CredentialsProvider.Credentials) match {
@@ -127,26 +122,25 @@ class Application(implicit inj: Injector)
    *
    * @return The result to display.
    */
-  def signUpHandler = Action.async { implicit request =>
-    SignUpForm.form.bindFromRequest.fold(
+  def signUpHandler = Action.async (BodyParsers.parse.json) { implicit request =>
 
-      formWithErrors => Future.successful(BadRequest(views.html.signUp(formWithErrors))),
+    val userCredentials = request.body.validate[Credentials]
 
-      data => {
-        val loginInfo = LoginInfo(CredentialsProvider.Credentials, data.email)
-        val authInfo = passwordHasher.hash(data.password)
+    userCredentials match {
+      case credentials: JsSuccess[Credentials] =>
+        val email = credentials.get.identifier
+        val password = credentials.get.password
+        val loginInfo = LoginInfo(CredentialsProvider.Credentials, email)
+        val authInfo = passwordHasher.hash(password)
         val user = User(
           userID = new ObjectId(),
           loginInfo = loginInfo,
-          firstName = Some(data.firstName),
-          lastName = Some(data.lastName),
-          fullName = Some(data.firstName + " " + data.lastName),
-          email = Some(data.email),
+          email = Some(email),
           avatarURL = None
         )
 
         for {
-          avatar <- avatarService.retrieveURL(data.email)
+          avatar <- avatarService.retrieveURL(email)
           user <- userService.save(user.copy(avatarURL = avatar))
           authInfo <- authInfoService.save(loginInfo, authInfo)
           maybeAuthenticator <- env.authenticatorService.create(user)
@@ -155,11 +149,12 @@ class Application(implicit inj: Injector)
             case Some(authenticator) =>
               env.eventBus.publish(SignUpEvent(user, request, request2lang))
               env.eventBus.publish(LoginEvent(user, request, request2lang))
-              env.authenticatorService.send(authenticator, Redirect(routes.Application.index))
+              env.authenticatorService.send(authenticator, Ok(Json.obj("identity" -> user.email)))
             case None => throw new AuthenticationException("Couldn't create an authenticator")
           }
         }
-      }
-    )
+
+      case errors: JsError => Future.successful(BadRequest(Json.obj("errors" -> JsError.toFlatJson(errors))))
+    }
   }
 }
