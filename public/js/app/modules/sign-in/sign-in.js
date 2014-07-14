@@ -10,17 +10,22 @@ angular.module('lvr.signIn', [])
                     "password": ""
                 };
 
-                $scope.error = undefined;
-
                 $scope.submit = function () {
-                    $http.post('/authenticate/credentials', $scope.model)
-                        .success(function (data) {
-                            identity.email = data.email;
-                            $location.path(constants.applicationUrls.cloud);
-                        })
-                        .error(function (data) {
-                            $scope.error = data;
-                        });
+
+                    $scope.emailPasswordNotValid = $scope.credentials_sign_in_form.$invalid;
+
+                    if ($scope.credentials_sign_up_form.$valid){
+                        $http.post('/authenticate/credentials', $scope.model)
+                            .success(function (data) {
+                                identity.email = data.email;
+                                $location.path(constants.applicationUrls.cloud);
+                            })
+                            .error(function (data) {
+                                if (data.code === constants.errorCodes.userNotFound){
+                                    $scope.emailPasswordNotValid = true;
+                                }
+                            });
+                    }
                 }
             }
         }

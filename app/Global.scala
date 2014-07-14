@@ -4,7 +4,7 @@ import play.api.mvc.Results._
 import play.api.GlobalSettings
 import play.api.mvc.{Result, RequestHeader}
 import com.mohiva.play.silhouette.core.{Logger, SecuredSettings}
-import scaldi.play.ScaldiSupport
+import scaldi.play.{ControllerInjector, ScaldiSupport}
 import scala.concurrent.Future
 import controllers.routes
 
@@ -13,7 +13,7 @@ import controllers.routes
  */
 object Global extends GlobalSettings with ScaldiSupport with SecuredSettings with Logger {
 
-  def applicationModule = new WebModule :: new SilhouetteModule
+  def applicationModule = new WebModule :: new SilhouetteModule :: new ControllerInjector
 
 
   /**

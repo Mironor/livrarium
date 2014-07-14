@@ -8,6 +8,4 @@ import scaldi.Module
  * Date: 7/4/14
  */
 class WebModule extends Module{
-  binding to new Application
-  binding to new Cloud
 }
