@@ -4,6 +4,10 @@ angular.module('lvr.signUp', [])
             restrict: 'E',
             templateUrl: '/assets/js/app/modules/sign-up/credentials-sign-up-form.html',
             controller: function ($scope, $http, $location, constants, identity) {
+                $scope.translationData = {
+                    existingEmail: $scope.existingEmail
+                };
+
                 $scope.model = {
                     "email": "",
                     "password": ""

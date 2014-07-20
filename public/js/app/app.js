@@ -1,5 +1,6 @@
 angular.module('lvr', [
     'ui.router',
+    'pascalprecht.translate',
     'lvr.signIn',
     'lvr.signUp'
 ])
@@ -24,5 +25,9 @@ angular.module('lvr', [
         $urlRouterProvider.otherwise('/');
 
         $locationProvider.html5Mode(true);
+    })
+    .config(function ($translateProvider, i18nEn) {
+        $translateProvider.translations('en', i18nEn)
+        $translateProvider.preferredLanguage('en');
     });
 
