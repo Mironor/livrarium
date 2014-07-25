@@ -27,7 +27,7 @@ angular.module('lvr', [
         $locationProvider.html5Mode(true);
     })
     .config(function ($translateProvider, i18nEn) {
-        $translateProvider.translations('en', i18nEn)
+        $translateProvider.translations('en', i18nEn);
         $translateProvider.preferredLanguage('en');
     });
 

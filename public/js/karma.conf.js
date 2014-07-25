@@ -16,8 +16,10 @@ module.exports = function (config) {
         files: [
             'libs/bower_dependencies/angular/angular.js',
             'libs/bower_dependencies/angular-mocks/angular-mocks.js',
+            'libs/bower_dependencies/angular-translate/angular-translate.js',
             'libs/bower_dependencies/ng-file-upload/angular-file-upload.js',
-            'app/**/*.js'
+            'app/**/*.js',
+            'app/**/*.html'
         ],
 
 
@@ -25,6 +27,11 @@ module.exports = function (config) {
         exclude: [
 
         ],
+
+        // generate js files from html templates
+        preprocessors: {
+            'app/**/*.html': 'ng-html2js'
+        },
 
 
         // test results reporter to use
@@ -66,6 +73,6 @@ module.exports = function (config) {
 
         // Continuous Integration mode
         // if true, it capture browsers, run tests and exit
-        singleRun: false
+        singleRun: true
     });
 };

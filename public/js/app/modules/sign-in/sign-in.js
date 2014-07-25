@@ -2,7 +2,7 @@ angular.module('lvr.signIn', [])
     .directive('lvrCredentialsSignInForm', function () {
         return {
             restrict: 'E',
-            templateUrl: '/assets/js/app/modules/sign-in/credentials-sign-in-form.html',
+            templateUrl: 'app/modules/sign-in/credentials-sign-in-form.html',
 
             controller: function ($scope, $http, $location, constants, identity) {
                 $scope.model = {
