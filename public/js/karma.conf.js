@@ -17,6 +17,7 @@ module.exports = function (config) {
             'libs/bower_dependencies/angular/angular.js',
             'libs/bower_dependencies/angular-mocks/angular-mocks.js',
             'libs/bower_dependencies/angular-translate/angular-translate.js',
+            'libs/bower_dependencies/angular-ui-router/release/angular-ui-router.js',
             'libs/bower_dependencies/ng-file-upload/angular-file-upload.js',
             'app/**/*.js',
             'app/**/*.html'
