@@ -1,8 +1,8 @@
 angular.module('lvr.signUp', [])
-    .directive('lvrCredentialsSignUpForm', function () {
+    .directive('lvrCredentialsSignUpForm', function (constants) {
         return {
             restrict: 'E',
-            templateUrl: '/assets/js/app/modules/sign-up/credentials-sign-up-form.html',
+            templateUrl: constants.pathToApp + 'modules/sign-up/credentials-sign-up-form.html',
             controller: function ($scope, $http, $location, constants, identity) {
                 $scope.translationData = {
                     existingEmail: $scope.existingEmail
@@ -33,10 +33,10 @@ angular.module('lvr.signUp', [])
             }
         }
     })
-    .directive('lvrSocialSignUp', function () {
+    .directive('lvrSocialSignUp', function (constants) {
         return {
             restrict: 'E',
-            templateUrl: '/assets/js/app/modules/sign-up/social-sign-up.html'
+            templateUrl: constants.pathToApp + 'modules/sign-up/social-sign-up.html'
         }
     });
 

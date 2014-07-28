@@ -4,7 +4,7 @@ describe('Sign In', function () {
 
     beforeEach(module('lvr', 'lvr.signIn'));
 
-    beforeEach(module('app/modules/sign-in/credentials-sign-in-form.html', 'app/modules/sign-in/social-sign-in.html'));
+    beforeEach(module('public/js/app/modules/sign-in/credentials-sign-in-form.html', 'public/js/app/modules/sign-in/social-sign-in.html'));
 
     beforeEach(inject(function ($rootScope, $compile) {
         scope = $rootScope.$new();

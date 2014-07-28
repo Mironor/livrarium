@@ -1,7 +1,5 @@
 logs
-project/target
-target
-tmp
+/target
 .history
 dist
 /.idea
@@ -12,6 +10,9 @@ dist
 /.project
 /RUNNING_PID
 /.settings
-/public/js/libs/bower_dependencies
-/public/js/node_modules
+/bower_dependencies
+/node_modules
 /projectFilesBackup
+public/js/lvr-vendor.js
+public/js/lvr-vendor-test.js
+lvr-cloud.css

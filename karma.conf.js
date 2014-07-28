@@ -14,13 +14,9 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
-            'libs/bower_dependencies/angular/angular.js',
-            'libs/bower_dependencies/angular-mocks/angular-mocks.js',
-            'libs/bower_dependencies/angular-translate/angular-translate.js',
-            'libs/bower_dependencies/angular-ui-router/release/angular-ui-router.js',
-            'libs/bower_dependencies/ng-file-upload/angular-file-upload.js',
-            'app/**/*.html',
-            'app/**/*.js'
+            'public/js/lvr-vendor-test.js',
+            'public/js/app/**/*.html',
+            'public/js/app/**/*.js'
         ],
 
 
@@ -31,7 +27,7 @@ module.exports = function (config) {
 
         // generate js files from html templates
         preprocessors: {
-            'app/**/*.html': 'ng-html2js'
+            'public/js/app/**/*.html': 'ng-html2js'
         },
 
 

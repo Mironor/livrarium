@@ -1,0 +1,41 @@
+var gulp = require('gulp'),
+    concat = require('gulp-concat'),
+    rename = require('gulp-rename'),
+    less = require('gulp-less');
+
+var paths = {
+    styles : 'public/styles/less/cloud.less'
+};
+
+gulp.task('deps_dev', function () {
+    gulp.src([
+        'bower_dependencies/angular/angular.js',
+        'bower_dependencies/angular-ui-router/release/angular-ui-router.js',
+        'bower_dependencies/angular-translate/angular-translate.js'
+    ])
+        .pipe(concat('lvr-vendor.js'))
+        .pipe(gulp.dest('public/js/'))
+});
+
+gulp.task('deps_test', function () {
+    gulp.src([
+        'bower_dependencies/angular/angular.js',
+        'bower_dependencies/angular-mocks/angular-mocks.js',
+        'bower_dependencies/angular-translate/angular-translate.js',
+        'bower_dependencies/angular-ui-router/release/angular-ui-router.js',
+        'bower_dependencies/ng-file-upload/angular-file-upload.js'
+    ])
+        .pipe(concat('lvr-vendor-test.js'))
+        .pipe(gulp.dest('public/js/'))
+});
+
+gulp.task('less', function () {
+    gulp.src(paths.styles)
+        .pipe(less())
+        .pipe(rename('lvr-cloud.css'))
+        .pipe(gulp.dest('public/styles/'))
+});
+
+gulp.task('watch', function () {
+    gulp.watch(paths.styles, ['less'])
+});

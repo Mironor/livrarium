@@ -1,8 +1,8 @@
 angular.module('lvr.signIn', [])
-    .directive('lvrCredentialsSignInForm', function () {
+    .directive('lvrCredentialsSignInForm', function (constants) {
         return {
             restrict: 'E',
-            templateUrl: 'app/modules/sign-in/credentials-sign-in-form.html',
+            templateUrl: constants.pathToApp + 'modules/sign-in/credentials-sign-in-form.html',
 
             link: function ($scope, $http, $location, constants, identity) {
                 $scope.model = {
@@ -30,9 +30,9 @@ angular.module('lvr.signIn', [])
             }
         }
     })
-    .directive('lvrSocialSignIn', function () {
+    .directive('lvrSocialSignIn', function (constants) {
         return {
             restrict: 'E',
-            templateUrl: '/assets/js/app/modules/sign-in/social-sign-in.html'
+            templateUrl: constants.pathToApp + 'modules/sign-in/social-sign-in.html'
         }
     });
