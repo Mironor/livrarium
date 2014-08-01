@@ -11,7 +11,8 @@ gulp.task('deps_dev', function () {
     gulp.src([
         'bower_dependencies/angular/angular.js',
         'bower_dependencies/angular-ui-router/release/angular-ui-router.js',
-        'bower_dependencies/angular-translate/angular-translate.js'
+        'bower_dependencies/angular-translate/angular-translate.js',
+        'bower_dependencies/ng-file-upload/angular-file-upload.js'
     ])
         .pipe(concat('lvr-vendor.js'))
         .pipe(gulp.dest('public/js/'))
@@ -24,6 +25,7 @@ gulp.task('deps_test', function () {
         'bower_dependencies/angular-translate/angular-translate.js',
         'bower_dependencies/angular-ui-router/release/angular-ui-router.js',
         'bower_dependencies/ng-file-upload/angular-file-upload.js',
+
         'bower_dependencies/jquery/dist/jquery.js',
         'bower_dependencies/jasmine-jquery/lib/jasmine-jquery.js'
     ])

@@ -2,7 +2,10 @@ angular.module('lvr', [
     'ui.router',
     'pascalprecht.translate',
     'lvr.signIn',
-    'lvr.signUp'
+    'lvr.signUp',
+    'lvr.header',
+    'lvr.leftMenu',
+    'lvr.content'
 ])
     .config(function ($stateProvider, $urlRouterProvider, $locationProvider, constants) {
         $stateProvider

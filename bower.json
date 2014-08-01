@@ -11,6 +11,6 @@
         "angular-loader": "1.2.15",
         "angular-mocks": "1.2.15",
         "angular-translate": "2.2.0",
-        "ng-file-upload": "1.4.0"
+        "ng-file-upload": "1.6.5"
     }
 }
