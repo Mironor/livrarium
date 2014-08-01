@@ -27,7 +27,6 @@ class Cloud(implicit inj: Injector)
 
   def upload = Action(parse.multipartFormData) {
     request =>
-      print(request.body.file("book"))
       request.body.file("book").map {
         book =>
           val name = book.filename

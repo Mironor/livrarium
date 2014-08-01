@@ -46,10 +46,17 @@ class Application(implicit inj: Injector)
    */
   def index = UserAwareAction.async { implicit request =>
     request.identity match {
-      case Some(user) => Future.successful(Ok(views.html.index())) //Redirect(routes.Cloud.index()))
+      case Some(user) => Future.successful(Redirect(routes.Cloud.index()))
       case None => Future.successful(Ok(views.html.index()))
     }
   }
+
+  /**
+   * Handles the signUp action.
+   *
+   * @return The result to display.
+   */
+  def signUp = index
 
   /**
    * Handles the Sign Out action.
