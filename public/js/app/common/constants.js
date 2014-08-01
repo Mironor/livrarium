@@ -11,7 +11,8 @@ angular.module('lvr')
         },
 
         errorCodes: {
-            userNotFound: 4002,
+            userNotFound: 4004,
+            accessDenied: 4002,
             userAlreadyExists: 4005
         }
     });

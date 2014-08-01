@@ -4,7 +4,7 @@ angular.module('lvr.signIn', [])
             restrict: 'E',
             templateUrl: constants.pathToApp + 'modules/sign-in/credentials-sign-in-form.html',
 
-            link: function ($scope, $http, $location, constants, identity) {
+            controller: function ($scope, $http, $location, constants, identity) {
                 $scope.model = {
                     "email": "",
                     "password": ""
@@ -13,8 +13,9 @@ angular.module('lvr.signIn', [])
                 $scope.submit = function () {
 
                     $scope.emailPasswordNotValid = $scope.credentials_sign_in_form.$invalid;
+                    $scope.accessDenied = false;
 
-                    if ($scope.credentials_sign_up_form.$valid){
+                    if ($scope.credentials_sign_in_form.$valid){
                         $http.post('/authenticate/credentials', $scope.model)
                             .success(function (data) {
                                 identity.email = data.email;
@@ -23,6 +24,9 @@ angular.module('lvr.signIn', [])
                             .error(function (data) {
                                 if (data.code === constants.errorCodes.userNotFound){
                                     $scope.emailPasswordNotValid = true;
+                                }
+                                if (data.code === constants.errorCodes.accessDenied){
+                                    $scope.accessDenied = true;
                                 }
                             });
                     }

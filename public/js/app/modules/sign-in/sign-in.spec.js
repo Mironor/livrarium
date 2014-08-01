@@ -1,5 +1,8 @@
+/**
+ * This spec was created to verify that test system works as expected
+ */
 describe('Sign In', function () {
-    var scope, compile,
+    var scope, element, controller,
         validTemplate = '<lvr-credentials-sign-in-form></lvr-credentials-sign-in-form>';
 
     beforeEach(module('lvr', 'lvr.signIn'));
@@ -8,14 +11,12 @@ describe('Sign In', function () {
 
     beforeEach(inject(function ($rootScope, $compile) {
         scope = $rootScope.$new();
-        compile = $compile
+        element = $compile(validTemplate)(scope);
+        scope.$digest();
+        controller = element.controller;
     }));
 
     it('contains "Log in" words', function () {
-        var element = compile(validTemplate)(scope);
-
-        scope.$digest();
-
         expect(element.html()).toContain("Log in");
     });
 });
