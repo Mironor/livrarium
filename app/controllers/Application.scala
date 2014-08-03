@@ -7,7 +7,6 @@ import com.mohiva.play.silhouette.core.exceptions.{AccessDeniedException, Authen
 import com.mohiva.play.silhouette.core.providers._
 import com.mohiva.play.silhouette.core.services.{AuthInfoService, AvatarService}
 import com.mohiva.play.silhouette.core.utils.PasswordHasher
-import forms._
 import models.User
 import org.bson.types.ObjectId
 import play.api.libs.concurrent.Execution.Implicits._

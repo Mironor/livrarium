@@ -9,7 +9,6 @@ version := "0.1"
 libraryDependencies ++= Seq(
   "com.novus" %% "salat" % "1.9.8",
   "com.mohiva" %% "play-silhouette" % "1.0",
-  "org.webjars" %% "webjars-play" % "2.3.0",
   "org.scaldi" %% "scaldi-play" % "0.4.1",
   cache
 )

@@ -1,6 +1,7 @@
 logs
 /target
 .history
+npm-debug.log
 dist
 /.idea
 /*.iml
