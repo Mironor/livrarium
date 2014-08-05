@@ -1,0 +1,11 @@
+<li ng-repeat="node in children" class="menu-item">
+
+    <!--current level folder-->
+    <i class="icon-arrow-right" ng-show="node.children.length && !node.expanded" ng-click="expand(node)"></i>
+    <i class="icon-arrow-down" ng-show="node.children.length && node.expanded" ng-click="collapse(node)"></i>
+    <span>{{node.label}} </span>
+
+    <!--subfolders-->
+    <ul lvr-folder-tree children="node.children" ng-show="node.children.length && node.expanded"></ul>
+
+</li>

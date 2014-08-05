@@ -5,24 +5,14 @@
 <ul class="items">
     <li class="menu-root menu-item"><i class="icon-view-all"></i>All books</li>
 
-    <li class="menu-root menu-item menu-tree">
-        <i class="icon-arrow-down"></i>Books
-        <ul class="sub-folder">
-            <li class="menu-item">
-                <i class="icon-arrow-down"></i>Software engineering
-                <ul class="sub-folder">
-                    <li class="menu-item">
-                        <i></i>JavaScript
-                    </li>
-                    <li class="menu-item">
-                        <i></i>Databases
-                    </li>
-                </ul>
-            </li>
-            <li class="menu-item">
-                <i></i>Design
-            </li>
-        </ul>
+    <li class="menu-root menu-item menu-tree" ng-controller="lvrFolderTreeCtrl">
+
+        <i class="icon-arrow-down" ng-show="expanded" ng-click="toggleExpand()"></i>
+        <i class="icon-arrow-right" ng-show="!expanded" ng-click="toggleExpand()"></i>
+        <span>Folders</span>
+
+        <ul lvr-folder-tree children="folders" class="sub-folder" ng-show="expanded"></ul>
+
     </li>
 
     <li class="menu-root menu-item"><i class="icon-recent"></i>Recent</li>

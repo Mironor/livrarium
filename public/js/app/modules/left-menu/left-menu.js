@@ -1,4 +1,5 @@
 angular.module('lvr.leftMenu', [
+    'lvr.folderTree',
     'lvr.uploadButton'
 ]).directive('lvrLeftMenu', function (constants) {
     return {

@@ -19,7 +19,8 @@ class Cloud(implicit inj: Injector)
   def index = UserAwareAction.async { implicit request =>
     request.identity match {
       case Some(user) => Future.successful(Ok(views.html.index()))
-      case None => Future.successful(Redirect(routes.Application.index()))
+//      case None => Future.successful(Redirect(routes.Application.index()))
+      case None => Future.successful(Ok(views.html.index()))
     }
   }
 

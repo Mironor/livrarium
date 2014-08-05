@@ -12,6 +12,7 @@ gulp.task('deps_dev', function () {
         'bower_dependencies/angular/angular.js',
         'bower_dependencies/angular-ui-router/release/angular-ui-router.js',
         'bower_dependencies/angular-translate/angular-translate.js',
+        'bower_dependencies/angular-recursion/angular-recursion.js',
         'bower_dependencies/ng-file-upload/angular-file-upload.js'
     ])
         .pipe(concat('lvr-vendor.js'))
