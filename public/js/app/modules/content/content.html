@@ -1,4 +1,4 @@
-<div class="content-view">
+<div class="content-view" ng-controller="lvrContentCtrl">
     <div class="content-header">
         <div class="mosaic-sort">LAST OPENED BY ME <i class="icon-drop-down"></i></div>
         <div class="buttons">
@@ -8,13 +8,14 @@
 
             <div>
                 More <i class="icon-drop-down"></i>
-
+<!--
                 <div class="pure-menu pure-menu-open">
                     <ul>
                         <li><a href="#">Add to To-Reads</a></li>
                         <li><a href="#">Modify metadata</a></li>
                     </ul>
                 </div>
+                -->
             </div>
         </div>
         <div class="display-mode">
@@ -23,75 +24,6 @@
             <i class="icon-mosaic"></i>
         </div>
     </div>
-    <div class="content-mosaic">
-        <div class="folders"></div>
-        <div class="files">
-            <div class="file selected">
-                <div class="thumbnail">
-                    <img src="/assets/img/mosaic_thumb_angular.png" alt=""/>
-                </div>
-                <div class="progressbar">
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 100%"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 20%"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 0"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="file">
-                <div class="thumbnail">
-                    <img src="/assets/img/mosaic_thumb_algos.png" alt=""/>
-                </div>
-                <div class="progressbar">
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 100%"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 100%"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 100%"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 100%"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 20%"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 0"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="file">
-                <div class="thumbnail">
-                    <img src="/assets/img/mosaic_thumb_tdd.png" alt=""/>
-                </div>
-                <div class="progressbar">
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 70%"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 0"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 0"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 0"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 0"></div>
-                    </div>
-                    <div class="bar">
-                        <div class="percent-complete" style="width: 0"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!--<lvr-content-mosaic class="content-mosaic" ng-if="showAsMosaic"></lvr-content-mosaic>-->
+    <lvr-content-list class="content-list"></lvr-content-list>
 </div>

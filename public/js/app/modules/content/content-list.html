@@ -1,0 +1,33 @@
+<table class="pure-table pure-table-horizontal">
+    <thead>
+    <tr>
+        <th class="thumbnail"></th>
+        <th class="title">Title</th>
+        <th class="additional1">Added <i class="icon-drop-down"></i></th>
+        <th class="additional2">Formats <i class="icon-drop-down"></i></th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr ng-repeat="folder in folders">
+        <td class="thumbnail"></td>
+        <td>
+            {{folder.name}}
+        </td>
+        <td>{{folder.creationDate}}</td>
+        <td></td>
+    </tr>
+    <tr ng-repeat="book in books">
+        <td class="thumbnail"><img ng-src="/assets/img/{{book.id}}_small.png" alt=""/></td>
+        <td>
+            {{book.name}}
+            <div class="progressbar">
+                <div ng-repeat="bar in book.progressBars" class="bar">
+                    <div class="percent-complete" style="width: {{bar.completeness}}%"></div>
+                </div>
+            </div>
+        </td>
+        <td>{{book.createDate | date:'dd/MM/yyyy'}}</td>
+        <td><span ng-repeat="format in book.formats"><a href="/{{format}}">{{format}}</a>{{$last ? '' : ', '}}</span></td>
+    </tr>
+    </tbody>
+</table>

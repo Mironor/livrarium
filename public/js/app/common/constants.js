@@ -4,6 +4,7 @@ var pathToApp = window.pathToApp || 'public/js/app/'; // path for karma tests if
 angular.module('lvr')
     .constant('constants', {
         pathToApp: pathToApp,
+
         applicationUrls: {
             signIn: '/',
             signUp: '/sign-up',
@@ -14,5 +15,7 @@ angular.module('lvr')
             userNotFound: 4004,
             accessDenied: 4002,
             userAlreadyExists: 4005
-        }
+        },
+
+        minPagesPerBar: 50
     });

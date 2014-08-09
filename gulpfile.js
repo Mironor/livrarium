@@ -13,7 +13,9 @@ gulp.task('deps_dev', function () {
         'bower_dependencies/angular-ui-router/release/angular-ui-router.js',
         'bower_dependencies/angular-translate/angular-translate.js',
         'bower_dependencies/angular-recursion/angular-recursion.js',
-        'bower_dependencies/ng-file-upload/angular-file-upload.js'
+        'bower_dependencies/ng-file-upload/angular-file-upload.js',
+        'bower_dependencies/lodash/dist/lodash.js',
+        'bower_dependencies/restangular/dist/restangular.js'
     ])
         .pipe(concat('lvr-vendor.js'))
         .pipe(gulp.dest('public/js/'))
@@ -25,7 +27,9 @@ gulp.task('deps_test', function () {
         'bower_dependencies/angular-mocks/angular-mocks.js',
         'bower_dependencies/angular-translate/angular-translate.js',
         'bower_dependencies/angular-ui-router/release/angular-ui-router.js',
+        'bower_dependencies/angular-recursion/angular-recursion.js',
         'bower_dependencies/ng-file-upload/angular-file-upload.js',
+        'bower_dependencies/lodash/dist/lodash.js',
 
         'bower_dependencies/jquery/dist/jquery.js',
         'bower_dependencies/jasmine-jquery/lib/jasmine-jquery.js'
