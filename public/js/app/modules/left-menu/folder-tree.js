@@ -42,7 +42,9 @@ angular.module('lvr.folderTree', ['RecursionHelper'])
     .directive('lvrFolderTree', function (RecursionHelper, constants) {
         return {
             restrict: 'A',
-            scope: {children: '='},
+            scope: {
+                children: '='
+            },
             templateUrl: constants.pathToApp + 'modules/left-menu/folder-tree.html',
             compile: function (element) {
                 return RecursionHelper.compile(element, function (scope, iElement, iAttrs, controller, transcludeFn) {

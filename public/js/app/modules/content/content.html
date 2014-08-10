@@ -7,23 +7,21 @@
             <i class="icon-button icon-archive"></i>
 
             <div>
-                More <i class="icon-drop-down"></i>
-<!--
-                <div class="pure-menu pure-menu-open">
+                <span ng-click="showDropdown = !showDropdown">More <i class="icon-drop-down"></i></span>
+                <div ng-show="showDropdown" class="pure-menu pure-menu-open">
                     <ul>
                         <li><a href="#">Add to To-Reads</a></li>
                         <li><a href="#">Modify metadata</a></li>
                     </ul>
                 </div>
-                -->
             </div>
         </div>
         <div class="display-mode">
-            <div class="display-mode-highlight"></div>
-            <i class="icon-list"></i>
-            <i class="icon-mosaic"></i>
+            <div class="display-mode-highlight" ng-class="{mosaic: showAsMosaic, list: !showAsMosaic}"></div>
+            <i class="icon-list" ng-click="showAsMosaic = false"></i>
+            <i class="icon-mosaic" ng-click="showAsMosaic = true"></i>
         </div>
     </div>
-    <!--<lvr-content-mosaic class="content-mosaic" ng-if="showAsMosaic"></lvr-content-mosaic>-->
-    <lvr-content-list class="content-list"></lvr-content-list>
+    <div lvr-content-mosaic class="content-mosaic" ng-if="showAsMosaic"></div>
+    <div lvr-content-list class="content-list" ng-if="!showAsMosaic"></div>
 </div>

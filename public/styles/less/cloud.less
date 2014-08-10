@@ -364,6 +364,7 @@ header {
           float: left;
           padding: 0 11px;
           font-size: 27px;
+          cursor: pointer;
         }
         .display-mode-highlight {
           position: absolute;
@@ -374,6 +375,13 @@ header {
           background: @grey_light;
           .border-radius(@border-radius);
           z-index: -1;
+
+          &.mosaic {
+            left: 50px;
+          }
+          &.list{
+            left: 2px;
+          }
         }
       }
     }
@@ -402,11 +410,11 @@ header {
     .content-mosaic {
       padding: 30px 0px;
 
-      .files {
+      .books {
         .display(flex);
         .flex-wrap(wrap);
 
-        .file {
+        .book {
           .flex(0 0 176px);
           height: 275px;
           margin: 0 30px;
