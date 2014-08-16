@@ -17,5 +17,8 @@ angular.module('lvr')
             userAlreadyExists: 4005
         },
 
-        minPagesPerBar: 50
+        books: {
+            minPagesPerBar: 50,
+            maxBarsCount: 10
+        }
     });

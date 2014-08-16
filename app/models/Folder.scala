@@ -7,7 +7,7 @@ import mongoContext._
 import play.api.Play.current
 import play.api.PlayException
 
-case class Folder(_id: ObjectId = new ObjectId, name: String, left: Int, right: Int)
+case class Folder(_id: ObjectId = new ObjectId, label: String, children: List[Folder])
 
 object FolderDAO extends SalatDAO[Folder, ObjectId](
   collection = MongoClient()(
@@ -23,15 +23,8 @@ object Folder {
 
   def find(id: String) = FolderDAO.findOneById(new ObjectId(id))
 
-  def getChildrenOf(folder: Folder) = {
-    FolderDAO.find($and(
-      "left" $gt folder.left,
-      "right" $lt folder.right
-    )).toList
-  }
-
-  def create(name: String, left: Int, right: Int): Option[ObjectId] = {
-    FolderDAO.insert(Folder(name = name, left = left, right = right))
+  def create(folder: Folder): Option[ObjectId] = {
+    FolderDAO.insert(folder)
   }
 
   def delete(id: String) {

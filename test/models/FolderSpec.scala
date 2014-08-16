@@ -17,53 +17,44 @@ class FolderSpec extends Specification with BeforeExample {
 
   def before = new WithFakeApplication {
     FolderDAO.remove(MongoDBObject.empty)
-    println("before")
-    println(Folder.all().size)
   }
 
   "Folder Model" should {
 
     "be addable to the database" in new WithFakeApplication {
-      println("addable")
-      print(Folder.all().size)
-      Folder.create("Test Label", 0, 1)
+      Folder.create(Folder(label = "Test Label", children = List()))
       Folder.all().size must equalTo(1)
     }
 
     "be deletable" in new WithFakeApplication {
-      println("deletable")
-      print(Folder.all().size)
-      val folderIdOption = Folder.create("Test Label", 0, 1)
-      val folderId = folderIdOption.getOrElse(throw new PlayException(
-        "Database error",
-        "Could not get the ID of the created task, check your database configuration"
-      )).toString
+      val folderIdOption = Folder.create(Folder(label = "Test Label", children = List()))
+      val folderId = folderIdOption.get.toString
 
       Folder.delete(folderId)
 
       Folder.all().size must equalTo(0)
     }
 
-    "be able to give ancestors of a specific folder" in new WithFakeApplication {
-      println("children")
-      print(Folder.all().size)
-      Folder.create("Root 1", 0, 9)
-      val parentId = Folder.create("Sub 1 1", 1, 6)
-      Folder.create("Subsub 1 1 1", 2, 3)
-      Folder.create("Subsub 1 1 2", 4, 5)
-      Folder.create("Sub 1 2", 7, 8)
+    "be able to create and delete complex folder trees" in new WithFakeApplication {
+      val folderTree = Folder(label = "Root", children = List(
+        Folder(label = "Root 1", children = List(
+          Folder(label = "Sub 1 1", children = List(
+            Folder(label = "Subsub 1 1 1", children = List()),
+            Folder(label = "Subsub 1 1 2", children = List())
+          )),
+          Folder(label = "Sub 1 2", children = List())
+        )),
+        Folder(label = "Root 2", children = List(
+          Folder(label = "Sut 2", children = List())
+        ))
+      ))
 
-      Folder.create("Root 2", 10, 13)
-      Folder.create("Sut 2", 11, 12)
+      val folderTreeIdOption = Folder.create(folderTree)
+      val folderTreeId = folderTreeIdOption.get.toString
 
-      val parent = Folder.find(parentId.get.toString).getOrElse{
-        throw new Exception("No folder found")
-      }
+      Folder.delete(folderTreeId)
 
-      val children = Folder.getChildrenOf(parent)
-
-      children.size must equalTo(2)
-      children.map(_.name) must contain("Subsub 1 1 1", "Subsub 1 1 2")
+      Folder.all().size must equalTo(0)
     }
   }
 }

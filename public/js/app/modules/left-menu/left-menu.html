@@ -11,7 +11,7 @@
         <i class="icon-arrow-right" ng-show="!expanded" ng-click="toggleExpand()"></i>
         <span>Folders</span>
 
-        <ul lvr-folder-tree children="folders" class="sub-folder" ng-show="expanded"></ul>
+        <ul lvr-folder-tree children="rootFolder.children" class="sub-folder" ng-show="expanded"></ul>
 
     </li>
 
