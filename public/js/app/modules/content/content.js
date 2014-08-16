@@ -1,9 +1,12 @@
 angular.module('lvr.content', [])
-    .controller('lvrContentCtrl', function ($scope, Book) {
+    .controller('lvrContentCtrl', function ($scope, folders, Book) {
         $scope.showDropdown = false;
         $scope.showAsMosaic = true;
 
-        $scope.folders = [];
+        $scope.folders = folders.getCurrentFolder().children;
+
+        console.log($scope.folders);
+
         var books = [
             new Book({
                 id: 'mosaic_thumb_algos',

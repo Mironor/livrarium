@@ -14,7 +14,7 @@
 
 @icons-font-name: "fontastic-font";
 
-html{
+html {
   height: 100%;
 }
 
@@ -43,8 +43,6 @@ body {
     content: "1";
   }
 }
-
-
 
 a:link {
   color: @orange;
@@ -83,7 +81,7 @@ a:active {
     margin-top: 20px;
   }
 
-  .form_container_view{
+  .form_container_view {
     .display(flex);
     .flex-direction(column);
     .align-items(center);
@@ -150,19 +148,17 @@ a:active {
   }
 }
 
-
-
 header {
   background: @grey_light;
 
-  &>div{
+  & > div {
     .display(flex);
     height: 73px;
     margin: 0 20px;
     .justify-content(space-between);
     .align-items(center);
 
-    img{
+    img {
       .flex-shrink(0);
     }
 
@@ -379,13 +375,12 @@ header {
           &.mosaic {
             left: 50px;
           }
-          &.list{
+          &.list {
             left: 2px;
           }
         }
       }
     }
-
 
     .progressbar {
       width: 100%;
@@ -408,16 +403,47 @@ header {
     }
 
     .content-mosaic {
-      padding: 30px 0px;
+      padding: 15px 0px;
 
-      .books {
+      .folders, .books {
         .display(flex);
         .flex-wrap(wrap);
+      }
+
+      .folders {
+
+        .folder {
+          .display(flex);
+          .align-items(center);
+          .flex(0 0 156px);
+          height: 30px;
+          margin: 15px 30px;
+          padding: 10px;
+          font-size: 17px;
+          border: @white 1px solid;
+
+          i {
+            .display(inline-block);
+            margin-top: 5px;
+            margin-right: 10px;
+            font-size: 30px;
+          }
+
+          &:hover, &.selected {
+            border: @grey 1px solid;
+            background: @grey_light;
+            cursor: pointer;
+          }
+        }
+
+      }
+
+      .books {
 
         .book {
           .flex(0 0 176px);
           height: 275px;
-          margin: 0 30px;
+          margin: 15px 30px;
 
           .thumbnail {
             position: relative;
@@ -426,14 +452,15 @@ header {
             height: 220px;
             padding-top: 4px;
 
+            border: @white 1px solid;
             .border-radius(@border-radius);
 
             text-align: center;
             vertical-align: middle;
           }
 
-          &.selected {
-
+          &:hover, &.selected {
+            cursor: pointer;
             .thumbnail {
               border: @grey 1px solid;
               background: @grey_light;
@@ -464,17 +491,22 @@ header {
       }
     }
 
-    .content-list{
-      table{
+    .content-list {
+      table {
         width: 100%;
         table-layout: fixed;
         border: none @grey_light;
 
-        td, th{
+        td, th {
           border-bottom-color: @grey_light;
         }
 
-        .thumbnail{
+        tr:hover {
+          background: @grey_light;
+          cursor: pointer;
+        }
+
+        .thumbnail {
           width: 30px;
           padding: 5px 3px;
         }
@@ -484,13 +516,13 @@ header {
           color: @grey_dark;
           font-size: 14px;
 
-          th.title{
+          th.title {
             width: 70%;
           }
-          th.additional1{
+          th.additional1 {
             width: 15%;
           }
-          th.additional2{
+          th.additional2 {
             width: 15%;
           }
 
@@ -500,12 +532,20 @@ header {
             top: 3px;
           }
         }
-        tbody{
-          .progressbar{
+        tbody {
+          .progressbar {
             .justify-content(flex-start);
-            .bar{
+            .bar {
               .flex-basis(25px);
               .flex-grow(0);
+            }
+          }
+
+          td.thumbnail {
+            padding-top: 6px;
+            text-align: center;
+            i {
+              font-size: 27px;
             }
           }
         }

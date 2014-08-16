@@ -5,7 +5,7 @@ angular.module('lvr')
             children: []
         });
 
-        /*
+
         rootFolder = new Folder({
             name: 'root',
             children: [
@@ -39,13 +39,16 @@ angular.module('lvr')
             }
         ]
         });
-        */
 
+        var currentFolder = rootFolder;
 
 
         return {
             getRootFolder: function () {
                 return rootFolder;
+            },
+            getCurrentFolder: function () {
+                return currentFolder;
             }
         }
     });

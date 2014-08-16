@@ -1,4 +1,8 @@
-<div class="folders"></div>
+<div class="folders">
+    <div ng-repeat="folder in folders" class="folder">
+        <i class="icon-button icon-folder"></i> <span>{{folder.label}}</span>
+    </div>
+</div>
 <div class="books">
     <div ng-repeat="book in books" class="book">
         <div class="thumbnail">
