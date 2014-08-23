@@ -50,7 +50,7 @@ class UserService(implicit inj: Injector)  extends IdentityService[User] with In
         ))
       case None => // Insert a new user
         userDAO.save(User(
-          userID = new ObjectId(),
+          id = new ObjectId(),
           loginInfo = profile.loginInfo,
           email = profile.email,
           avatarURL = profile.avatarURL

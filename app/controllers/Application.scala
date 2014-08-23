@@ -1,13 +1,13 @@
 package controllers
 
-import _root_.services.UserService
+import _root_.services.{RootFolderService, UserService}
 import com.mohiva.play.silhouette.contrib.services.CachedCookieAuthenticator
 import com.mohiva.play.silhouette.core._
 import com.mohiva.play.silhouette.core.exceptions.{AccessDeniedException, AuthenticationException}
 import com.mohiva.play.silhouette.core.providers._
 import com.mohiva.play.silhouette.core.services.{AuthInfoService, AvatarService}
 import com.mohiva.play.silhouette.core.utils.PasswordHasher
-import models.User
+import models.{Folder, RootFolder, RootFolderDAO, User}
 import org.bson.types.ObjectId
 import play.api.libs.concurrent.Execution.Implicits._
 
@@ -29,6 +29,7 @@ class Application(implicit inj: Injector)
   implicit val env = inject[Environment[User, CachedCookieAuthenticator]]
 
   val userService = inject[UserService]
+  val rootFolderService = inject[RootFolderService]
   val authInfoService = inject[AuthInfoService]
   val avatarService = inject[AvatarService]
   val passwordHasher = inject[PasswordHasher]
@@ -153,30 +154,7 @@ class Application(implicit inj: Injector)
             "code" -> inject[Int](identified by "errors.auth.userAlreadyExists")
           )))
 
-          case None =>
-            val user = User(
-              userID = new ObjectId(),
-              loginInfo = loginInfo,
-              email = Some(email),
-              avatarURL = None
-            )
-
-            for {
-              avatar <- avatarService.retrieveURL(email)
-              user <- userService.save(user.copy(avatarURL = avatar))
-              authInfo <- authInfoService.save(loginInfo, authInfo)
-              maybeAuthenticator <- env.authenticatorService.create(user)
-            } yield {
-              maybeAuthenticator match {
-                case Some(authenticator) =>
-                  env.eventBus.publish(SignUpEvent(user, request, request2lang))
-                  env.eventBus.publish(LoginEvent(user, request, request2lang))
-                  env.authenticatorService.send(authenticator, Ok(Json.obj("identity" -> user.email)))
-                case None => BadRequest(Json.obj(
-                  "code" -> inject[Int](identified by "errors.auth.noAuthenticator")
-                ))
-              }
-            }
+          case None => createNewUser(loginInfo, email, authInfo)
         }
 
       case errors: JsError => Future.successful(BadRequest(Json.obj(
@@ -184,5 +162,35 @@ class Application(implicit inj: Injector)
         "fields" -> JsError.toFlatJson(errors)
       )))
     }
+  }
+
+  def createNewUser(loginInfo: LoginInfo, email: String, password: PasswordInfo) = {
+    val user = User(
+      id = new ObjectId(),
+      loginInfo = loginInfo,
+      email = Some(email),
+      avatarURL = None
+    )
+
+    val rootFolder = RootFolder(
+      folder = Folder(inject[String](identified by "folder.rootFolderName"), List())
+    )
+
+    for {
+      avatar <- avatarService.retrieveURL(email)
+      user <- userService.save(user.copy(avatarURL = avatar))
+      rootFolder <- rootFolderService.save(rootFolder.copy(userId = user.id))
+      authInfo <- authInfoService.save(loginInfo, password)
+      maybeAuthenticator <- env.authenticatorService.create(user)
+    } yield {
+      maybeAuthenticator match {
+        case Some(authenticator) =>
+          env.authenticatorService.send(authenticator, Ok(Json.obj("identity" -> user.email)))
+        case None => BadRequest(Json.obj(
+          "code" -> inject[Int](identified by "errors.auth.noAuthenticator")
+        ))
+      }
+    }
+
   }
 }

@@ -1,5 +1,5 @@
 angular.module('lvr.content', [])
-    .controller('lvrContentCtrl', function ($scope, folders, Book) {
+    .controller('lvrContentCtrl', function ($scope, Book, Folder, folders) {
         $scope.showDropdown = false;
         $scope.showAsMosaic = true;
 
@@ -35,6 +35,12 @@ angular.module('lvr.content', [])
         ];
 
         $scope.books = _.invoke(books, 'initProgressBars');
+
+        $scope.createNewFolder = function () {
+            $scope.folders.unshift(new Folder({
+                label: "new folder"
+            }))
+        }
     })
     .directive('lvrContent', function (constants) {
         return {

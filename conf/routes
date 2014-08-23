@@ -15,7 +15,8 @@ GET           /assets/*file                    controllers.Assets.at(path="/publ
 
 # Actual service
 GET           /cloud                           @controllers.Cloud.index
-GET           /cloud/menu                      @controllers.Cloud.menu
+GET           /cloud/folders                   @controllers.Cloud.folders
+POST          /cloud/folders                   @controllers.Cloud.updateFolders
 POST          /cloud/upload                    @controllers.Cloud.upload
 
 GET           /books                           controllers.Books.index

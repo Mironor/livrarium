@@ -12,12 +12,12 @@ import scala.concurrent.Future
 /**
  * The user object.
  *
- * @param userID The unique ID of the user.
+ * @param id The unique ID of the user.
  * @param loginInfo The linked login info.
  * @param email Maybe the email of the authenticated provider.
  * @param avatarURL Maybe the avatar URL of the authenticated provider.
  */
-case class User(userID: ObjectId = new ObjectId(),
+case class User(id: ObjectId = new ObjectId(),
                 loginInfo: LoginInfo,
                 email: Option[String],
                 avatarURL: Option[String]) extends Identity
