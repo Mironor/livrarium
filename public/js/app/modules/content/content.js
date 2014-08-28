@@ -5,8 +5,6 @@ angular.module('lvr.content', [])
 
         $scope.folders = folders.getCurrentFolder().children;
 
-        console.log($scope.folders);
-
         var books = [
             new Book({
                 id: 'mosaic_thumb_algos',
@@ -38,8 +36,10 @@ angular.module('lvr.content', [])
 
         $scope.createNewFolder = function () {
             $scope.folders.unshift(new Folder({
-                label: "new folder"
-            }))
+                label: folders.getNewFolderNameInCurrentFolder()
+            }));
+
+            folders.saveRootFolder();
         }
     })
     .directive('lvrContent', function (constants) {

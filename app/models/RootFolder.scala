@@ -5,8 +5,6 @@ import com.mongodb.casbah.Imports._
 import com.novus.salat.dao._
 import mongoContext._
 import play.api.Play.current
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
 
 import scala.concurrent.Future
 
@@ -14,21 +12,11 @@ import scala.concurrent.Future
  * A wrapper that takes care of user's id
  * as we don't want each folder to store user's id, just the root one
  */
-case class RootFolder(id: ObjectId = new ObjectId, userId: ObjectId = new ObjectId, folder: Folder)
+case class RootFolder(id: ObjectId = new ObjectId, userId: ObjectId = new ObjectId, children: List[Folder])
 
-case class Folder(label: String, children: List[Folder]){
+case class Folder(label: String, children: List[Folder])
 
-  implicit val folderReads: Reads[Folder] = (
-    (__ \ "label").read[String] and
-      (__ \ "children").read[List[Folder]]
-    )(Folder.apply _)
 
-  implicit val folderWrites: Writes[Folder] = (
-    (__ \ "label").write[String] and
-      (__ \ "children").write[List[Folder]]
-    )(unlift(Folder.unapply))
-
-}
 
 
 /**

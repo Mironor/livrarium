@@ -13,6 +13,7 @@
         "angular-translate": "2.2.0",
         "angular-recursion": "1.0.1",
         "ng-file-upload": "1.6.5",
-        "restangular": "1.4.0"
+        "lodash": "2.4.1",
+        "underscore.string": "2.3.3"
     }
 }

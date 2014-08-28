@@ -8,7 +8,8 @@ angular.module('lvr')
         applicationUrls: {
             signIn: '/',
             signUp: '/sign-up',
-            cloud: '/cloud'
+            cloud: '/cloud',
+            folders: '/folders'
         },
 
         errorCodes: {

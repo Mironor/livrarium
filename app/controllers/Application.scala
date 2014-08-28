@@ -7,7 +7,7 @@ import com.mohiva.play.silhouette.core.exceptions.{AccessDeniedException, Authen
 import com.mohiva.play.silhouette.core.providers._
 import com.mohiva.play.silhouette.core.services.{AuthInfoService, AvatarService}
 import com.mohiva.play.silhouette.core.utils.PasswordHasher
-import models.{Folder, RootFolder, RootFolderDAO, User}
+import models.{RootFolder, User}
 import org.bson.types.ObjectId
 import play.api.libs.concurrent.Execution.Implicits._
 
@@ -78,11 +78,18 @@ class Application(implicit inj: Injector)
     val userCredentials = request.body.validate[Credentials]
 
     userCredentials match {
-      case credentials: JsSuccess[Credentials] => credentialsAuthentication(credentials.get).flatMap { loginInfo =>
+      case credentials: JsSuccess[Credentials] => authenticateUser(credentials.get)
+      case errors: JsError => Future.successful(BadRequest(Json.obj(
+        "code" -> inject[Int](identified by "errors.auth.loginPasswordNotValid"),
+        "fields" -> JsError.toFlatJson(errors)
+      )))
+    }
+  }
+
+  def authenticateUser(userCredentials: Credentials) =  credentialsAuthentication(userCredentials).flatMap { loginInfo =>
         userService.retrieve(loginInfo).flatMap {
           case Some(user) => env.authenticatorService.create(user).map {
             case Some(authenticator) =>
-              env.eventBus.publish(LoginEvent(user, request, request2lang))
               env.authenticatorService.send(authenticator, Ok(Json.obj("identity" -> user.email)))
             case None => BadRequest(Json.obj(
               "code" -> inject[Int](identified by "errors.auth.noAuthenticator")
@@ -98,13 +105,6 @@ class Application(implicit inj: Injector)
           "code" -> inject[Int](identified by "errors.auth.notAuthenticated")
         ))
       }
-      case errors: JsError => Future.successful(BadRequest(Json.obj(
-        "code" -> inject[Int](identified by "errors.auth.loginPasswordNotValid"),
-        "fields" -> JsError.toFlatJson(errors)
-      )))
-    }
-
-  }
 
   def credentialsAuthentication(userCredentials: Credentials) = env.providers.get(CredentialsProvider.Credentials) match {
     case Some(credentialsProvider: CredentialsProvider) => credentialsProvider.authenticate(userCredentials)
@@ -173,7 +173,7 @@ class Application(implicit inj: Injector)
     )
 
     val rootFolder = RootFolder(
-      folder = Folder(inject[String](identified by "folder.rootFolderName"), List())
+      children = List()
     )
 
     for {

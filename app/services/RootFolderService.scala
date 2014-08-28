@@ -30,16 +30,16 @@ class RootFolderService(implicit inj: Injector) extends Injectable {
    * @param user The user to which the root folder is attached
    * @return the created root folder
    */
-  def save(folders: Folder, user: User): Future[RootFolder] = {
+  def save(folders: List[Folder], user: User): Future[RootFolder] = {
     rootFolderDAO.findByUser(user) match {
       case Some(rootFolder) =>
         rootFolderDAO.save(rootFolder.copy(
-          folder = folders
+          children = folders
         ))
       case None =>
         rootFolderDAO.save(RootFolder(
           userId = user.id,
-          folder = folders
+          children = folders
         ))
     }
   }

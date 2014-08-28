@@ -1,13 +1,13 @@
 describe('Book', function () {
     var constants;
-    var bookModel, zeroPagesBook, manyPagesBook;
+    var book, zeroPagesBook, manyPagesBook;
 
     beforeEach(module('lvr'));
 
     beforeEach(inject(function (_constants_, Book) {
         constants = _constants_;
 
-        bookModel = new Book({
+        book = new Book({
             id: 'book_one',
             name: 'Book one',
             createDate: 1407608313000,
@@ -43,10 +43,10 @@ describe('Book', function () {
         ];
 
         // When
-        bookModel.initProgressBars();
+        book.initProgressBars();
 
         // Then
-        expect(bookModel.progressBars).toEqual(expected);
+        expect(book.progressBars).toEqual(expected);
     });
 
     it('should show one full bar if the number of total pages is 0', function () {
