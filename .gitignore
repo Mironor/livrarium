@@ -17,3 +17,7 @@ dist
 public/js/lvr-vendor.js
 public/js/lvr-vendor-test.js
 lvr-cloud.css
+
+/upload
+/tmp
+/public/img/upload

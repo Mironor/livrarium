@@ -106,7 +106,7 @@ class Application(implicit inj: Injector)
         ))
       }
 
-  def credentialsAuthentication(userCredentials: Credentials) = env.providers.get(CredentialsProvider.Credentials) match {
+  private def credentialsAuthentication(userCredentials: Credentials) = env.providers.get(CredentialsProvider.Credentials) match {
     case Some(credentialsProvider: CredentialsProvider) => credentialsProvider.authenticate(userCredentials)
     case _ => Future.failed(new AuthenticationException(s"Cannot find credentials provider"))
   }

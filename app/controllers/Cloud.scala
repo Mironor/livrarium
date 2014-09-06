@@ -5,7 +5,11 @@ import java.io.File
 import com.mohiva.play.silhouette.contrib.services.CachedCookieAuthenticator
 import com.mohiva.play.silhouette.core.providers.Credentials
 import com.mohiva.play.silhouette.core.{Environment, Silhouette}
-import models.{Folder, Book, User}
+import com.sksamuel.scrimage.{Image, Format => ImgFormat}
+import helpers.PDFHelper
+import models.{BookDAO, Folder, User}
+import play.api.Play
+import play.api.libs.Files
 import play.api.mvc._
 import scaldi.{Injectable, Injector}
 import services.RootFolderService
@@ -35,6 +39,7 @@ class Cloud(implicit inj: Injector)
   def index = UserAwareAction.async { implicit request =>
     request.identity match {
       case Some(user) => Future.successful(Ok(views.html.index()))
+
       case None => applicationController.authenticateUser(Credentials("meanor89@gmail.com", "aaaaaa"))
     }
   }
@@ -69,20 +74,63 @@ class Cloud(implicit inj: Injector)
     }
   }
 
-  def upload = Action(parse.multipartFormData) {
-    request =>
-      request.body.file("book").map {
+  def upload = UserAwareAction.async(parse.multipartFormData) { implicit request =>
+    request.identity match {
+      case Some(user) => uploadBook(request)
+      case None => Future.successful(Ok(views.html.index()))
+    }
+  }
+
+  private def uploadBook(request: RequestWithUser[MultipartFormData[Files.TemporaryFile]]) = {
+    Future.successful {
+      request.body.file("books").map {
         book =>
-          val name = book.filename
+          val filename = book.filename
+          val name = filename.dropRight(filename.length - filename.lastIndexOf('.'))
+          val extension = filename.drop(filename.lastIndexOf('.'))
           val fileType = book.contentType.getOrElse("")
+          val applicationPath = Play.current.path
+          val uploadFolder = applicationPath + inject[String](identified by "folders.uploadFolder")
+          val generatedImageFolder = applicationPath + inject[String](identified by "folders.generatedImageFolder")
 
-          book.ref.moveTo(new File(s"/tmp/$name"))
+          val idOption = BookDAO.create(name, fileType)
 
-          Book.create(name, fileType)
-          Ok(Json.obj("error" -> ""))
+          idOption match {
+            case Some(id) =>
+              val uploadedBookPath = s"$uploadFolder/$id$extension"
+              book.ref.moveTo(new File(uploadedBookPath))
+
+              val uploadedBookImagePath = s"$generatedImageFolder/$id.jpg"
+              PDFHelper.extractImageFromPdf(uploadedBookPath, uploadedBookImagePath)
+
+              val uploadedBookSmallThumbPath = s"$generatedImageFolder/$id-small.jpg"
+              val uploadedImage = new File(uploadedBookImagePath)
+
+              Image(uploadedImage).fit(
+                inject[Int](identified by "books.thumbnailWidth"),
+                inject[Int](identified by "books.thumbnailHeight")
+              ).write(new File(uploadedBookImagePath), ImgFormat.JPEG)
+
+              Image(uploadedImage).fit(
+                inject[Int](identified by "books.smallThumbnailWidth"),
+                inject[Int](identified by "books.smallThumbnailHeight")
+              ).write(new File(uploadedBookSmallThumbPath), ImgFormat.JPEG)
+
+
+              Ok(Json.obj(
+                "id" -> id.toString,
+                "name" -> name
+              ))
+
+            case None =>
+              BadRequest(Json.obj("code" -> inject[Int](identified by "errors.database.noId")))
+          }
+
+
       }.getOrElse {
-        Ok(Json.obj("error" -> "Missing file"))
+        BadRequest(Json.obj("code" -> inject[Int](identified by "errors.upload.noFileFound")))
       }
 
+    }
   }
 }
