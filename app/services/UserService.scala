@@ -12,7 +12,7 @@ import scala.concurrent.Future
 
 /**
  * Handles actions to users.
- *
+ * UserDAO should only handle database interactions to improve database abstraction
  */
 class UserService(implicit inj: Injector)  extends IdentityService[User] with Injectable {
   val userDAO  = inject[UserDAO]

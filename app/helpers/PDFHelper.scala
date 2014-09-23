@@ -19,4 +19,11 @@ object PDFHelper {
     val titlePageImage = titlePage.convertToImage()
     ImageIO.write(titlePageImage, "jpg", output)
   }
+
+  def getTotalPages(pdfPath: String) = {
+    val input = new File(pdfPath)
+
+    val document = PDDocument.load(input)
+    document.getNumberOfPages
+  }
 }

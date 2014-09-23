@@ -4,7 +4,7 @@ angular.module('lvr.uploadButton', [
     return {
         restrict: 'A',
         templateUrl: constants.pathToApp + 'modules/upload-button/upload-button.html',
-        controller: function ($scope, $upload) {
+        controller: function ($scope, $upload, folders) {
             $scope.onFileSelect = function ($files) {
                 //$files: an array of files selected, each file has name, size, and type.
                 for (var i = 0; i < $files.length; i++) {
@@ -13,7 +13,9 @@ angular.module('lvr.uploadButton', [
                         url: '/upload', //upload.php script, node.js route, or servlet url
                         method: 'POST',
                         // withCredentials: true,
-//                        data: {myObj: $scope.myModelObj},
+                        data: {
+                            path: folders.getCurrentPath()
+                        },
                         file: file, // or list of files: $files for html5 only
                         fileFormDataName: 'books'
                         /* set the file formData name ('Content-Desposition'). Default is 'file' */

@@ -5,24 +5,27 @@ import java.io.File
 import com.mohiva.play.silhouette.contrib.services.CachedCookieAuthenticator
 import com.mohiva.play.silhouette.core.providers.Credentials
 import com.mohiva.play.silhouette.core.{Environment, Silhouette}
+import com.mongodb.casbah.commons.Imports.ObjectId
 import com.sksamuel.scrimage.{Image, Format => ImgFormat}
-import helpers.PDFHelper
-import models.{BookDAO, Folder, User}
+import helpers.{BookFormatHelper, PDFHelper}
+import models.{Book, Folder, User}
 import play.api.Play
 import play.api.libs.Files
 import play.api.mvc._
 import scaldi.{Injectable, Injector}
-import services.RootFolderService
+import services.{BookService, RootFolderService}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
 import scala.concurrent.Future
+import scala.util.{Failure, Success}
 
 class Cloud(implicit inj: Injector)
   extends Silhouette[User, CachedCookieAuthenticator] with Injectable {
 
   implicit val env = inject[Environment[User, CachedCookieAuthenticator]]
   val rootFolderService = inject[RootFolderService]
+  val bookService = inject[BookService]
   val applicationController = inject[Application]
 
 
@@ -88,49 +91,56 @@ class Cloud(implicit inj: Injector)
           val filename = book.filename
           val name = filename.dropRight(filename.length - filename.lastIndexOf('.'))
           val extension = filename.drop(filename.lastIndexOf('.'))
-          val fileType = book.contentType.getOrElse("")
+
+          val fileType = BookFormatHelper.normalize(
+            book.contentType.getOrElse(BookFormatHelper.NONE)
+          )
+
           val applicationPath = Play.current.path
           val uploadFolder = applicationPath + inject[String](identified by "folders.uploadFolder")
           val generatedImageFolder = applicationPath + inject[String](identified by "folders.generatedImageFolder")
 
-          val idOption = BookDAO.create(name, fileType)
+          val id = new ObjectId()
 
-          idOption match {
-            case Some(id) =>
-              val uploadedBookPath = s"$uploadFolder/$id$extension"
-              book.ref.moveTo(new File(uploadedBookPath))
+          val uploadedBookPath = s"$uploadFolder/$id$extension"
+          book.ref.moveTo(new File(uploadedBookPath))
 
-              val uploadedBookImagePath = s"$generatedImageFolder/$id.jpg"
-              PDFHelper.extractImageFromPdf(uploadedBookPath, uploadedBookImagePath)
+          val uploadedBookImagePath = s"$generatedImageFolder/$id.jpg"
+          PDFHelper.extractImageFromPdf(uploadedBookPath, uploadedBookImagePath)
 
-              val uploadedBookSmallThumbPath = s"$generatedImageFolder/$id-small.jpg"
-              val uploadedImage = new File(uploadedBookImagePath)
+          val uploadedBookSmallThumbPath = s"$generatedImageFolder/$id-small.jpg"
+          val uploadedImage = new File(uploadedBookImagePath)
 
-              Image(uploadedImage).fit(
-                inject[Int](identified by "books.thumbnailWidth"),
-                inject[Int](identified by "books.thumbnailHeight")
-              ).write(new File(uploadedBookImagePath), ImgFormat.JPEG)
+          Image(uploadedImage).fit(
+            inject[Int](identified by "books.thumbnailWidth"),
+            inject[Int](identified by "books.thumbnailHeight")
+          ).write(new File(uploadedBookImagePath), ImgFormat.JPEG)
 
-              Image(uploadedImage).fit(
-                inject[Int](identified by "books.smallThumbnailWidth"),
-                inject[Int](identified by "books.smallThumbnailHeight")
-              ).write(new File(uploadedBookSmallThumbPath), ImgFormat.JPEG)
+          Image(uploadedImage).fit(
+            inject[Int](identified by "books.smallThumbnailWidth"),
+            inject[Int](identified by "books.smallThumbnailHeight")
+          ).write(new File(uploadedBookSmallThumbPath), ImgFormat.JPEG)
 
+          val bookModel = Book(
+            _id = id,
+            name = name,
+            format = List(fileType),
+            pages = PDFHelper.getTotalPages(uploadedBookPath)
+          )
 
-              Ok(Json.obj(
-                "id" -> id.toString,
-                "name" -> name
-              ))
+          bookService.save(bookModel)
 
-            case None =>
-              BadRequest(Json.obj("code" -> inject[Int](identified by "errors.database.noId")))
-          }
-
+          Ok(Json.obj(
+            "id" -> id.toString,
+            "name" -> name
+          ))
 
       }.getOrElse {
         BadRequest(Json.obj("code" -> inject[Int](identified by "errors.upload.noFileFound")))
       }
 
     }
+
   }
+
 }

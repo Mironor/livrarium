@@ -112,4 +112,15 @@ describe('Folders', function () {
         // Then
         expect(secondNewFolderName).toBe(i18n['content.folders.newFolderName'] + i18n['content.numberSign'] + '2')
     });
+
+    it("should generate correct path to current folder", function () {
+        // Given
+        var expectedPath = "/database/Beginning with MongoDB";
+
+        // When
+
+        // Then
+        expect(foldersService.getCurrentPath()).toBe()
+
+    })
 });

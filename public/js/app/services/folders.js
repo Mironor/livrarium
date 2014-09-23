@@ -26,6 +26,9 @@ angular.module('lvr')
             getCurrentFolder: function () {
                 return currentFolder;
             },
+            getCurrentPath: function(){
+
+            },
             getNewFolderNameInCurrentFolder: function () {
                 var currentFolderChildren = this.getCurrentFolder().children,
                     expectedNumber = 1;
