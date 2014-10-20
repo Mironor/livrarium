@@ -1,14 +1,13 @@
 package controllers
 
-import _root_.services.{RootFolderService, UserService}
+import _root_.services.UserService
 import com.mohiva.play.silhouette.contrib.services.CachedCookieAuthenticator
 import com.mohiva.play.silhouette.core._
 import com.mohiva.play.silhouette.core.exceptions.{AccessDeniedException, AuthenticationException}
 import com.mohiva.play.silhouette.core.providers._
 import com.mohiva.play.silhouette.core.services.{AuthInfoService, AvatarService}
 import com.mohiva.play.silhouette.core.utils.PasswordHasher
-import models.{RootFolder, User}
-import org.bson.types.ObjectId
+import models.User
 import play.api.libs.concurrent.Execution.Implicits._
 
 import play.api.libs.json.Reads._
@@ -29,7 +28,6 @@ class Application(implicit inj: Injector)
   implicit val env = inject[Environment[User, CachedCookieAuthenticator]]
 
   val userService = inject[UserService]
-  val rootFolderService = inject[RootFolderService]
   val authInfoService = inject[AuthInfoService]
   val avatarService = inject[AvatarService]
   val passwordHasher = inject[PasswordHasher]
@@ -166,20 +164,20 @@ class Application(implicit inj: Injector)
 
   def createNewUser(loginInfo: LoginInfo, email: String, password: PasswordInfo) = {
     val user = User(
-      id = new ObjectId(),
+      id = None,
       loginInfo = loginInfo,
       email = Some(email),
       avatarURL = None
     )
 
-    val rootFolder = RootFolder(
-      children = List()
-    )
+//    val rootFolder = RootFolder(
+//      children = List()
+//    )
 
     for {
       avatar <- avatarService.retrieveURL(email)
       user <- userService.save(user.copy(avatarURL = avatar))
-      rootFolder <- rootFolderService.save(rootFolder.copy(userId = user.id))
+//      rootFolder <- rootFolderService.save(rootFolder.copy(userId = user.id))
       authInfo <- authInfoService.save(loginInfo, password)
       maybeAuthenticator <- env.authenticatorService.create(user)
     } yield {

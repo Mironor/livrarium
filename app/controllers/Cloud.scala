@@ -5,36 +5,33 @@ import java.io.File
 import com.mohiva.play.silhouette.contrib.services.CachedCookieAuthenticator
 import com.mohiva.play.silhouette.core.providers.Credentials
 import com.mohiva.play.silhouette.core.{Environment, Silhouette}
-import com.mongodb.casbah.commons.Imports.ObjectId
 import com.sksamuel.scrimage.{Image, Format => ImgFormat}
 import helpers.{BookFormatHelper, PDFHelper}
-import models.{Book, Folder, User}
+import models.{Folder, User}
 import play.api.Play
 import play.api.libs.Files
 import play.api.mvc._
 import scaldi.{Injectable, Injector}
-import services.{BookService, RootFolderService}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success}
 
 class Cloud(implicit inj: Injector)
   extends Silhouette[User, CachedCookieAuthenticator] with Injectable {
 
   implicit val env = inject[Environment[User, CachedCookieAuthenticator]]
-  val rootFolderService = inject[RootFolderService]
-  val bookService = inject[BookService]
   val applicationController = inject[Application]
 
 
   implicit val folderReads: Reads[Folder] = (
-    (__ \ "label").read[String] and
+    (__ \ "id").read[Option[Long]] and
+    (__ \ "name").read[String] and
       (__ \ "children").read[List[Folder]]
     )(Folder.apply _)
 
   implicit val folderWrites: Writes[Folder] = (
+    (__ \ "id").write[Option[Long]] and
     (__ \ "label").write[String] and
       (__ \ "children").write[List[Folder]]
     )(unlift(Folder.unapply))
@@ -47,7 +44,7 @@ class Cloud(implicit inj: Injector)
     }
   }
 
-  def folders = UserAwareAction.async { implicit request =>
+  def folders = TODO/*UserAwareAction.async { implicit request =>
     request.identity match {
       case Some(user) =>
         val rootFolder = rootFolderService.retrieve(user).get
@@ -56,7 +53,7 @@ class Cloud(implicit inj: Injector)
 
       case None => Future.successful(Ok(views.html.index()))
     }
-  }
+  }*/
 
   def updateFolders() = UserAwareAction.async(BodyParsers.parse.json) { implicit request =>
     request.identity match {
@@ -64,7 +61,7 @@ class Cloud(implicit inj: Injector)
         val foldersJson = request.body.validate[List[Folder]]
         foldersJson match {
           case folders: JsSuccess[List[Folder]] =>
-            rootFolderService.save(folders.get, user)
+//            rootFolderService.save(folders.get, user)
             Future.successful(Ok(Json.obj()))
 
           case errors: JsError => Future.successful(BadRequest(Json.obj(
@@ -100,7 +97,7 @@ class Cloud(implicit inj: Injector)
           val uploadFolder = applicationPath + inject[String](identified by "folders.uploadFolder")
           val generatedImageFolder = applicationPath + inject[String](identified by "folders.generatedImageFolder")
 
-          val id = new ObjectId()
+          val id = "ss"
 
           val uploadedBookPath = s"$uploadFolder/$id$extension"
           book.ref.moveTo(new File(uploadedBookPath))
@@ -121,6 +118,7 @@ class Cloud(implicit inj: Injector)
             inject[Int](identified by "books.smallThumbnailHeight")
           ).write(new File(uploadedBookSmallThumbPath), ImgFormat.JPEG)
 
+          /*
           val bookModel = Book(
             _id = id,
             name = name,
@@ -129,7 +127,7 @@ class Cloud(implicit inj: Injector)
           )
 
           bookService.save(bookModel)
-
+*/
           Ok(Json.obj(
             "id" -> id.toString,
             "name" -> name

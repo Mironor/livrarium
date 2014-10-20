@@ -9,20 +9,20 @@ import com.mohiva.play.silhouette.core.providers.oauth2._
 import com.mohiva.play.silhouette.core.services._
 import com.mohiva.play.silhouette.core.utils._
 import com.mohiva.play.silhouette.core.{Environment, EventBus}
-import models.{BookDAO, RootFolderDAO, UserDAO, User}
+import models._
 import models.silhouette.{OAuth2InfoDAO, OAuth1InfoDAO, PasswordInfoDAO}
 import scaldi.Module
-import services.{BookService, RootFolderService, UserService}
+import services.{UserService}
 
 class SilhouetteModule extends Module {
 
   bind[PasswordInfoDAO] to new PasswordInfoDAO
   bind[OAuth1InfoDAO] to new OAuth1InfoDAO
   bind[OAuth2InfoDAO] to new OAuth2InfoDAO
-  bind[RootFolderDAO] to new RootFolderDAO
-  bind[RootFolderService] to new RootFolderService
-  bind[BookService] to new BookService
-  bind[BookDAO] to new BookDAO
+  bind[FolderDAO] to new FolderDAO
+//  bind[RootFolderService] to new RootFolderService
+//  bind[BookService] to new BookService
+//  bind[BookDAO] to new BookDAO
   bind[UserDAO] to new UserDAO
   bind[UserService] to new UserService
   bind[DelegableAuthInfoDAO[PasswordInfo]] to new PasswordInfoDAO

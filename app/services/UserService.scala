@@ -4,7 +4,6 @@ import com.mohiva.play.silhouette.core.LoginInfo
 import com.mohiva.play.silhouette.core.providers.CommonSocialProfile
 import com.mohiva.play.silhouette.core.services.{AuthInfo, IdentityService}
 import models.{UserDAO, User}
-import org.bson.types.ObjectId
 import play.api.libs.concurrent.Execution.Implicits._
 import scaldi.{Injectable, Injector}
 
@@ -50,7 +49,7 @@ class UserService(implicit inj: Injector)  extends IdentityService[User] with In
         ))
       case None => // Insert a new user
         userDAO.save(User(
-          id = new ObjectId(),
+          id = None,
           loginInfo = profile.loginInfo,
           email = profile.email,
           avatarURL = profile.avatarURL
