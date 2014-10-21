@@ -1,6 +1,6 @@
 package controllers
 
-import _root_.services.UserService
+import services.UserService
 import com.mohiva.play.silhouette.contrib.services.CachedCookieAuthenticator
 import com.mohiva.play.silhouette.core._
 import com.mohiva.play.silhouette.core.exceptions.{AccessDeniedException, AuthenticationException}

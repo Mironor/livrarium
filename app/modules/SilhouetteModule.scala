@@ -19,10 +19,6 @@ class SilhouetteModule extends Module {
   bind[PasswordInfoDAO] to new PasswordInfoDAO
   bind[OAuth1InfoDAO] to new OAuth1InfoDAO
   bind[OAuth2InfoDAO] to new OAuth2InfoDAO
-  bind[FolderDAO] to new FolderDAO
-//  bind[RootFolderService] to new RootFolderService
-//  bind[BookService] to new BookService
-//  bind[BookDAO] to new BookDAO
   bind[UserDAO] to new UserDAO
   bind[UserService] to new UserService
   bind[DelegableAuthInfoDAO[PasswordInfo]] to new PasswordInfoDAO

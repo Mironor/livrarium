@@ -76,6 +76,16 @@ class UserDAO {
     }
   }
 
+  def create(user: DBUser): Future[Long] = {
+    Future.successful {
+      DB withSession { implicit session =>
+        createDbUser(user)
+      }
+    }
+  }
+
+  private def createDbUser(dbUser: DBUser)(implicit session: Session): Long = (slickUsers returning slickUsers.map(_.id)) += dbUser
+
   /**
    * Saves a user.
    *
@@ -102,8 +112,8 @@ class UserDAO {
       case Some(userFound) =>
         slickUsers.filter(_.id === dbUser.id).update(dbUser)
         dbUser.id.get
-      case None =>
-        (slickUsers returning slickUsers.map(_.id)) += dbUser
+      case None => createDbUser(dbUser)
     }
   }
+
 }

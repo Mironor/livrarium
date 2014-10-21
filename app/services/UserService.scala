@@ -3,6 +3,7 @@ package services
 import com.mohiva.play.silhouette.core.LoginInfo
 import com.mohiva.play.silhouette.core.providers.CommonSocialProfile
 import com.mohiva.play.silhouette.core.services.{AuthInfo, IdentityService}
+import models.DBTableDefinitions.DBUser
 import models.{UserDAO, User}
 import play.api.libs.concurrent.Execution.Implicits._
 import scaldi.{Injectable, Injector}
@@ -23,6 +24,11 @@ class UserService(implicit inj: Injector)  extends IdentityService[User] with In
    * @return The retrieved user or None if no user could be retrieved for the given login info.
    */
   def retrieve(loginInfo: LoginInfo): Future[Option[User]] = userDAO.find(loginInfo)
+
+  def create(user: User): Future[User] = {
+    val idPromise = userDAO.create(DBUser(user.id, user.email, user.avatarURL))
+    idPromise.map(userId => user.copy(id = Option(userId)))
+  }
 
   /**
    * Saves a user.
