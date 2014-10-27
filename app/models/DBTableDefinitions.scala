@@ -7,8 +7,8 @@ import play.api.db.slick.Config.driver.simple._
 object DBTableDefinitions {
 
   case class DBUser(id: Option[Long],
-                            email: Option[String],
-                            avatarURL: Option[String])
+                    email: Option[String],
+                    avatarURL: Option[String])
 
   class Users(tag: Tag) extends Table[DBUser](tag, "users") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
@@ -21,9 +21,9 @@ object DBTableDefinitions {
   }
 
   case class DBLoginInfo(id: Option[Long],
-                                 idUser: Long,
-                                 providerID: String,
-                                 providerKey: String)
+                         idUser: Long,
+                         providerID: String,
+                         providerKey: String)
 
   class LoginInfos(tag: Tag) extends Table[DBLoginInfo](tag, "logininfos") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
@@ -40,8 +40,8 @@ object DBTableDefinitions {
   }
 
   case class DBOAuth1Info(idLoginInfo: Long,
-                                  token: String,
-                                  secret: String)
+                          token: String,
+                          secret: String)
 
   class OAuth1Infos(tag: Tag) extends Table[DBOAuth1Info](tag, "oauth1infos") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
@@ -58,10 +58,10 @@ object DBTableDefinitions {
   }
 
   case class DBOAuth2Info(idLoginInfo: Long,
-                                  accessToken: String,
-                                  tokenType: Option[String],
-                                  expiresIn: Option[Int],
-                                  refreshToken: Option[String])
+                          accessToken: String,
+                          tokenType: Option[String],
+                          expiresIn: Option[Int],
+                          refreshToken: Option[String])
 
   class OAuth2Infos(tag: Tag) extends Table[DBOAuth2Info](tag, "oauth2infos") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
@@ -82,9 +82,9 @@ object DBTableDefinitions {
   }
 
   case class DBPasswordInfo(idLoginInfo: Long,
-                                    hasher: String,
-                                    password: String,
-                                    salt: Option[String])
+                            hasher: String,
+                            password: String,
+                            salt: Option[String])
 
   class PasswordInfos(tag: Tag) extends Table[DBPasswordInfo](tag, "passwordinfos") {
     def idLoginInfo = column[Long]("idLoginInfo")
@@ -102,11 +102,11 @@ object DBTableDefinitions {
 
   case class DBBook(id: Option[Long],
                     userId: Long,
-                  uuid: UUID,
-                  name: String,
-                  format: String,
-                  pages: Int = 0,
-                  currentPage: Int = 0)
+                    uuid: UUID,
+                    name: String,
+                    format: String,
+                    pages: Int = 0,
+                    currentPage: Int = 0)
 
   /**
    * Many-to-one with user
@@ -153,15 +153,15 @@ object DBTableDefinitions {
   }
 
   case class DBFolder(id: Option[Long],
-                    idUser: Long,
-                    name: String,
-                    left: Int,
-                    right: Int)
+                      idUser: Long,
+                      name: String,
+                      left: Int,
+                      right: Int)
 
   class Folders(tag: Tag) extends Table[DBFolder](tag, "folders") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def idUser = column[Long]("id", O.NotNull)
+    def idUser = column[Long]("idUser", O.NotNull)
 
     def name = column[String]("name")
 

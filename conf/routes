@@ -6,7 +6,7 @@
 GET           /                                @controllers.Application.index
 GET           /sign-out                        @controllers.Application.signOut
 GET           /sign-up                         @controllers.Application.signUp
-GET           /authenticate/:provider          @controllers.Application.socialAuthenticationHandler(provider)
+#GET           /authenticate/:provider          @controllers.Application.socialAuthenticationHandler(provider)
 POST          /authenticate/credentials        @controllers.Application.credentialsAuthenticationHandler
 POST          /sign-up                         @controllers.Application.signUpHandler
 

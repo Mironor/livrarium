@@ -12,7 +12,7 @@ import com.mohiva.play.silhouette.core.{Environment, EventBus}
 import models._
 import models.silhouette.{OAuth2InfoDAO, OAuth1InfoDAO, PasswordInfoDAO}
 import scaldi.Module
-import services.{UserService}
+import services.{User, UserService}
 
 class SilhouetteModule extends Module {
 

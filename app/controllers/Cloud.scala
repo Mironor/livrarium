@@ -7,14 +7,13 @@ import com.mohiva.play.silhouette.core.providers.Credentials
 import com.mohiva.play.silhouette.core.{Environment, Silhouette}
 import com.sksamuel.scrimage.{Image, Format => ImgFormat}
 import helpers.{BookFormatHelper, PDFHelper}
-import models.User
 import play.api.Play
 import play.api.libs.Files
 import play.api.mvc._
 import scaldi.{Injectable, Injector}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
-import services.Folder
+import services.{User, Folder}
 
 import scala.concurrent.Future
 

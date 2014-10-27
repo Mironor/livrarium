@@ -1,20 +1,19 @@
 package controllers
 
-import services.UserService
+import _root_.services.{FolderService, User, UserService}
 import com.mohiva.play.silhouette.contrib.services.CachedCookieAuthenticator
 import com.mohiva.play.silhouette.core._
 import com.mohiva.play.silhouette.core.exceptions.{AccessDeniedException, AuthenticationException}
 import com.mohiva.play.silhouette.core.providers._
 import com.mohiva.play.silhouette.core.services.{AuthInfoService, AvatarService}
 import com.mohiva.play.silhouette.core.utils.PasswordHasher
-import models.User
 import play.api.libs.concurrent.Execution.Implicits._
 
 import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 
-import play.api.mvc.{Action, BodyParsers}
+import play.api.mvc._
 import scaldi.{Injectable, Injector}
 
 import scala.concurrent.Future
@@ -28,6 +27,7 @@ class Application(implicit inj: Injector)
   implicit val env = inject[Environment[User, CachedCookieAuthenticator]]
 
   val userService = inject[UserService]
+  val folderService = inject[FolderService]
   val authInfoService = inject[AuthInfoService]
   val avatarService = inject[AvatarService]
   val passwordHasher = inject[PasswordHasher]
@@ -84,52 +84,31 @@ class Application(implicit inj: Injector)
     }
   }
 
-  def authenticateUser(userCredentials: Credentials) =  credentialsAuthentication(userCredentials).flatMap { loginInfo =>
-        userService.retrieve(loginInfo).flatMap {
-          case Some(user) => env.authenticatorService.create(user).map {
-            case Some(authenticator) =>
-              env.authenticatorService.send(authenticator, Ok(Json.obj("identity" -> user.email)))
-            case None => BadRequest(Json.obj(
-              "code" -> inject[Int](identified by "errors.auth.noAuthenticator")
-            ))
-          }
-          case None => Future.failed(new AuthenticationException(""))
-        }
-      } recover {
-        case e: AccessDeniedException => BadRequest(Json.obj(
-          "code" -> inject[Int](identified by "errors.auth.accessDenied")
-        ))
-        case e: AuthenticationException => BadRequest(Json.obj(
-          "code" -> inject[Int](identified by "errors.auth.notAuthenticated")
+  def authenticateUser(userCredentials: Credentials) = credentialsAuthentication(userCredentials).flatMap { loginInfo =>
+    userService.retrieve(loginInfo).flatMap {
+      case Some(user) => env.authenticatorService.create(user).map {
+        case Some(authenticator) =>
+          env.authenticatorService.send(authenticator, Ok(Json.obj("identity" -> user.email)))
+        case None => BadRequest(Json.obj(
+          "code" -> inject[Int](identified by "errors.auth.noAuthenticator")
         ))
       }
+      case None => Future.failed(new AuthenticationException(""))
+    }
+  } recover {
+    case e: AccessDeniedException => BadRequest(Json.obj(
+      "code" -> inject[Int](identified by "errors.auth.accessDenied")
+    ))
+    case e: AuthenticationException => BadRequest(Json.obj(
+      "code" -> inject[Int](identified by "errors.auth.notAuthenticated")
+    ))
+  }
 
   private def credentialsAuthentication(userCredentials: Credentials) = env.providers.get(CredentialsProvider.Credentials) match {
     case Some(credentialsProvider: CredentialsProvider) => credentialsProvider.authenticate(userCredentials)
     case _ => Future.failed(new AuthenticationException(s"Cannot find credentials provider"))
   }
 
-  def socialAuthenticationHandler(provider: String) = Action.async { implicit request =>
-    (env.providers.get(provider) match {
-      case Some(p: SocialProvider[_] with CommonSocialProfileBuilder[_]) => p.authenticate()
-      case _ => Future.failed(new AuthenticationException(s"Cannot authenticate with unexpected social provider $provider"))
-    }).flatMap {
-      case Left(result) => Future.successful(result)
-      case Right(profile: CommonSocialProfile[_]) =>
-        for {
-          user <- userService.save(profile)
-          authInfo <- authInfoService.save(profile.loginInfo, profile.authInfo)
-          maybeAuthenticator <- env.authenticatorService.create(user)
-        } yield {
-          maybeAuthenticator match {
-            case Some(authenticator) =>
-              env.eventBus.publish(LoginEvent(user, request, request2lang))
-              env.authenticatorService.send(authenticator, Redirect(routes.Application.index()))
-            case None => throw new AuthenticationException("Couldn't create an authenticator")
-          }
-        }
-    }.recoverWith(exceptionHandler)
-  }
 
   /**
    * Registers a new user.
@@ -170,25 +149,25 @@ class Application(implicit inj: Injector)
       avatarURL = None
     )
 
-//    val rootFolder = RootFolder(
-//      children = List()
-//    )
-
-    for {
+    val userPromise = for {
       avatar <- avatarService.retrieveURL(email)
-      user <- userService.save(user.copy(avatarURL = avatar))
-//      rootFolder <- rootFolderService.save(rootFolder.copy(userId = user.id))
-      authInfo <- authInfoService.save(loginInfo, password)
-      maybeAuthenticator <- env.authenticatorService.create(user)
-    } yield {
-      maybeAuthenticator match {
-        case Some(authenticator) =>
-          env.authenticatorService.send(authenticator, Ok(Json.obj("identity" -> user.email)))
-        case None => BadRequest(Json.obj(
-          "code" -> inject[Int](identified by "errors.auth.noAuthenticator")
-        ))
+      user <- userService.saveWithLoginInfo(user.copy(avatarURL = avatar))
+    } yield user
+
+    userPromise.flatMap { user =>
+      for {
+        folders <- folderService.createRootForUser(user)
+        authInfo <- authInfoService.save(loginInfo, password)
+        maybeAuthenticator <- env.authenticatorService.create(user)
+      } yield {
+        maybeAuthenticator match {
+          case Some(authenticator) =>
+            env.authenticatorService.send(authenticator, Ok(Json.obj("identity" -> user.email)))
+          case None => BadRequest(Json.obj(
+            "code" -> inject[Int](identified by "errors.auth.noAuthenticator")
+          ))
+        }
       }
     }
-
   }
 }
