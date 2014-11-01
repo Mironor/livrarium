@@ -25,7 +25,6 @@ class FolderService(implicit inj: Injector) extends Injectable {
    */
   def retrieveUserFolderTree(user: User): Future[List[Folder]] = {
     val dbFoldersPromise = folderDAO.findUserFolders(user)
-
     dbFoldersPromise.map {
       case rootFolder :: tail => generateChildren(0, rootFolder.right, tail)
       case Nil => Nil
@@ -34,7 +33,7 @@ class FolderService(implicit inj: Injector) extends Injectable {
 
   private def generateChildren(currentLeft: Int, currentRight: Int, dbFolders: Seq[DBFolder]): List[Folder] = {
     dbFolders match {
-      case dbFolder :: tail if dbFolder.left == currentRight + 1 => Nil
+      case dbFolder :: tail if dbFolder.left > currentRight => Nil
       case dbFolder :: tail if dbFolder.left > currentLeft => Folder(dbFolder.id, dbFolder.name, generateChildren(dbFolder.left, dbFolder.right, tail)) :: generateChildren(dbFolder.right, currentRight, tail)
       case dbFolder :: tail => generateChildren(currentLeft, currentRight, tail)
       case Nil => Nil
