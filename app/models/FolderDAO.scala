@@ -16,7 +16,12 @@ class FolderDAO {
   val rootFolderName = "__root__"
   val slickFolders = TableQuery[Folders]
 
-  def getUserRoot(user: User): Future[Option[DBFolder]] = {
+  /**
+   * Gets user's root folder
+   * @param user User
+   * @return
+   */
+  def findUserRoot(user: User): Future[Option[DBFolder]] = {
     Future.successful {
       DB withSession { implicit session =>
         slickFolders.filter(folder => folder.idUser === user.id.get && folder.left === 0)
@@ -25,7 +30,13 @@ class FolderDAO {
     }
   }
 
-  def getById(user: User, folderId: Long): Future[Option[DBFolder]] = {
+  /**
+   * Gets folder by Id
+   * @param user user
+   * @param folderId folder's id
+   * @return
+   */
+  def findById(user: User, folderId: Long): Future[Option[DBFolder]] = {
     Future.successful {
       DB withSession { implicit session =>
         slickFolders.filter(folder => folder.idUser === user.id.get && folder.id === folderId)
@@ -34,6 +45,11 @@ class FolderDAO {
     }
   }
 
+  /**
+   * Gets all user's folders ordered by `left` field (see Nested Sets pattern)
+   * @param user User
+   * @return
+   */
   def findUserFolders(user: User): Future[List[DBFolder]] = {
     Future.successful {
       DB withSession { implicit session =>
@@ -43,6 +59,11 @@ class FolderDAO {
     }
   }
 
+  /**
+   * Creates root folder for supplied User
+   * @param user User
+   * @return
+   */
   def createRootForUser(user: User): Future[_] = {
     Future.successful {
       DB withSession { implicit session =>
@@ -51,11 +72,18 @@ class FolderDAO {
     }
   }
 
+  /**
+   * Appends sub folder to user's folder
+   * @param user User
+   * @param folderParent parent folder
+   * @param folderName new folder's name
+   * @return
+   */
   def appendToFolder(user: User, folderParent: DBFolder, folderName: String): Future[DBFolder] = {
     Future.successful {
       DB withSession { implicit session =>
 
-        val userId = user.id.get.toString
+        val userId = user.id.getOrElse(throw IllegalArgumentException)
         val parentRight = folderParent.right
 
         // Making space in parents Folders (and folders to the right of the parent folder

@@ -33,18 +33,6 @@ class UserDAO {
     }
   }
 
-  def create(user: DBUser): Future[Long] = {
-    Future.successful {
-      DB withSession { implicit session =>
-        createDbUser(user)
-      }
-    }
-  }
-
-  private def createDbUser(dbUser: DBUser)(implicit session: Session): Long = (slickUsers returning slickUsers.map(_.id)) += dbUser
-
-
-
   /**
    * Saves a user.
    *
@@ -61,8 +49,7 @@ class UserDAO {
   }
 
   /**
-   * Saves a user.
-   * This method also handles login info
+   * Saves a user with login info.
    * @param user The user to save.
    * @param loginInfo a user may have LoginInfo attached
    * @return The saved user.
@@ -72,9 +59,7 @@ class UserDAO {
       DB withSession { implicit session =>
         val returnedUserId: Long = saveDbUser(user)
 
-        // Insert if it does not exist yet
-        val dbLoginInfoOption = slickLoginInfos.filter(info => info.providerID === loginInfo.providerID && info.providerKey === loginInfo.providerKey).firstOption
-        if (dbLoginInfoOption.isEmpty) slickLoginInfos.insert(DBLoginInfo(None, returnedUserId, loginInfo.providerID, loginInfo.providerKey))
+        saveLoginInfo(loginInfo, returnedUserId)
 
         user.copy(id = Option(returnedUserId))
       }
@@ -90,4 +75,12 @@ class UserDAO {
     }
   }
 
+  private def createDbUser(dbUser: DBUser)(implicit session: Session): Long = (slickUsers returning slickUsers.map(_.id)) += dbUser
+
+  private def saveLoginInfo(loginInfo: LoginInfo, userId: Long)(implicit session: Session): Unit = {
+    // Insert if it does not exist yet
+    val dbLoginInfoOption = slickLoginInfos.filter(info => info.providerID === loginInfo.providerID && info.providerKey === loginInfo.providerKey)
+      .firstOption
+    if (dbLoginInfoOption.isEmpty) slickLoginInfos.insert(DBLoginInfo(None, userId, loginInfo.providerID, loginInfo.providerKey))
+  }
 }

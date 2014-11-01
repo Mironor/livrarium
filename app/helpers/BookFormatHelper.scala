@@ -1,5 +1,8 @@
 package helpers
 
+/**
+ * Static object that contains methods to work with file types
+ */
 object BookFormatHelper {
   val NONE = "none"
   val PDF = "pdf"

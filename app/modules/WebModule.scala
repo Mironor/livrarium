@@ -6,8 +6,7 @@ import scaldi.Module
 import services.FolderService
 
 /**
- * User: mironor
- * Date: 7/4/14
+ * Application's dependency injections
  */
 class WebModule extends Module{
   bind[FolderDAO] to new FolderDAO

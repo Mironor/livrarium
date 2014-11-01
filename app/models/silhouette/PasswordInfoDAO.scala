@@ -47,14 +47,19 @@ class PasswordInfoDAO extends DelegableAuthInfoDAO[PasswordInfo] {
     Future.successful {
       DB withSession { implicit session =>
 
-        val loginInfoId = slickLoginInfos
+        val loginInfoOption = slickLoginInfos
           .filter(x => x.providerID === loginInfo.providerID && x.providerKey === loginInfo.providerKey)
-          .first.id
+          .firstOption
 
-        slickPasswordInfos insert DBPasswordInfo(loginInfoId.get, authInfo.hasher, authInfo.password, authInfo.salt)
+        val loginInfoIdOption = loginInfoOption.flatMap(_.id)
+
+        val loginInfoId = loginInfoIdOption.getOrElse(throw new PasswordLoginInfoNotFoundException("Associated LoginInfo not found"))
+
+        slickPasswordInfos insert DBPasswordInfo(loginInfoId, authInfo.hasher, authInfo.password, authInfo.salt)
         authInfo
       }
     }
   }
 }
 
+case class PasswordLoginInfoNotFoundException(override val message: String) extends SilhouetteDAOException(message)

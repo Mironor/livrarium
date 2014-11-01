@@ -14,6 +14,9 @@ import models.silhouette.{OAuth2InfoDAO, OAuth1InfoDAO, PasswordInfoDAO}
 import scaldi.Module
 import services.{User, UserService}
 
+/**
+ * Silhouette module dependency injections
+ */
 class SilhouetteModule extends Module {
 
   bind[PasswordInfoDAO] to new PasswordInfoDAO

@@ -4,6 +4,9 @@ import java.util.UUID
 
 import play.api.db.slick.Config.driver.simple._
 
+/**
+ * Tables definitions for slick
+ */
 object DBTableDefinitions {
 
   case class DBUser(id: Option[Long],

@@ -51,6 +51,7 @@ class Application(implicit inj: Injector)
 
   /**
    * Handles the signUp action.
+   * Same as index, the client-side router will handle the sing up form rendering
    *
    * @return The result to display.
    */

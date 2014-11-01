@@ -12,7 +12,7 @@ import scala.concurrent.Future
 
 /**
  * The user object.
- *
+ * Also Identity object for Silhouette
  * @param id The unique ID of the user.
  * @param loginInfo The linked login info.
  * @param email Maybe the email of the authenticated provider.
@@ -25,10 +25,10 @@ case class User(id: Option[Long],
 
 
 /**
- * Handles actions to users.
  * UserDAO should only handle database interactions to improve database abstraction
- * Thus UserDAO should not know about User case class existance, instead this service
- * will handle all the casting between User <> DBUser
+ * All interactions with UserDAO should go through this class
+ * Thus UserDAO should not know about the existence of the User case class
+ * It will handle all the casting between User <> DBUser
  */
 class UserService(implicit inj: Injector) extends IdentityService[User] with Injectable {
   val userDAO = inject[UserDAO]
@@ -47,8 +47,7 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
   }
 
   /**
-   * Saves a user.
-   *
+   * Saves a user with login info.
    * @param user The user to save.
    * @return The saved user.
    */
@@ -60,9 +59,7 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
 
   /**
    * Saves the social profile for a user.
-   *
    * If a user exists for this profile then update the user, otherwise create a new user with the given profile.
-   *
    * @param profile The social profile to save.
    * @return The user for whom the profile was saved.
    */
@@ -83,13 +80,6 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
           profile.avatarURL
         ), profile.loginInfo).map(dbUser => User(dbUser.id, profile.loginInfo, dbUser.email, dbUser.avatarURL))
     }
-
-  }
-
-  /**
-   * Hack for silhouette
-   */
-  def saveNoAsync[A <: AuthInfo](profile: CommonSocialProfile[A]) = {
 
   }
 }

@@ -5,7 +5,19 @@ import javax.imageio.ImageIO
 import org.apache.pdfbox.io.RandomAccessFile
 import org.apache.pdfbox.pdmodel.{PDPage, PDDocument}
 
+/**
+ * Static object that contains helper methods for working with pdf files
+ */
 object PDFHelper {
+
+  val imageFileType = "jpg"
+
+  /**
+   * Using PDFBox extract first page as an image of the supplied pdf
+   * @param pdfPath input pdf
+   * @param outputPath output image
+   * @return
+   */
   def extractImageFromPdf(pdfPath: String, outputPath: String) = {
     val input = new File(pdfPath)
     val inputRABuf = new RandomAccessFile(input, "rw")
@@ -17,9 +29,14 @@ object PDFHelper {
     val titlePage = pages.get(0).asInstanceOf[PDPage]
 
     val titlePageImage = titlePage.convertToImage()
-    ImageIO.write(titlePageImage, "jpg", output)
+    ImageIO.write(titlePageImage, imageFileType, output)
   }
 
+  /**
+   * Returns the number of pages in supplied pdf
+   * @param pdfPath
+   * @return
+   */
   def getTotalPages(pdfPath: String) = {
     val input = new File(pdfPath)
 

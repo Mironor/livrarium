@@ -47,9 +47,13 @@ class OAuth2InfoDAO extends DelegableAuthInfoDAO[OAuth2Info] {
     Future.successful(
       DB withSession { implicit session =>
 
-        val loginInfoId = slickLoginInfos
+        val loginInfoOption = slickLoginInfos
           .filter(x => x.providerID === loginInfo.providerID && x.providerKey === loginInfo.providerKey)
-          .first.id.get
+          .firstOption
+
+        val loginInfoIdOption = loginInfoOption.flatMap(_.id)
+
+        val loginInfoId = loginInfoIdOption.getOrElse(throw new OAuth2InfoLoginInfoNotFoundException("Associated LoginInfo not found"))
 
         val dbOAuth2Info = slickOAuth2Infos.filter(_.idLoginInfo === loginInfoId).firstOption
 
@@ -62,4 +66,6 @@ class OAuth2InfoDAO extends DelegableAuthInfoDAO[OAuth2Info] {
     )
   }
 }
+
+case class OAuth2InfoLoginInfoNotFoundException(override val message: String) extends SilhouetteDAOException(message)
 
