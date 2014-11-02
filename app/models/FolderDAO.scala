@@ -83,7 +83,7 @@ class FolderDAO {
     Future.successful {
       DB withSession { implicit session =>
 
-        val userId = user.id.getOrElse(throw IllegalArgumentException)
+        val userId = user.id.getOrElse(throw new Exception("User.id should be defined"))
         val parentRight = folderParent.right
 
         // Making space in parents Folders (and folders to the right of the parent folder

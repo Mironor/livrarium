@@ -53,7 +53,7 @@ class OAuth1InfoDAO extends DelegableAuthInfoDAO[OAuth1Info] {
 
         val loginInfoIdOption = loginInfoOption.flatMap(_.id)
 
-        val loginInfoId = loginInfoIdOption.getOrElse(throw new OAuth1InfoLoginInfoNotFoundException("Associated LoginInfo not found"))
+        val loginInfoId = loginInfoIdOption.getOrElse(throw new SilhouetteDAOException("Associated LoginInfo not found"))
 
         val dbOAuth1Info = slickOAuth1Infos.filter(_.idLoginInfo === loginInfoId).firstOption
 
@@ -66,6 +66,4 @@ class OAuth1InfoDAO extends DelegableAuthInfoDAO[OAuth1Info] {
     )
   }
 }
-
-case class OAuth1InfoLoginInfoNotFoundException(override val message: String) extends SilhouetteDAOException(message)
 

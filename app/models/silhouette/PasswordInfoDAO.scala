@@ -53,7 +53,7 @@ class PasswordInfoDAO extends DelegableAuthInfoDAO[PasswordInfo] {
 
         val loginInfoIdOption = loginInfoOption.flatMap(_.id)
 
-        val loginInfoId = loginInfoIdOption.getOrElse(throw new PasswordLoginInfoNotFoundException("Associated LoginInfo not found"))
+        val loginInfoId = loginInfoIdOption.getOrElse(throw new SilhouetteDAOException("Associated LoginInfo not found"))
 
         slickPasswordInfos insert DBPasswordInfo(loginInfoId, authInfo.hasher, authInfo.password, authInfo.salt)
         authInfo
@@ -61,5 +61,3 @@ class PasswordInfoDAO extends DelegableAuthInfoDAO[PasswordInfo] {
     }
   }
 }
-
-case class PasswordLoginInfoNotFoundException(override val message: String) extends SilhouetteDAOException(message)
