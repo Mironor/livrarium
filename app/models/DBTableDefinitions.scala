@@ -158,6 +158,7 @@ object DBTableDefinitions {
   case class DBFolder(id: Option[Long],
                       idUser: Long,
                       name: String,
+                      level: Long,
                       left: Int,
                       right: Int)
 
@@ -168,13 +169,15 @@ object DBTableDefinitions {
 
     def name = column[String]("name")
 
+    def level = column[Long]("level")
+
     def left = column[Int]("left")
 
     def right = column[Int]("right")
 
     def userFK = foreignKey("FOLDER_USER_FK", idUser, TableQuery[Users])(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
-    def * = (id.?, idUser, name, left, right) <>(DBFolder.tupled, DBFolder.unapply)
+    def * = (id.?, idUser, name, level, left, right) <>(DBFolder.tupled, DBFolder.unapply)
   }
 
 }

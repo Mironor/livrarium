@@ -2,8 +2,9 @@ package helpers
 
 import java.io.File
 import javax.imageio.ImageIO
+
 import org.apache.pdfbox.io.RandomAccessFile
-import org.apache.pdfbox.pdmodel.{PDPage, PDDocument}
+import org.apache.pdfbox.pdmodel.{PDDocument, PDPage}
 
 /**
  * Static object that contains helper methods for working with pdf files

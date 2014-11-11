@@ -10,7 +10,7 @@ import com.mohiva.play.silhouette.core.services._
 import com.mohiva.play.silhouette.core.utils._
 import com.mohiva.play.silhouette.core.{Environment, EventBus}
 import models._
-import models.silhouette.{OAuth2InfoDAO, OAuth1InfoDAO, PasswordInfoDAO}
+import models.silhouette.{OAuth1InfoDAO, OAuth2InfoDAO, PasswordInfoDAO}
 import scaldi.Module
 import services.{User, UserService}
 

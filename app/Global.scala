@@ -1,12 +1,13 @@
-import modules.{WebModule, SilhouetteModule}
-import play.api.i18n.{Messages, Lang}
-import play.api.mvc.Results._
-import play.api.GlobalSettings
-import play.api.mvc.{Result, RequestHeader}
 import com.mohiva.play.silhouette.core.{Logger, SecuredSettings}
-import scaldi.play.{ControllerInjector, ScaldiSupport}
-import scala.concurrent.Future
 import controllers.routes
+import modules.{SilhouetteModule, WebModule}
+import play.api.GlobalSettings
+import play.api.i18n.{Lang, Messages}
+import play.api.mvc.Results._
+import play.api.mvc.{RequestHeader, Result}
+import scaldi.play.{ControllerInjector, ScaldiSupport}
+
+import scala.concurrent.Future
 
 /**
  * The global configuration.

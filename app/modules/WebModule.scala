@@ -1,6 +1,5 @@
 package modules
 
-import controllers.{Cloud, Application}
 import models.FolderDAO
 import scaldi.Module
 import services.FolderService

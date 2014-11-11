@@ -9,64 +9,96 @@ import com.sksamuel.scrimage.{Image, Format => ImgFormat}
 import helpers.{BookFormatHelper, PDFHelper}
 import play.api.Play
 import play.api.libs.Files
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
 import play.api.mvc._
 import scaldi.{Injectable, Injector}
-import play.api.libs.json._
-import play.api.libs.functional.syntax._
-import services.{User, Folder}
+import services.{Folder, FolderService, User}
 
 import scala.concurrent.Future
+import scala.language.postfixOps
 
 class Cloud(implicit inj: Injector)
   extends Silhouette[User, CachedCookieAuthenticator] with Injectable {
 
   implicit val env = inject[Environment[User, CachedCookieAuthenticator]]
+
   val applicationController = inject[Application]
+  val folderService = inject[FolderService]
+
+  /** Case classes used in requests **/
+  case class FolderContents(id: Long,
+                            folders: List[Folder])
 
 
-  implicit val folderReads: Reads[Folder] = (
-    (__ \ "id").read[Option[Long]] and
-    (__ \ "name").read[String] and
-      (__ \ "children").read[List[Folder]]
-    )(Folder.apply _)
+  /** Readers and Writers to handle json requests
+    * https://www.playframework.com/documentation/2.1.0/ScalaJsonRequests
+    */
+  implicit val appendFolderReads = (
+    (__ \ 'idParent).read[Option[Long]] and
+      (__ \ 'name).read[String]
+    ) tupled
 
   implicit val folderWrites: Writes[Folder] = (
     (__ \ "id").write[Option[Long]] and
-    (__ \ "label").write[String] and
+      (__ \ "label").write[String] and
       (__ \ "children").write[List[Folder]]
     )(unlift(Folder.unapply))
+
+  implicit val folderContentsWrites: Writes[FolderContents] = (
+    (__ \ "id").write[Long] and
+      (__ \ "folders").write[List[Folder]]
+    )(unlift(FolderContents.unapply))
+
 
   def index = UserAwareAction.async { implicit request =>
     request.identity match {
       case Some(user) => Future.successful(Ok(views.html.index()))
 
-      case None => applicationController.authenticateUser(Credentials("meanor89@gmail.com", "aaaaaa"))
+      case None => applicationController.authenticateUser(Credentials("meanor@gmail.com", "aaaaaa"))
     }
   }
 
-  def folders = TODO/*UserAwareAction.async { implicit request =>
+  def rootContent = UserAwareAction.async { implicit request =>
     request.identity match {
-      case Some(user) =>
-        val rootFolder = rootFolderService.retrieve(user).get
-        val json = Json.toJson(rootFolder.children)
-        Future.successful(Ok(json))
+      case Some(user) => folderService.retrieveRoot(user).flatMap { rootFolderOption =>
+        val rootFolder = rootFolderOption.getOrElse(throw new Exception("Root folder not found"))
+        val rootFolderId = rootFolder.id.getOrElse(throw new Exception("Root folder does not have id"))
+        val rootFolderContentPromise = getFolderContents(user, rootFolderId)
+
+        rootFolderContentPromise.map(rootContent => Ok(Json.toJson(rootContent)))
+      }
 
       case None => Future.successful(Ok(views.html.index()))
     }
-  }*/
+  }
 
-  def updateFolders() = UserAwareAction.async(BodyParsers.parse.json) { implicit request =>
+  private def getFolderContents(user: User, folderId: Long): Future[FolderContents] = {
+    val childrenPromise = folderService.retrieveChildren(user, folderId)
+    childrenPromise.map(children => FolderContents(folderId, children))
+  }
+
+  def content(id: Long) = UserAwareAction.async { implicit request =>
     request.identity match {
       case Some(user) =>
-        val foldersJson = request.body.validate[List[Folder]]
-        foldersJson match {
-          case folders: JsSuccess[List[Folder]] =>
-//            rootFolderService.save(folders.get, user)
-            Future.successful(Ok(Json.obj()))
+        val folderContentsPromise = getFolderContents(user, id)
+        folderContentsPromise.map(rootContent => Ok(Json.toJson(rootContent)))
 
-          case errors: JsError => Future.successful(BadRequest(Json.obj(
-            "code" -> inject[Int](identified by "errors.auth.loginPasswordNotValid"),
-            "fields" -> JsError.toFlatJson(errors)
+      case None => Future.successful(Ok(views.html.index()))
+    }
+  }
+
+  def appendFolder() = UserAwareAction.async(BodyParsers.parse.json) { implicit request =>
+    request.identity match {
+      case Some(user) =>
+        request.body.validate[(Long, String)].map {
+          case (parentFolderId: Long, name: String) => folderService.appendTo(user, parentFolderId, name)
+            Future.successful(Ok(Json.obj()))
+        }.recoverTotal {
+          error => Future.successful(BadRequest(Json.obj(
+            "code" -> inject[Int](identified by "errors.request.badRequest"),
+            "fields" -> JsError.toFlatJson(error)
           )))
         }
 

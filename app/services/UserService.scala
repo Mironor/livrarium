@@ -1,8 +1,8 @@
 package services
 
-import com.mohiva.play.silhouette.core.{Identity, LoginInfo}
 import com.mohiva.play.silhouette.core.providers.CommonSocialProfile
 import com.mohiva.play.silhouette.core.services.{AuthInfo, IdentityService}
+import com.mohiva.play.silhouette.core.{Identity, LoginInfo}
 import models.DBTableDefinitions.DBUser
 import models.UserDAO
 import play.api.libs.concurrent.Execution.Implicits._

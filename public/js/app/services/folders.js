@@ -1,13 +1,6 @@
 angular.module('lvr')
     .factory('folders', function ($http, constants, i18nEn, Folder) {
 
-        var rootFolder = new Folder({
-                name: 'root',
-                children: []
-            }),
-
-            currentFolder = rootFolder;
-
         return {
             initRootFolder: function () {
                 $http.get(constants.applicationUrls.folders)
@@ -26,7 +19,7 @@ angular.module('lvr')
             getCurrentFolder: function () {
                 return currentFolder;
             },
-            getCurrentPath: function(){
+            getCurrentPath: function () {
 
             },
             getNewFolderNameInCurrentFolder: function () {
@@ -34,7 +27,7 @@ angular.module('lvr')
                     expectedNumber = 1;
 
                 _(currentFolderChildren).forEach(function (child) {
-                    if (_.str.startsWith(child.label, i18nEn['content.folders.newFolderName'])){
+                    if (_.str.startsWith(child.label, i18nEn['content.folders.newFolderName'])) {
                         expectedNumber++;
                     }
                 });

@@ -2,10 +2,10 @@ package services
 
 import models.DBTableDefinitions.DBFolder
 import models.FolderDAO
+import play.api.libs.concurrent.Execution.Implicits._
 import scaldi.{Injectable, Injector}
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
 case class Folder(id: Option[Long],
                   name: String,
@@ -50,6 +50,31 @@ class FolderService(implicit inj: Injector) extends Injectable {
   def createRootForUser(user: User): Future[_] = folderDAO.createRootForUser(user)
 
   /**
+   * Gets root folder for defined user
+   * @param user User
+   * @return
+   */
+  def retrieveRoot(user: User): Future[Option[Folder]] = {
+    folderDAO.findUserRoot(user).map { dbFolderOption =>
+      dbFolderOption.map {
+        dbFolder => Folder(dbFolder.id, dbFolder.name, List())
+      }
+    }
+  }
+
+  /**
+   * Gets folder's children folders
+   * @param user User
+   * @param folderId parent folder's id
+   * @return
+   */
+  def retrieveChildren(user: User, folderId: Long): Future[List[Folder]] = {
+    folderDAO.findChildren(user, folderId).map{
+      _.map(dbFolder => Folder(dbFolder.id, dbFolder.name, List()))
+    }
+  }
+
+  /**
    * Appends sub-folder with a given name to the root folder
    * @param user User
    * @param folderName new folder's label
@@ -64,19 +89,24 @@ class FolderService(implicit inj: Injector) extends Injectable {
   /**
    * Appends sub-folder to a supplied user
    * @param user User
-   * @param parentFolder parent folder
+   * @param parentFolderId parent folder id
    * @param folderName new folder's label
    * @return
    */
-  def appendTo(user: User, parentFolder: Folder, folderName: String): Future[Folder] = {
-    val dbParentFolderPromise = folderDAO.findById(user, parentFolder.id.get)
+  def appendTo(user: User, parentFolderId: Long, folderName: String): Future[Folder] = {
+    val dbParentFolderPromise = folderDAO.findById(user, parentFolderId)
     val appendedDBFolderPromise = appendToPromise(user, dbParentFolderPromise, folderName)
     appendedDBFolderPromise.map(dbFolder => Folder(dbFolder.id, dbFolder.name, Nil))
   }
 
+  def appendTo(user: User, parentFolder: Folder, folderName: String): Future[Folder] = {
+    val parentFolderId = parentFolder.id.getOrElse(throw FolderNotFoundException("Folder should have id"))
+    appendTo(user, parentFolderId, folderName)
+  }
+
   private def appendToPromise(user: User, parentFolderPromise: Future[Option[DBFolder]], folderName: String): Future[DBFolder] = {
     parentFolderPromise.flatMap { parentFolderOption =>
-      val parentFolder = parentFolderOption.getOrElse (throw FolderNotFoundException("Folder is not defined for userId=" + user.id))
+      val parentFolder = parentFolderOption.getOrElse(throw FolderNotFoundException("Folder is not defined for userId=" + user.id))
       folderDAO.appendToFolder(user, parentFolder, folderName)
     }
   }

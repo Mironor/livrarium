@@ -1,7 +1,8 @@
 angular.module('lvr')
     .factory('Folder', function () {
         var folderModel = {
-            label: "root",
+            id: -1,
+            name: "",
             children: []
         };
 

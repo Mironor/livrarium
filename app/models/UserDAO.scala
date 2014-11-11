@@ -1,14 +1,13 @@
 package models
 
 import com.mohiva.play.silhouette.core.LoginInfo
-import scala.slick.jdbc.JdbcBackend.Session
-import models.DBTableDefinitions.Users
-import models.DBTableDefinitions._
-import scala.slick.driver.PostgresDriver.simple._
-import play.api.db.slick._
+import models.DBTableDefinitions.{Users, _}
 import play.api.Play.current
+import play.api.db.slick._
 
 import scala.concurrent.Future
+import scala.slick.driver.PostgresDriver.simple._
+import scala.slick.jdbc.JdbcBackend.Session
 
 
 class UserDAO {

@@ -1,15 +1,14 @@
 package models
 
 import models.DBTableDefinitions.{DBFolder, Folders}
+import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
 import services.User
 
 import scala.concurrent.Future
-import scala.slick.lifted.TableQuery
 import scala.slick.jdbc.StaticQuery.interpolation
-
-import play.api.Play.current
+import scala.slick.lifted.TableQuery
 
 class FolderDAO {
 
@@ -24,7 +23,8 @@ class FolderDAO {
   def findUserRoot(user: User): Future[Option[DBFolder]] = {
     Future.successful {
       DB withSession { implicit session =>
-        slickFolders.filter(folder => folder.idUser === user.id.get && folder.left === 0)
+        val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
+        slickFolders.filter(folder => folder.idUser === userId && folder.left === 0)
           .firstOption
       }
     }
@@ -39,7 +39,8 @@ class FolderDAO {
   def findById(user: User, folderId: Long): Future[Option[DBFolder]] = {
     Future.successful {
       DB withSession { implicit session =>
-        slickFolders.filter(folder => folder.idUser === user.id.get && folder.id === folderId)
+        val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
+        slickFolders.filter(folder => folder.idUser === userId && folder.id === folderId)
           .firstOption
       }
     }
@@ -53,8 +54,22 @@ class FolderDAO {
   def findUserFolders(user: User): Future[List[DBFolder]] = {
     Future.successful {
       DB withSession { implicit session =>
-        slickFolders.filter(folder => folder.idUser === user.id.get).sortBy(_.left.asc)
+        val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
+        slickFolders.filter(folder => folder.idUser === userId).sortBy(_.left.asc)
           .list
+      }
+    }
+  }
+
+  def findChildren(user: User, folderId: Long): Future[List[DBFolder]] = {
+    Future.successful {
+      DB withSession { implicit session =>
+        val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
+
+        (for {
+          parent <- slickFolders if parent.idUser === userId
+          child <- slickFolders  if child.idUser === userId && child.left > parent.left && child.right < parent.right && child.level === parent.level + 1
+        } yield child).list
       }
     }
   }
@@ -67,7 +82,8 @@ class FolderDAO {
   def createRootForUser(user: User): Future[_] = {
     Future.successful {
       DB withSession { implicit session =>
-        slickFolders += DBFolder(None, user.id.get, rootFolderName, 0, 1)
+        val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
+        slickFolders += DBFolder(None, userId, rootFolderName, 0, 0, 1)
       }
     }
   }
@@ -87,11 +103,11 @@ class FolderDAO {
         val parentRight = folderParent.right
 
         // Making space in parents Folders (and folders to the right of the parent folder
-        // Slick does not support mutating updates so we will use plain query here
+        // Slick does not support mutating updates so we will use plain query
         sqlu"""UPDATE "folders" SET "right" = "right" + 2 where "idUser" = $userId AND "right" >= $parentRight""".execute
         sqlu"""UPDATE "folders" SET "left" = "left" + 2 where "idUser" = $userId AND "left" > $parentRight""".execute
 
-        val appendedDBFolder = DBFolder(None, user.id.get, folderName, folderParent.right, folderParent.right + 1)
+        val appendedDBFolder = DBFolder(None, userId, folderName, folderParent.level + 1, folderParent.right, folderParent.right + 1)
         val appendedDBFolderId = (slickFolders returning slickFolders.map(_.id)) += appendedDBFolder
         appendedDBFolder.copy(id = Option(appendedDBFolderId))
       }

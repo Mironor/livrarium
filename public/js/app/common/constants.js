@@ -21,5 +21,10 @@ angular.module('lvr')
         books: {
             minPagesPerBar: 50,
             maxBarsCount: 10
+        },
+
+        folders: {
+            rootFolderName: "__root__",
+            rootFolderId: 0
         }
     });

@@ -8,11 +8,9 @@ import com.mohiva.play.silhouette.core.providers._
 import com.mohiva.play.silhouette.core.services.{AuthInfoService, AvatarService}
 import com.mohiva.play.silhouette.core.utils.PasswordHasher
 import play.api.libs.concurrent.Execution.Implicits._
-
+import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
-
 import play.api.mvc._
 import scaldi.{Injectable, Injector}
 
