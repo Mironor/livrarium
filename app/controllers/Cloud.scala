@@ -36,7 +36,7 @@ class Cloud(implicit inj: Injector)
     * https://www.playframework.com/documentation/2.1.0/ScalaJsonRequests
     */
   implicit val appendFolderReads = (
-    (__ \ 'idParent).read[Option[Long]] and
+    (__ \ 'idParent).read[Long] and
       (__ \ 'name).read[String]
     ) tupled
 
@@ -60,7 +60,7 @@ class Cloud(implicit inj: Injector)
     }
   }
 
-  def rootContent = UserAwareAction.async { implicit request =>
+  def getRootContent = UserAwareAction.async { implicit request =>
     request.identity match {
       case Some(user) => folderService.retrieveRoot(user).flatMap { rootFolderOption =>
         val rootFolder = rootFolderOption.getOrElse(throw new Exception("Root folder not found"))
@@ -79,7 +79,7 @@ class Cloud(implicit inj: Injector)
     childrenPromise.map(children => FolderContents(folderId, children))
   }
 
-  def content(id: Long) = UserAwareAction.async { implicit request =>
+  def getContent(id: Long) = UserAwareAction.async { implicit request =>
     request.identity match {
       case Some(user) =>
         val folderContentsPromise = getFolderContents(user, id)
@@ -89,7 +89,7 @@ class Cloud(implicit inj: Injector)
     }
   }
 
-  def appendFolder() = UserAwareAction.async(BodyParsers.parse.json) { implicit request =>
+  def createFolder() = UserAwareAction.async(BodyParsers.parse.json) { implicit request =>
     request.identity match {
       case Some(user) =>
         request.body.validate[(Long, String)].map {

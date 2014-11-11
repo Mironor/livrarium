@@ -158,7 +158,7 @@ object DBTableDefinitions {
   case class DBFolder(id: Option[Long],
                       idUser: Long,
                       name: String,
-                      level: Long,
+                      level: Int,
                       left: Int,
                       right: Int)
 
@@ -169,7 +169,7 @@ object DBTableDefinitions {
 
     def name = column[String]("name")
 
-    def level = column[Long]("level")
+    def level = column[Int]("level")
 
     def left = column[Int]("left")
 

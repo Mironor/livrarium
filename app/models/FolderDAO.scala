@@ -68,7 +68,7 @@ class FolderDAO {
 
         (for {
           parent <- slickFolders if parent.idUser === userId
-          child <- slickFolders  if child.idUser === userId && child.left > parent.left && child.right < parent.right && child.level === parent.level + 1
+          child <- slickFolders  if child.idUser === userId && child.left > parent.left && child.right < parent.right && child.level === (parent.level + 1)
         } yield child).list
       }
     }
