@@ -1,14 +1,14 @@
 package controllers
 
-import java.io.File
+//import java.io.File
 
-import com.mohiva.play.silhouette.contrib.services.CachedCookieAuthenticator
-import com.mohiva.play.silhouette.core.providers.Credentials
-import com.mohiva.play.silhouette.core.{Environment, Silhouette}
-import com.sksamuel.scrimage.{Image, Format => ImgFormat}
-import helpers.{BookFormatHelper, PDFHelper}
-import play.api.Play
-import play.api.libs.Files
+import com.mohiva.play.silhouette.api.{Environment, Silhouette}
+import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
+import com.mohiva.play.silhouette.impl.providers.Credentials
+//import com.sksamuel.scrimage.{Image, Format => ImgFormat}
+//import helpers.{BookFormatHelper, PDFHelper}
+//import play.api.Play
+//import play.api.libs.Files
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
@@ -20,9 +20,9 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 
 class Cloud(implicit inj: Injector)
-  extends Silhouette[User, CachedCookieAuthenticator] with Injectable {
+  extends Silhouette[User, SessionAuthenticator] with Injectable {
 
-  implicit val env = inject[Environment[User, CachedCookieAuthenticator]]
+  implicit val env = inject[Environment[User, SessionAuthenticator]]
 
   val applicationController = inject[Application]
   val folderService = inject[FolderService]
@@ -108,11 +108,12 @@ class Cloud(implicit inj: Injector)
 
   def upload = UserAwareAction.async(parse.multipartFormData) { implicit request =>
     request.identity match {
-      case Some(user) => uploadBook(request)
+      case Some(user) => Future.successful(Ok(views.html.index()))//uploadBook(request)
       case None => Future.successful(Ok(views.html.index()))
     }
   }
 
+  /*
   private def uploadBook(request: RequestWithUser[MultipartFormData[Files.TemporaryFile]]) = {
     Future.successful {
       request.body.file("books").map {
@@ -150,7 +151,6 @@ class Cloud(implicit inj: Injector)
             inject[Int](identified by "books.smallThumbnailHeight")
           ).write(new File(uploadedBookSmallThumbPath), ImgFormat.JPEG)
 
-          /*
           val bookModel = Book(
             _id = id,
             name = name,
@@ -159,7 +159,6 @@ class Cloud(implicit inj: Injector)
           )
 
           bookService.save(bookModel)
-*/
           Ok(Json.obj(
             "id" -> id.toString,
             "name" -> name
@@ -172,5 +171,6 @@ class Cloud(implicit inj: Injector)
     }
 
   }
+  */
 
 }

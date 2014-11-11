@@ -1,8 +1,8 @@
 package models.silhouette
 
-import com.mohiva.play.silhouette.contrib.daos.DelegableAuthInfoDAO
-import com.mohiva.play.silhouette.core.LoginInfo
-import com.mohiva.play.silhouette.core.providers.PasswordInfo
+import com.mohiva.play.silhouette.api.LoginInfo
+import com.mohiva.play.silhouette.impl.daos.DelegableAuthInfoDAO
+import com.mohiva.play.silhouette.impl.providers.PasswordInfo
 import models.DBTableDefinitions.{DBPasswordInfo, LoginInfos, PasswordInfos}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._

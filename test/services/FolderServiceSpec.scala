@@ -1,4 +1,4 @@
-package models
+package services
 
 import com.mohiva.play.silhouette.core.LoginInfo
 import modules.{SilhouetteModule, WebModule}
@@ -8,7 +8,6 @@ import play.api.GlobalSettings
 import play.api.test.{FakeApplication, PlaySpecification}
 import scaldi.Injectable
 import scaldi.play.ScaldiSupport
-import services.{Folder, UserService, FolderService, User}
 
 
 class FolderServiceSpec extends PlaySpecification with AroundExample with Injectable {
@@ -62,9 +61,9 @@ class FolderServiceSpec extends PlaySpecification with AroundExample with Inject
       // Given
 
       // When
+      val rootFolderChildren = await(folderService.retrieveUserFolderTree(user))
 
       // Then
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(user))
       rootFolderChildren must have size 2
 
       val sub1 = rootFolderChildren(0)
@@ -88,9 +87,9 @@ class FolderServiceSpec extends PlaySpecification with AroundExample with Inject
 
       // When
       await(folderService.appendToRoot(user, testFolderName))
+      val rootFolderChildren = await(folderService.retrieveUserFolderTree(user))
 
       // Then
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(user))
       rootFolderChildren must have size 3
 
       val testFolder = rootFolderChildren(2)
@@ -107,9 +106,9 @@ class FolderServiceSpec extends PlaySpecification with AroundExample with Inject
 
       // When
       await(folderService.appendTo(user, sub1BeforeAppend, testFolderName))
+      val rootFolderChildren = await(folderService.retrieveUserFolderTree(user))
 
       // Then
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(user))
       val sub1 = rootFolderChildren(0)
       sub1.children must have size 3
 

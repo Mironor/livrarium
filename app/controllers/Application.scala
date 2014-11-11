@@ -1,12 +1,12 @@
 package controllers
 
 import _root_.services.{FolderService, User, UserService}
-import com.mohiva.play.silhouette.contrib.services.CachedCookieAuthenticator
-import com.mohiva.play.silhouette.core._
-import com.mohiva.play.silhouette.core.exceptions.{AccessDeniedException, AuthenticationException}
-import com.mohiva.play.silhouette.core.providers._
-import com.mohiva.play.silhouette.core.services.{AuthInfoService, AvatarService}
-import com.mohiva.play.silhouette.core.utils.PasswordHasher
+import com.mohiva.play.silhouette.api.Silhouette
+import com.mohiva.play.silhouette.api._
+import com.mohiva.play.silhouette.api.exceptions.{AccessDeniedException, AuthenticationException}
+import com.mohiva.play.silhouette.api.services.{AuthInfoService, AvatarService}
+import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
+import com.mohiva.play.silhouette.impl.providers.{PasswordInfo, CredentialsProvider, Credentials, PasswordHasher}
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
@@ -20,9 +20,9 @@ import scala.concurrent.Future
  * The basic application controller.
  */
 class Application(implicit inj: Injector)
-  extends Silhouette[User, CachedCookieAuthenticator] with Injectable {
+  extends Silhouette[User, SessionAuthenticator] with Injectable {
 
-  implicit val env = inject[Environment[User, CachedCookieAuthenticator]]
+  implicit val env = inject[Environment[User, SessionAuthenticator]]
 
   val userService = inject[UserService]
   val folderService = inject[FolderService]
@@ -61,8 +61,10 @@ class Application(implicit inj: Injector)
    * @return The result to display.
    */
   def signOut = SecuredAction.async { implicit request =>
+    val result = Future.successful(Redirect(routes.Application.index()))
     env.eventBus.publish(LogoutEvent(request.identity, request, request2lang))
-    Future.successful(env.authenticatorService.discard(Redirect(routes.Application.index())))
+
+    request.authenticator.discard(result)
   }
 
   /**
@@ -83,16 +85,22 @@ class Application(implicit inj: Injector)
     }
   }
 
-  def authenticateUser(userCredentials: Credentials) = credentialsAuthentication(userCredentials).flatMap { loginInfo =>
-    userService.retrieve(loginInfo).flatMap {
-      case Some(user) => env.authenticatorService.create(user).map {
-        case Some(authenticator) =>
-          env.authenticatorService.send(authenticator, Ok(Json.obj("identity" -> user.email)))
-        case None => BadRequest(Json.obj(
-          "code" -> inject[Int](identified by "errors.auth.noAuthenticator")
-        ))
+  def authenticateUser(userCredentials: Credentials)(implicit request: Request[_]) = {
+    credentialsAuthentication(userCredentials).flatMap { loginInfo =>
+      userService.retrieve(loginInfo).flatMap {
+        case Some(user) => env.authenticatorService.create(user.loginInfo).flatMap { authenticator =>
+          val result = Future.successful(Ok(Json.obj("identity" -> user.email)))
+          env.eventBus.publish(LoginEvent(user, request, request2lang))
+          env.authenticatorService.init(authenticator, result)
+        }
+        case None => Future.successful {
+          BadRequest(Json.obj(
+            "code" -> inject[Int](identified by "errors.auth.noAuthenticator")
+          ))
+        }
       }
-      case None => Future.failed(new AuthenticationException(""))
+
+
     }
   } recover {
     case e: AccessDeniedException => BadRequest(Json.obj(
@@ -103,7 +111,7 @@ class Application(implicit inj: Injector)
     ))
   }
 
-  private def credentialsAuthentication(userCredentials: Credentials) = env.providers.get(CredentialsProvider.Credentials) match {
+  private def credentialsAuthentication(userCredentials: Credentials) = env.providers.get(CredentialsProvider.ID) match {
     case Some(credentialsProvider: CredentialsProvider) => credentialsProvider.authenticate(userCredentials)
     case _ => Future.failed(new AuthenticationException(s"Cannot find credentials provider"))
   }
@@ -122,7 +130,7 @@ class Application(implicit inj: Injector)
       case credentials: JsSuccess[Credentials] =>
         val email = credentials.get.identifier
         val password = credentials.get.password
-        val loginInfo = LoginInfo(CredentialsProvider.Credentials, email)
+        val loginInfo = LoginInfo(CredentialsProvider.ID, email)
         val authInfo = passwordHasher.hash(password)
 
         userService.retrieve(loginInfo).flatMap {
@@ -140,7 +148,7 @@ class Application(implicit inj: Injector)
     }
   }
 
-  def createNewUser(loginInfo: LoginInfo, email: String, password: PasswordInfo) = {
+  def createNewUser(loginInfo: LoginInfo, email: String, password: PasswordInfo)(implicit request: Request[_]) = {
     val user = User(
       id = None,
       loginInfo = loginInfo,
@@ -157,15 +165,14 @@ class Application(implicit inj: Injector)
       for {
         folders <- folderService.createRootForUser(user)
         authInfo <- authInfoService.save(loginInfo, password)
-        maybeAuthenticator <- env.authenticatorService.create(user)
+        authenticator <- env.authenticatorService.create(user.loginInfo)
+        result <- env.authenticatorService.init(authenticator, Future.successful {
+          Ok(Json.obj("identity" -> user.email))
+        })
       } yield {
-        maybeAuthenticator match {
-          case Some(authenticator) =>
-            env.authenticatorService.send(authenticator, Ok(Json.obj("identity" -> user.email)))
-          case None => BadRequest(Json.obj(
-            "code" -> inject[Int](identified by "errors.auth.noAuthenticator")
-          ))
-        }
+        env.eventBus.publish(SignUpEvent(user, request, request2lang))
+        env.eventBus.publish(LoginEvent(user, request, request2lang))
+        result
       }
     }
   }

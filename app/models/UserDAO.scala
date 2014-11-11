@@ -1,6 +1,6 @@
 package models
 
-import com.mohiva.play.silhouette.core.LoginInfo
+import com.mohiva.play.silhouette.api.LoginInfo
 import models.DBTableDefinitions.{Users, _}
 import play.api.Play.current
 import play.api.db.slick._
@@ -21,14 +21,12 @@ class UserDAO {
    * @param loginInfo The login info of the user to find.
    * @return The found user or None if no user for the given login info could be found.
    */
-  def find(loginInfo: LoginInfo): Future[Option[DBUser]] = {
-    Future.successful {
-      DB withSession { implicit session =>
-        (for {
-          lInfo <- slickLoginInfos if lInfo.providerID === loginInfo.providerID && lInfo.providerKey === loginInfo.providerKey
-          user <- slickUsers if user.id === lInfo.idUser
-        } yield user).firstOption
-      }
+  def find(loginInfo: LoginInfo): Future[Option[DBUser]] = Future.successful {
+    DB withSession { implicit session =>
+      (for {
+        lInfo <- slickLoginInfos if lInfo.providerID === loginInfo.providerID && lInfo.providerKey === loginInfo.providerKey
+        user <- slickUsers if user.id === lInfo.idUser
+      } yield user).firstOption
     }
   }
 
@@ -38,12 +36,10 @@ class UserDAO {
    * @param user The user to save.
    * @return The saved user.
    */
-  def save(user: DBUser): Future[DBUser] = {
-    Future.successful {
-      DB withSession { implicit session =>
-        val returnedUserId: Long = saveDbUser(user)
-        user.copy(id = Option(returnedUserId))
-      }
+  def save(user: DBUser): Future[DBUser] = Future.successful {
+    DB withSession { implicit session =>
+      val returnedUserId: Long = saveDbUser(user)
+      user.copy(id = Option(returnedUserId))
     }
   }
 
@@ -53,15 +49,13 @@ class UserDAO {
    * @param loginInfo a user may have LoginInfo attached
    * @return The saved user.
    */
-  def saveWithLoginInfo(user: DBUser, loginInfo: LoginInfo): Future[DBUser] = {
-    Future.successful {
-      DB withSession { implicit session =>
-        val returnedUserId: Long = saveDbUser(user)
+  def saveWithLoginInfo(user: DBUser, loginInfo: LoginInfo): Future[DBUser] = Future.successful {
+    DB withSession { implicit session =>
+      val returnedUserId: Long = saveDbUser(user)
 
-        saveLoginInfo(loginInfo, returnedUserId)
+      saveLoginInfo(loginInfo, returnedUserId)
 
-        user.copy(id = Option(returnedUserId))
-      }
+      user.copy(id = Option(returnedUserId))
     }
   }
 

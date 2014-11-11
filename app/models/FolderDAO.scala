@@ -7,8 +7,8 @@ import play.api.db.slick._
 import services.User
 
 import scala.concurrent.Future
-import scala.slick.jdbc.StaticQuery.interpolation
 import scala.slick.lifted.TableQuery
+import scala.slick.jdbc.StaticQuery.interpolation
 
 class FolderDAO {
 

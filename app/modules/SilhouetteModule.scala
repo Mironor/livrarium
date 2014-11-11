@@ -1,14 +1,14 @@
 package modules
 
-import com.mohiva.play.silhouette.contrib.daos.DelegableAuthInfoDAO
-import com.mohiva.play.silhouette.contrib.services._
-import com.mohiva.play.silhouette.contrib.utils._
-import com.mohiva.play.silhouette.core.providers._
-import com.mohiva.play.silhouette.core.providers.oauth1._
-import com.mohiva.play.silhouette.core.providers.oauth2._
-import com.mohiva.play.silhouette.core.services._
-import com.mohiva.play.silhouette.core.utils._
-import com.mohiva.play.silhouette.core.{Environment, EventBus}
+import com.mohiva.play.silhouette.api.{Environment, EventBus}
+import com.mohiva.play.silhouette.api.services.{AuthenticatorService, AvatarService, AuthInfoService}
+import com.mohiva.play.silhouette.api.util._
+import com.mohiva.play.silhouette.impl.authenticators._
+import com.mohiva.play.silhouette.impl.daos.DelegableAuthInfoDAO
+import com.mohiva.play.silhouette.impl.providers.credentials.hasher.BCryptPasswordHasher
+import com.mohiva.play.silhouette.impl.providers._
+import com.mohiva.play.silhouette.impl.services.{GravatarService, DelegableAuthInfoService}
+import com.mohiva.play.silhouette.impl.util.{DefaultFingerprintGenerator, SecureRandomIDGenerator, PlayCacheLayer}
 import models._
 import models.silhouette.{OAuth1InfoDAO, OAuth2InfoDAO, PasswordInfoDAO}
 import scaldi.Module
@@ -30,20 +30,20 @@ class SilhouetteModule extends Module {
   bind[CacheLayer] to new PlayCacheLayer
   bind[HTTPLayer] to new PlayHTTPLayer
   bind[IDGenerator] to new SecureRandomIDGenerator
+  bind[FingerprintGenerator] to new DefaultFingerprintGenerator(false)
   bind[PasswordHasher] to new BCryptPasswordHasher
   bind[EventBus] to new EventBus
 
 
 
-  binding toProvider new CachedCookieAuthenticatorService(CachedCookieAuthenticatorSettings(
-    cookieName = inject[String]("silhouette.authenticator.cookieName"),
-    cookiePath = inject[String]("silhouette.authenticator.cookiePath"),
-    secureCookie = inject[Boolean]("silhouette.authenticator.secureCookie"),
-    httpOnlyCookie = inject[Boolean]("silhouette.authenticator.httpOnlyCookie"),
-    cookieIdleTimeout = inject[Int]("silhouette.authenticator.cookieIdleTimeout"),
-    cookieAbsoluteTimeout = Some(inject[Int]("silhouette.authenticator.cookieAbsoluteTimeout")),
+  binding toProvider new SessionAuthenticatorService(SessionAuthenticatorSettings(
+
+    sessionKey = inject[String]("silhouette.authenticator.sessionKey"),
+    encryptAuthenticator = inject[Boolean]("silhouette.authenticator.encryptAuthenticator"),
+    useFingerprinting = inject[Boolean]("silhouette.authenticator.useFingerprinting"),
+    authenticatorIdleTimeout = Option(inject[Int]("silhouette.authenticator.authenticatorIdleTimeout")),
     authenticatorExpiry = inject[Int]("silhouette.authenticator.authenticatorExpiry")
-  ), inject[CacheLayer], inject[IDGenerator], Clock())
+  ), inject[FingerprintGenerator], Clock())
 
   bind[AuthInfoService] toProvider new DelegableAuthInfoService(inject[PasswordInfoDAO], inject[OAuth1InfoDAO], inject[OAuth2InfoDAO])
 
@@ -52,60 +52,15 @@ class SilhouetteModule extends Module {
   // Auth providers //
   bind[CredentialsProvider] toProvider new CredentialsProvider(inject[AuthInfoService], inject[PasswordHasher], Seq(inject[PasswordHasher]))
 
-  bind[FacebookProvider] toProvider {
-    val settings = OAuth2Settings(
-      authorizationURL = inject[String]("silhouette.facebook.authorizationURL"),
-      accessTokenURL = inject[String]("silhouette.facebook.accessTokenURL"),
-      redirectURL = inject[String]("silhouette.facebook.redirectURL"),
-      clientID = inject[String]("silhouette.facebook.clientID"),
-      clientSecret = inject[String]("silhouette.facebook.clientSecret"),
-      scope = Some(inject[String]("silhouette.facebook.scope"))
-    )
-
-    FacebookProvider(inject[CacheLayer], inject[HTTPLayer], settings)
-  }
-
-  bind[GoogleProvider] toProvider {
-    val settings = OAuth2Settings(
-      authorizationURL = inject[String]("silhouette.google.authorizationURL"),
-      accessTokenURL = inject[String]("silhouette.google.accessTokenURL"),
-      redirectURL = inject[String]("silhouette.google.redirectURL"),
-      clientID = inject[String]("silhouette.google.clientID"),
-      clientSecret = inject[String]("silhouette.google.clientSecret"),
-      scope = Some(inject[String]("silhouette.google.scope"))
-    )
-
-    GoogleProvider(inject[CacheLayer], inject[HTTPLayer], settings)
-  }
-
-  bind[TwitterProvider] toProvider {
-    val settings = OAuth1Settings(
-      requestTokenURL = inject[String]("silhouette.twitter.requestTokenURL"),
-      accessTokenURL = inject[String]("silhouette.twitter.accessTokenURL"),
-      authorizationURL = inject[String]("silhouette.twitter.authorizationURL"),
-      callbackURL = inject[String]("silhouette.twitter.callbackURL"),
-      consumerKey = inject[String]("silhouette.twitter.consumerKey"),
-      consumerSecret = inject[String]("silhouette.twitter.consumerSecret")
-    )
-
-    TwitterProvider(inject[CacheLayer], inject[HTTPLayer], new PlayOAuth1Service(settings), settings)
-  }
-
   // Main env injection in each Controller //
-  bind[Environment[User, CachedCookieAuthenticator]] toProvider {
+  bind[Environment[User, SessionAuthenticator]] toProvider {
     val credentialsProvider = inject[CredentialsProvider]
-    val facebookProvider = inject[FacebookProvider]
-    val googleProvider = inject[GoogleProvider]
-    val twitterProvider = inject[TwitterProvider]
 
-    Environment[User, CachedCookieAuthenticator](
+    Environment[User, SessionAuthenticator](
       inject[UserService],
-      inject[AuthenticatorService[CachedCookieAuthenticator]],
+      inject[AuthenticatorService[SessionAuthenticator]],
       Map(
-        credentialsProvider.id -> credentialsProvider,
-        facebookProvider.id -> facebookProvider,
-        googleProvider.id -> googleProvider,
-        twitterProvider.id -> twitterProvider
+        credentialsProvider.id -> credentialsProvider
       ),
       inject[EventBus]
     )

@@ -1,4 +1,4 @@
-import com.mohiva.play.silhouette.core.{Logger, SecuredSettings}
+import com.mohiva.play.silhouette.api.{Logger, SecuredSettings}
 import controllers.routes
 import modules.{SilhouetteModule, WebModule}
 import play.api.GlobalSettings

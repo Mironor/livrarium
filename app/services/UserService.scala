@@ -1,8 +1,8 @@
 package services
 
-import com.mohiva.play.silhouette.core.providers.CommonSocialProfile
-import com.mohiva.play.silhouette.core.services.{AuthInfo, IdentityService}
-import com.mohiva.play.silhouette.core.{Identity, LoginInfo}
+import com.mohiva.play.silhouette.api.services.{AuthInfo, IdentityService}
+import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
+import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
 import models.DBTableDefinitions.DBUser
 import models.UserDAO
 import play.api.libs.concurrent.Execution.Implicits._
@@ -63,7 +63,7 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
    * @param profile The social profile to save.
    * @return The user for whom the profile was saved.
    */
-  def save[A <: AuthInfo](profile: CommonSocialProfile[A]): Future[User] = {
+  def save[A <: AuthInfo](profile: CommonSocialProfile): Future[User] = {
     val userPromise = retrieve(profile.loginInfo)
 
     userPromise.flatMap {
