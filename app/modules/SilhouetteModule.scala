@@ -37,7 +37,6 @@ class SilhouetteModule extends Module {
 
 
   binding toProvider new SessionAuthenticatorService(SessionAuthenticatorSettings(
-
     sessionKey = inject[String]("silhouette.authenticator.sessionKey"),
     encryptAuthenticator = inject[Boolean]("silhouette.authenticator.encryptAuthenticator"),
     useFingerprinting = inject[Boolean]("silhouette.authenticator.useFingerprinting"),

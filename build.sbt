@@ -21,3 +21,4 @@ libraryDependencies ++= Seq(
 
 lazy val root = (project in file(".")).enablePlugins(PlayScala)
 
+javaOptions in Test += "-Dconfig.file=conf/test.conf"

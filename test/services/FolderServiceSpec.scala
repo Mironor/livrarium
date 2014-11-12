@@ -1,6 +1,6 @@
 package services
 
-import com.mohiva.play.silhouette.core.LoginInfo
+import com.mohiva.play.silhouette.api.LoginInfo
 import modules.{SilhouetteModule, WebModule}
 import org.specs2.execute.AsResult
 import org.specs2.specification.AroundExample
