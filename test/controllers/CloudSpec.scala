@@ -18,14 +18,14 @@ class CloudSpec extends PlaySpecification with AroundExample with Injectable {
     def applicationModule = new WebModule :: new SilhouetteModule
   }
 
-  implicit val injector = TestGlobal.applicationModule
+  implicit lazy val injector = TestGlobal.injector
 
 
   /**
    * This automatically handles up and down evolutions at the beginning and at the end of a spec respectively
    */
   def around[T: AsResult](t: => T) = {
-    val app = FakeApplication(additionalConfiguration = inMemoryDatabase()++ Map(
+    val app = FakeApplication(withGlobal = Some(TestGlobal), additionalConfiguration = inMemoryDatabase() ++ Map(
       "silhouette.authenticator.sessionKey" -> "livrarium-auth-test",
       "silhouette.authenticator.encryptAuthenticator" -> true,
       "silhouette.authenticator.useFingerprinting" -> true,
