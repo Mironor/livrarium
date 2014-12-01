@@ -93,8 +93,10 @@ class Cloud(implicit inj: Injector)
     request.identity match {
       case Some(user) =>
         request.body.validate[(Long, String)].map {
-          case (parentFolderId: Long, name: String) => folderService.appendTo(user, parentFolderId, name)
-            Future.successful(Ok(Json.obj()))
+          case (parentFolderId: Long, name: String) =>
+            folderService.appendTo(user, parentFolderId, name).map{
+              folder => Ok(Json.toJson(folder))
+            }
         }.recoverTotal {
           error => Future.successful(BadRequest(Json.obj(
             "code" -> inject[Int](identified by "errors.request.badRequest"),

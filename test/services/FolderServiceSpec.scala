@@ -1,34 +1,30 @@
 package services
 
 import com.mohiva.play.silhouette.api.LoginInfo
+import globals.TestGlobal
 import modules.{SilhouetteModule, WebModule}
 import org.specs2.execute.AsResult
 import org.specs2.specification.AroundExample
 import play.api.GlobalSettings
 import play.api.test.{FakeApplication, PlaySpecification}
-import scaldi.Injectable
+import scaldi.{Injector, Injectable}
 import scaldi.play.ScaldiSupport
 
 
 class FolderServiceSpec extends PlaySpecification with AroundExample with Injectable {
 
-
   val user = User(Option(1), LoginInfo("key", "value"), None, None)
 
-  object TestGlobal extends GlobalSettings with ScaldiSupport {
-    def applicationModule = new WebModule :: new SilhouetteModule
-  }
 
-  implicit val injector = TestGlobal.applicationModule
-  val userService = inject[UserService]
-  val folderService = inject[FolderService]
+  implicit def injector: Injector = TestGlobal.injector
 
   /**
    * This automatically handles up and down evolutions at the beginning and at the end of a spec respectively
    */
   def around[T: AsResult](t: => T) = {
-    val app = FakeApplication(additionalConfiguration = inMemoryDatabase())
+    val app = FakeApplication(withGlobal = Some(TestGlobal), additionalConfiguration = inMemoryDatabase())
     running(app) {
+      val userService = inject[UserService]
       await(userService.saveWithLoginInfo(user))
       constructUserTree()
 
@@ -47,6 +43,7 @@ class FolderServiceSpec extends PlaySpecification with AroundExample with Inject
      *     SubSub2
      *   Sub2
      */
+    val folderService = new FolderService
 
     await(folderService.createRootForUser(user))
     val sub1Folder = await(folderService.appendToRoot(user, "Sub1"))
@@ -59,6 +56,7 @@ class FolderServiceSpec extends PlaySpecification with AroundExample with Inject
 
     "return user's folder tree" in {
       // Given
+      val folderService = new FolderService
 
       // When
       val rootFolderChildren = await(folderService.retrieveUserFolderTree(user))
@@ -83,6 +81,7 @@ class FolderServiceSpec extends PlaySpecification with AroundExample with Inject
 
     "append a folder to root" in {
       // Given
+      val folderService = new FolderService
       val testFolderName = "testFolder"
 
       // When
@@ -99,6 +98,7 @@ class FolderServiceSpec extends PlaySpecification with AroundExample with Inject
 
     "append a folder to another folder (not root)" in {
       // Given
+      val folderService = new FolderService
       val testFolderName = "testFolder"
 
       val rootFolderChildrenBeforeAppend = await(folderService.retrieveUserFolderTree(user))

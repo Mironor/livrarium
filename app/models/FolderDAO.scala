@@ -8,6 +8,7 @@ import services.User
 
 import scala.concurrent.Future
 import scala.slick.lifted.TableQuery
+import scala.slick.jdbc.JdbcBackend.Session
 import scala.slick.jdbc.StaticQuery.interpolation
 
 class FolderDAO {
@@ -99,18 +100,27 @@ class FolderDAO {
     Future.successful {
       DB withSession { implicit session =>
 
-        val userId = user.id.getOrElse(throw new Exception("User.id should be defined"))
+        val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
         val parentRight = folderParent.right
 
-        // Making space in parents Folders (and folders to the right of the parent folder
-        // Slick does not support mutating updates so we will use plain query
-        sqlu"""UPDATE "folders" SET "right" = "right" + 2 where "idUser" = $userId AND "right" >= $parentRight""".execute
-        sqlu"""UPDATE "folders" SET "left" = "left" + 2 where "idUser" = $userId AND "left" > $parentRight""".execute
+        updateOthers(userId, parentRight)
 
         val appendedDBFolder = DBFolder(None, userId, folderName, folderParent.level + 1, folderParent.right, folderParent.right + 1)
         val appendedDBFolderId = (slickFolders returning slickFolders.map(_.id)) += appendedDBFolder
         appendedDBFolder.copy(id = Option(appendedDBFolderId))
       }
+    }
+  }
+
+  def updateOthers(userId: Long, parentRight: Int)(implicit session: Session) {
+    // Making space in parents Folders (and folders to the right of the parent folder
+    // Slick does not support mutating updates so we will use plain query
+    // IMPORTANT: exceptions are silent, so make sure to treat them
+    try {
+      sqlu"""UPDATE "folders" SET "right" = "right" + 2 where "idUser" = $userId AND "right" >= $parentRight""".execute
+      sqlu"""UPDATE "folders" SET "left" = "left" + 2 where "idUser" = $userId AND "left" > $parentRight""".execute
+    } catch {
+      case e: Exception => throw new DAOException("Append folder: slick could not execute plain query")
     }
   }
 }

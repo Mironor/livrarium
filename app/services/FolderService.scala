@@ -65,13 +65,14 @@ class FolderService(implicit inj: Injector) extends Injectable {
   /**
    * Gets folder's children folders
    * @param user User
-   * @param folderId parent folder's id
+   * @param parentFolderId parent folder's id
    * @return
    */
-  def retrieveChildren(user: User, folderId: Long): Future[List[Folder]] = {
-    folderDAO.findChildren(user, folderId).map{
+  def retrieveChildren(user: User, parentFolderId: Long): Future[List[Folder]] = {
+    folderDAO.findChildren(user, parentFolderId).map{
       _.map(dbFolder => Folder(dbFolder.id, dbFolder.name, List()))
     }
+
   }
 
   /**
