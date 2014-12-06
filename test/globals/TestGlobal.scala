@@ -16,5 +16,6 @@ object TestGlobal extends GlobalSettings with ScaldiSupport {
     bind[Environment[User, SessionAuthenticator]] to FakeEnvironment[User, SessionAuthenticator](testUser)
 
   } :: new WebModule :: new SilhouetteModule :: new ControllerInjector
+
 }
 

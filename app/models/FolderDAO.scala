@@ -62,17 +62,40 @@ class FolderDAO {
     }
   }
 
-  def findChildren(user: User, folderId: Long): Future[List[DBFolder]] = {
+  /**
+   * Find folder's immediate children
+   * @param user current user
+   * @param folderId parent's folder id
+   * @return
+   */
+  def findChildrenById(user: User, folderId: Long): Future[List[DBFolder]] = {
     Future.successful {
       DB withSession { implicit session =>
         val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
+        val parentFolderOption = slickFolders.filter(_.id === folderId).firstOption
+        val parentFolder = parentFolderOption.getOrElse(throw new DAOException("Parent folder cannot be found"))
 
-        (for {
-          parent <- slickFolders if parent.idUser === userId
-          child <- slickFolders  if child.idUser === userId && child.left > parent.left && child.right < parent.right && child.level === (parent.level + 1)
-        } yield child).list
+
+        slickFolders.filter(child =>
+          child.idUser === userId
+            && child.left > parentFolder.left
+            && child.left > parentFolder.left
+            && child.right < parentFolder.right
+            && child.level === (parentFolder.level + 1)
+        ).list
       }
     }
+  }
+
+  /**
+   * findChildren proxy
+   * @param user current user
+   * @param folder parent's folder dto
+   * @return
+   */
+  def findChildren(user: User, folder: DBFolder): Future[List[DBFolder]] = {
+    val folderId = folder.id.getOrElse(throw new DAOException("Parent folder's id should be defined"))
+    findChildrenById(user, folderId)
   }
 
   /**
@@ -80,11 +103,13 @@ class FolderDAO {
    * @param user User
    * @return
    */
-  def createRootForUser(user: User): Future[_] = {
+  def createRootForUser(user: User): Future[DBFolder] = {
     Future.successful {
       DB withSession { implicit session =>
         val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
-        slickFolders += DBFolder(None, userId, rootFolderName, 0, 0, 1)
+        val rootFolder = DBFolder(None, userId, rootFolderName, 0, 0, 1)
+        val rootFolderId = (slickFolders returning slickFolders.map(_.id)) += rootFolder
+        rootFolder.copy(id = Option(rootFolderId))
       }
     }
   }

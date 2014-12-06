@@ -1,22 +1,14 @@
 package services
 
-import com.mohiva.play.silhouette.api.LoginInfo
 import globals.TestGlobal
-import modules.{SilhouetteModule, WebModule}
+import helpers.LivrariumSpecification
 import org.specs2.execute.AsResult
+import org.specs2.matcher.ThrownMessages
 import org.specs2.specification.AroundExample
-import play.api.GlobalSettings
-import play.api.test.{FakeApplication, PlaySpecification}
-import scaldi.{Injector, Injectable}
-import scaldi.play.ScaldiSupport
+import play.api.test.FakeApplication
 
 
-class FolderServiceSpec extends PlaySpecification with AroundExample with Injectable {
-
-  val user = User(Option(1), LoginInfo("key", "value"), None, None)
-
-
-  implicit def injector: Injector = TestGlobal.injector
+class FolderServiceSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
 
   /**
    * This automatically handles up and down evolutions at the beginning and at the end of a spec respectively
@@ -25,7 +17,7 @@ class FolderServiceSpec extends PlaySpecification with AroundExample with Inject
     val app = FakeApplication(withGlobal = Some(TestGlobal), additionalConfiguration = inMemoryDatabase())
     running(app) {
       val userService = inject[UserService]
-      await(userService.saveWithLoginInfo(user))
+      await(userService.saveWithLoginInfo(TestGlobal.testUser))
       constructUserTree()
 
       AsResult(t)
@@ -45,11 +37,11 @@ class FolderServiceSpec extends PlaySpecification with AroundExample with Inject
      */
     val folderService = new FolderService
 
-    await(folderService.createRootForUser(user))
-    val sub1Folder = await(folderService.appendToRoot(user, "Sub1"))
-    await(folderService.appendToRoot(user, "Sub2"))
-    await(folderService.appendTo(user, sub1Folder, "SubSub1"))
-    await(folderService.appendTo(user, sub1Folder, "SubSub2"))
+    await(folderService.createRootForUser(TestGlobal.testUser))
+    val sub1Folder = await(folderService.appendToRoot(TestGlobal.testUser, "Sub1"))
+    await(folderService.appendToRoot(TestGlobal.testUser, "Sub2"))
+    await(folderService.appendTo(TestGlobal.testUser, sub1Folder, "SubSub1"))
+    await(folderService.appendTo(TestGlobal.testUser, sub1Folder, "SubSub2"))
   }
 
   "Folder service" should {
@@ -59,7 +51,7 @@ class FolderServiceSpec extends PlaySpecification with AroundExample with Inject
       val folderService = new FolderService
 
       // When
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(user))
+      val rootFolderChildren = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
 
       // Then
       rootFolderChildren must have size 2
@@ -85,8 +77,8 @@ class FolderServiceSpec extends PlaySpecification with AroundExample with Inject
       val testFolderName = "testFolder"
 
       // When
-      await(folderService.appendToRoot(user, testFolderName))
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(user))
+      await(folderService.appendToRoot(TestGlobal.testUser, testFolderName))
+      val rootFolderChildren = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
 
       // Then
       rootFolderChildren must have size 3
@@ -96,17 +88,37 @@ class FolderServiceSpec extends PlaySpecification with AroundExample with Inject
       testFolder.children must have size 0
     }
 
+    "retrieve folder's children" in {
+      // Given
+      val folderService = new FolderService
+
+      // When
+      val rootFolderChildren = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
+      val sub1FolderId = rootFolderChildren(0).id.getOrElse(fail("sub-folder's id is not defined"))
+      val sub1FolderChildren = await(folderService.retrieveChildren(TestGlobal.testUser, sub1FolderId))
+
+      // Then
+      sub1FolderChildren must have size 2
+
+      val subSub1 = sub1FolderChildren(0)
+      subSub1.name must beEqualTo("SubSub1")
+
+      val subSub2 = sub1FolderChildren(1)
+      subSub2.name must beEqualTo("SubSub2")
+
+    }
+
     "append a folder to another folder (not root)" in {
       // Given
       val folderService = new FolderService
       val testFolderName = "testFolder"
 
-      val rootFolderChildrenBeforeAppend = await(folderService.retrieveUserFolderTree(user))
+      val rootFolderChildrenBeforeAppend = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
       val sub1BeforeAppend = rootFolderChildrenBeforeAppend(0)
 
       // When
-      await(folderService.appendTo(user, sub1BeforeAppend, testFolderName))
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(user))
+      await(folderService.appendTo(TestGlobal.testUser, sub1BeforeAppend, testFolderName))
+      val rootFolderChildren = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
 
       // Then
       val sub1 = rootFolderChildren(0)

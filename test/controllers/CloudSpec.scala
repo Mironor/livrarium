@@ -1,19 +1,17 @@
 package controllers
 
-import com.mohiva.play.silhouette.api.{Authenticator, Environment}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.test._
 import globals.TestGlobal
+import helpers.LivrariumSpecification
 import org.specs2.execute.AsResult
+import org.specs2.matcher.ThrownMessages
 import org.specs2.specification.AroundExample
 import play.api.libs.json.{JsNumber, JsString, Json}
 import play.api.test._
-import scaldi.{Injectable, Injector}
-import services.{FolderService, User, UserService}
+import services.{FolderContents, FolderService, UserService}
 
-class CloudSpec extends PlaySpecification with AroundExample with Injectable {
-
-  implicit def injector: Injector = TestGlobal.injector
+class CloudSpec extends LivrariumSpecification with AroundExample with ThrownMessages{
 
   /**
    * This automatically handles up and down evolutions at the beginning and at the end of a spec respectively
@@ -28,9 +26,55 @@ class CloudSpec extends PlaySpecification with AroundExample with Injectable {
   }
 
   "Cloud controller" should {
+
+
+    "return root's content" in {
+      // Given
+      val folderService = inject[FolderService]
+      await(folderService.createRootForUser(TestGlobal.testUser))
+      await(folderService.appendToRoot(TestGlobal.testUser, "sub1"))
+      await(folderService.appendToRoot(TestGlobal.testUser, "sub2"))
+
+
+      val request = FakeRequest().withAuthenticator[SessionAuthenticator](TestGlobal.testUser.loginInfo)
+
+      val cloudController = new Cloud
+
+      // When
+      val result = cloudController.getRootContent()(request)
+
+      // Then
+      status(result) must equalTo(OK)
+      contentType(result) must beSome("application/json")
+      contentAsJson(result).as[FolderContents].folders must have size 2
+    }
+
+    "return some folder's (other than root) content" in {
+      // Given
+      val folderService = inject[FolderService]
+      await(folderService.createRootForUser(TestGlobal.testUser))
+      await(folderService.appendToRoot(TestGlobal.testUser, "sub1"))
+
+      val sub2Folder = await(folderService.appendToRoot(TestGlobal.testUser, "sub2"))
+      val sub2FolderId = sub2Folder.id.getOrElse(fail("sub-folder's id is not defined"))
+      await(folderService.appendTo(TestGlobal.testUser, sub2FolderId, "subSub1"))
+
+
+      val request = FakeRequest().withAuthenticator[SessionAuthenticator](TestGlobal.testUser.loginInfo)
+
+      val cloudController = new Cloud
+
+      // When
+      val result = cloudController.getContent(sub2FolderId)(request)
+
+      // Then
+      status(result) must equalTo(OK)
+      contentType(result) must beSome("application/json")
+      contentAsJson(result).as[FolderContents].folders must have size 1
+    }
+
     "create new folder" in {
       // Given
-      implicit val env: Environment[User, SessionAuthenticator] = inject[Environment[User, SessionAuthenticator]]
       val folderService = inject[FolderService]
       await(folderService.createRootForUser(TestGlobal.testUser))
 
@@ -38,8 +82,8 @@ class CloudSpec extends PlaySpecification with AroundExample with Injectable {
         "idParent" -> JsNumber(1),
         "name" -> JsString("testCreateFolder")
       )
-      val request = FakeRequest(Helpers.POST, routes.Cloud.createFolder().url, FakeHeaders(),
-        requestJson).withAuthenticator[SessionAuthenticator](TestGlobal.testUser.loginInfo)
+      val request = FakeRequest(Helpers.POST, "", FakeHeaders(), requestJson)
+        .withAuthenticator[SessionAuthenticator](TestGlobal.testUser.loginInfo)
 
       val cloudController = new Cloud
 

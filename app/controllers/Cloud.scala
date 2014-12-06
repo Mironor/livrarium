@@ -14,7 +14,7 @@ import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.mvc._
 import scaldi.{Injectable, Injector}
-import services.{Folder, FolderService, User}
+import services.{FolderContents, Folder, FolderService, User}
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -27,9 +27,6 @@ class Cloud(implicit inj: Injector)
   val applicationController = inject[Application]
   val folderService = inject[FolderService]
 
-  /** Case classes used in requests **/
-  case class FolderContents(id: Long,
-                            folders: List[Folder])
 
 
   /** Readers and Writers to handle json requests
@@ -39,17 +36,6 @@ class Cloud(implicit inj: Injector)
     (__ \ 'idParent).read[Long] and
       (__ \ 'name).read[String]
     ) tupled
-
-  implicit val folderWrites: Writes[Folder] = (
-    (__ \ "id").write[Option[Long]] and
-      (__ \ "label").write[String] and
-      (__ \ "children").write[List[Folder]]
-    )(unlift(Folder.unapply))
-
-  implicit val folderContentsWrites: Writes[FolderContents] = (
-    (__ \ "id").write[Long] and
-      (__ \ "folders").write[List[Folder]]
-    )(unlift(FolderContents.unapply))
 
 
   def index = UserAwareAction.async { implicit request =>
