@@ -1,19 +1,19 @@
 package modules
 
 import helpers.{UUIDGenerator, RandomIdGenerator}
-import models.FolderDAO
+import models.{BookDAO, FolderDAO}
 import scaldi.Module
-import services.FolderService
+import services.{BookService, FolderService}
 
 /**
  * Application's dependency injections
  */
-class WebModule extends Module{
+class WebModule extends Module {
+  bind[RandomIdGenerator] to new UUIDGenerator
+
   bind[FolderDAO] to new FolderDAO
   bind[FolderService] to new FolderService
 
-  bind[RandomIdGenerator] to new UUIDGenerator
-
-  //  bind[BookService] to new BookService
-  //  bind[BookDAO] to new BookDAO
+  bind[BookService] to new BookService
+  bind[BookDAO] to new BookDAO
 }

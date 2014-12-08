@@ -11,7 +11,7 @@ import services.UserService
 
 class BookDAOSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
 
-  lazy val randomIdGenerator = inject[RandomIdGenerator]
+  def randomIdGenerator = inject[RandomIdGenerator]
 
   def around[T: AsResult](t: => T) = {
     val app = FakeApplication(withGlobal = Some(TestGlobal), additionalConfiguration = inMemoryDatabase())
@@ -28,14 +28,15 @@ class BookDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
 
     val bookDAO = new BookDAO
     val userId = TestGlobal.testUser.id.getOrElse(fail("User's id is not defined"))
-    val book = DBBook(None,
+    val book = DBBook(
+      None,
       userId,
       randomIdGenerator.generateBookId(),
       "book",
       BookFormatHelper.PDF
     )
 
-    bookDAO.insert(book)
+    bookDAO.insertOrUpdate(book)
   }
 
   "Book DAO" should {

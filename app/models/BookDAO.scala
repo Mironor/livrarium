@@ -21,7 +21,7 @@ class BookDAO {
     }
   }
 
-  def insert(book: DBBook): Future[DBBook] = {
+  def insertOrUpdate(book: DBBook): Future[DBBook] = {
     Future.successful {
       DB withSession { implicit session =>
         val insertedBookId = (slickBooks returning slickBooks.map(_.id)) += book
