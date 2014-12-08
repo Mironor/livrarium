@@ -38,20 +38,20 @@ class FolderDAOSpec extends LivrariumSpecification with AroundExample with Throw
 
     val folderDAO = new FolderDAO
 
-    val rootFolder = await(folderDAO.createRootForUser(TestGlobal.testUser))
+    val rootFolder = await(folderDAO.insertRoot(TestGlobal.testUser))
     val sub1Folder = await(folderDAO.appendToFolder(TestGlobal.testUser, rootFolder, "Sub1"))
     await(folderDAO.appendToFolder(TestGlobal.testUser, rootFolder, "Sub2"))
     await(folderDAO.appendToFolder(TestGlobal.testUser, sub1Folder, "SubSub1"))
     await(folderDAO.appendToFolder(TestGlobal.testUser, sub1Folder, "SubSub2"))
   }
 
-  "FolderDAO" should {
+  "Folder DAO" should {
     "find folder's children" in {
       // Given
       val folderDAO = new FolderDAO
 
       // When
-      val rootFolderOption = await(folderDAO.findUserRoot(TestGlobal.testUser))
+      val rootFolderOption = await(folderDAO.findRoot(TestGlobal.testUser))
       val rootFolder = rootFolderOption.getOrElse(fail("root folder cannot be found"))
       val rootFolderChildren = await(folderDAO.findChildren(TestGlobal.testUser, rootFolder))
 

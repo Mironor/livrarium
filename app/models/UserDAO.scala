@@ -36,9 +36,9 @@ class UserDAO {
    * @param user The user to save.
    * @return The saved user.
    */
-  def save(user: DBUser): Future[DBUser] = Future.successful {
+  def insertOrUpdate(user: DBUser): Future[DBUser] = Future.successful {
     DB withSession { implicit session =>
-      val returnedUserId: Long = saveDbUser(user)
+      val returnedUserId: Long = insertOrUpdate(user)
       user.copy(id = Option(returnedUserId))
     }
   }
@@ -49,28 +49,28 @@ class UserDAO {
    * @param loginInfo a user may have LoginInfo attached
    * @return The saved user.
    */
-  def saveWithLoginInfo(user: DBUser, loginInfo: LoginInfo): Future[DBUser] = Future.successful {
+  def insertOrUpdateWithLoginInfo(user: DBUser, loginInfo: LoginInfo): Future[DBUser] = Future.successful {
     DB withSession { implicit session =>
-      val returnedUserId: Long = saveDbUser(user)
+      val returnedUserId: Long = insertOrUpdate(user)
 
-      saveLoginInfo(loginInfo, returnedUserId)
+      insertOrUpdateLoginInfo(loginInfo, returnedUserId)
 
       user.copy(id = Option(returnedUserId))
     }
   }
 
-  private def saveDbUser(dbUser: DBUser)(implicit session: Session): Long = {
+  private def insertOrUpdate(dbUser: DBUser)(implicit session: Session): Long = {
     slickUsers.filter(_.id === dbUser.id).firstOption match {
       case Some(userFound) =>
         slickUsers.filter(_.id === dbUser.id).update(dbUser)
         dbUser.id.get
-      case None => createDbUser(dbUser)
+      case None => insert(dbUser)
     }
   }
 
-  private def createDbUser(dbUser: DBUser)(implicit session: Session): Long = (slickUsers returning slickUsers.map(_.id)) += dbUser
+  private def insert(dbUser: DBUser)(implicit session: Session): Long = (slickUsers returning slickUsers.map(_.id)) += dbUser
 
-  private def saveLoginInfo(loginInfo: LoginInfo, userId: Long)(implicit session: Session): Unit = {
+  private def insertOrUpdateLoginInfo(loginInfo: LoginInfo, userId: Long)(implicit session: Session): Unit = {
     // Insert if it does not exist yet
     val dbLoginInfoOption = slickLoginInfos.filter(info => info.providerID === loginInfo.providerID && info.providerKey === loginInfo.providerKey)
       .firstOption

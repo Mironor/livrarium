@@ -53,7 +53,7 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
    */
   def saveWithLoginInfo(user: User): Future[User] = {
     val dbUser = DBUser(user.id, user.email, user.avatarURL)
-    userDAO.saveWithLoginInfo(dbUser, user.loginInfo)
+    userDAO.insertOrUpdateWithLoginInfo(dbUser, user.loginInfo)
       .map(returnedDBUser => user.copy(id = returnedDBUser.id))
   }
 
@@ -68,13 +68,13 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
 
     userPromise.flatMap {
       case Some(user) => // Update user with profile
-        userDAO.save(DBUser(
+        userDAO.insertOrUpdate(DBUser(
           user.id,
           profile.email,
           profile.avatarURL
         )).map(dbUser => User(dbUser.id, profile.loginInfo, dbUser.email, dbUser.avatarURL))
       case None => // Insert a new user
-        userDAO.saveWithLoginInfo(DBUser(
+        userDAO.insertOrUpdateWithLoginInfo(DBUser(
           None,
           profile.email,
           profile.avatarURL

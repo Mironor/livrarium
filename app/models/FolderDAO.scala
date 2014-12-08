@@ -21,7 +21,7 @@ class FolderDAO {
    * @param user User
    * @return
    */
-  def findUserRoot(user: User): Future[Option[DBFolder]] = {
+  def findRoot(user: User): Future[Option[DBFolder]] = {
     Future.successful {
       DB withSession { implicit session =>
         val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
@@ -103,7 +103,7 @@ class FolderDAO {
    * @param user User
    * @return
    */
-  def createRootForUser(user: User): Future[DBFolder] = {
+  def insertRoot(user: User): Future[DBFolder] = {
     Future.successful {
       DB withSession { implicit session =>
         val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))

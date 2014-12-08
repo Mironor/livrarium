@@ -83,7 +83,7 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @param user User
    * @return
    */
-  def createRootForUser(user: User): Future[_] = folderDAO.createRootForUser(user)
+  def createRootForUser(user: User): Future[_] = folderDAO.insertRoot(user)
 
   /**
    * Gets root folder for defined user
@@ -91,7 +91,7 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @return
    */
   def retrieveRoot(user: User): Future[Option[Folder]] = {
-    folderDAO.findUserRoot(user).map { dbFolderOption =>
+    folderDAO.findRoot(user).map { dbFolderOption =>
       dbFolderOption.map {
         dbFolder => Folder(dbFolder.id, dbFolder.name, List())
       }
@@ -118,7 +118,7 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @return
    */
   def appendToRoot(user: User, folderName: String): Future[Folder] = {
-    val dbRootFolderPromise = folderDAO.findUserRoot(user)
+    val dbRootFolderPromise = folderDAO.findRoot(user)
     val appendedDBFolderPromise = appendToPromise(user, dbRootFolderPromise, folderName)
     appendedDBFolderPromise.map(dbFolder => Folder(dbFolder.id, dbFolder.name, Nil))
   }
