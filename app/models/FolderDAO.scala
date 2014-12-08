@@ -72,7 +72,7 @@ class FolderDAO {
     Future.successful {
       DB withSession { implicit session =>
         val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
-        val parentFolderOption = slickFolders.filter(_.id === folderId).firstOption
+        val parentFolderOption = slickFolders.filter(folder => folder.idUser === userId && folder.id === folderId).firstOption
         val parentFolder = parentFolderOption.getOrElse(throw new DAOException("Parent folder cannot be found"))
 
 

@@ -2,19 +2,22 @@ package controllers
 
 //import java.io.File
 
+import java.io.File
+
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.impl.providers.Credentials
-//import com.sksamuel.scrimage.{Image, Format => ImgFormat}
-//import helpers.{BookFormatHelper, PDFHelper}
-//import play.api.Play
-//import play.api.libs.Files
+import com.sksamuel.scrimage.{Format => ImgFormat, Image}
+import helpers.{PDFHelper, RandomIdGenerator, BookFormatHelper}
+import org.apache.commons.io.FileUtils
+import play.api.Play
+import play.api.libs.Files
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.mvc._
 import scaldi.{Injectable, Injector}
-import services.{FolderContents, Folder, FolderService, User}
+import services.{FolderContents, FolderService, User}
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -26,7 +29,7 @@ class Cloud(implicit inj: Injector)
 
   val applicationController = inject[Application]
   val folderService = inject[FolderService]
-
+  val randomIdGenerator = inject[RandomIdGenerator]
 
 
   /** Readers and Writers to handle json requests
@@ -80,7 +83,7 @@ class Cloud(implicit inj: Injector)
       case Some(user) =>
         request.body.validate[(Long, String)].map {
           case (parentFolderId: Long, name: String) =>
-            folderService.appendTo(user, parentFolderId, name).map{
+            folderService.appendTo(user, parentFolderId, name).map {
               folder => Ok(Json.toJson(folder))
             }
         }.recoverTotal {
@@ -96,59 +99,82 @@ class Cloud(implicit inj: Injector)
 
   def upload = UserAwareAction.async(parse.multipartFormData) { implicit request =>
     request.identity match {
-      case Some(user) => Future.successful(Ok(views.html.index()))//uploadBook(request)
+      case Some(user) => uploadBook(user)
       case None => Future.successful(Ok(views.html.index()))
     }
   }
 
-  /*
-  private def uploadBook(request: RequestWithUser[MultipartFormData[Files.TemporaryFile]]) = {
+  private def uploadBook(user: User)(implicit request: UserAwareRequest[MultipartFormData[Files.TemporaryFile]]) = {
     Future.successful {
-      request.body.file("books").map {
+      val uploadInputName = inject[String](identified by "books.uploadInputName")
+      request.body.file(uploadInputName).map {
         book =>
           val filename = book.filename
           val name = filename.dropRight(filename.length - filename.lastIndexOf('.'))
           val extension = filename.drop(filename.lastIndexOf('.'))
+          val uuid = randomIdGenerator.generateBookId()
 
           val fileType = BookFormatHelper.normalize(
             book.contentType.getOrElse(BookFormatHelper.NONE)
           )
 
           val applicationPath = Play.current.path
+          val userId = user.id.getOrElse(throw new Exception("User's id is not defined"))
           val uploadFolder = applicationPath + inject[String](identified by "folders.uploadFolder")
           val generatedImageFolder = applicationPath + inject[String](identified by "folders.generatedImageFolder")
 
-          val id = "ss"
+          val userUploadFolder = s"$uploadFolder/$userId"
+          val userGeneratedImageFolder = s"$generatedImageFolder/$userId"
 
-          val uploadedBookPath = s"$uploadFolder/$id$extension"
+          FileUtils.forceMkdir(new File(userUploadFolder))
+
+          val uploadedBookPath = s"$userUploadFolder/$uuid$extension"
           book.ref.moveTo(new File(uploadedBookPath))
 
-          val uploadedBookImagePath = s"$generatedImageFolder/$id.jpg"
-          PDFHelper.extractImageFromPdf(uploadedBookPath, uploadedBookImagePath)
+          FileUtils.forceMkdir(new File(userGeneratedImageFolder))
 
-          val uploadedBookSmallThumbPath = s"$generatedImageFolder/$id-small.jpg"
-          val uploadedImage = new File(uploadedBookImagePath)
+          val generatedThumbnailPath = s"$userGeneratedImageFolder/$uuid.jpg"
+          PDFHelper.extractImageFromPdf(uploadedBookPath, generatedThumbnailPath)
 
-          Image(uploadedImage).fit(
+          val generatedThumbnail = new File(generatedThumbnailPath)
+
+          Image(generatedThumbnail).fit(
             inject[Int](identified by "books.thumbnailWidth"),
             inject[Int](identified by "books.thumbnailHeight")
-          ).write(new File(uploadedBookImagePath), ImgFormat.JPEG)
+          ).write(new File(generatedThumbnailPath), ImgFormat.JPEG)
 
-          Image(uploadedImage).fit(
+          val generatedSmallThumbnailPath = s"$generatedImageFolder/$userId/$uuid-small.jpg"
+
+          Image(generatedThumbnail).fit(
             inject[Int](identified by "books.smallThumbnailWidth"),
             inject[Int](identified by "books.smallThumbnailHeight")
-          ).write(new File(uploadedBookSmallThumbPath), ImgFormat.JPEG)
+          ).write(new File(generatedSmallThumbnailPath), ImgFormat.JPEG)
 
-          val bookModel = Book(
-            _id = id,
-            name = name,
-            format = List(fileType),
-            pages = PDFHelper.getTotalPages(uploadedBookPath)
-          )
+          /*
 
-          bookService.save(bookModel)
+
+
+          */
+
+          //
+
+          /*
+
+
+
+
+
+                  val bookModel = Book(
+                    _id = id,
+                    name = name,
+                    format = List(fileType),
+                    pages = PDFHelper.getTotalPages(uploadedBookPath)
+                  )
+
+                  bookService.save(bookModel)
+          */
           Ok(Json.obj(
-            "id" -> id.toString,
+            "id" -> uuid,
             "name" -> name
           ))
 
@@ -159,6 +185,5 @@ class Cloud(implicit inj: Injector)
     }
 
   }
-  */
 
 }

@@ -3,7 +3,6 @@ package services
 import models.DBTableDefinitions.DBFolder
 import models.FolderDAO
 import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.json.{Reads, Writes}
 import scaldi.{Injectable, Injector}
 
 import play.api.libs.json._

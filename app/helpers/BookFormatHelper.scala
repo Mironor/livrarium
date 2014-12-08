@@ -24,6 +24,10 @@ object BookFormatHelper {
 
       // compatibility types
       case "application/x-pdf" => PDF
+
+
+      // if type is not handled, it's None
+      case _ => NONE
     }
   }
 
