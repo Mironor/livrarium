@@ -52,7 +52,7 @@ class FolderDAO {
    * @param user User
    * @return
    */
-  def findUserFolders(user: User): Future[List[DBFolder]] = {
+  def findAll(user: User): Future[List[DBFolder]] = {
     Future.successful {
       DB withSession { implicit session =>
         val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
@@ -137,7 +137,7 @@ class FolderDAO {
     }
   }
 
-  def updateOthers(userId: Long, parentRight: Int)(implicit session: Session) {
+  private def updateOthers(userId: Long, parentRight: Int)(implicit session: Session) {
     // Making space in parents Folders (and folders to the right of the parent folder
     // Slick does not support mutating updates so we will use plain query
     // IMPORTANT: exceptions are silent, so make sure to treat them

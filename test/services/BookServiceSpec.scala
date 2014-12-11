@@ -19,13 +19,22 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
     running(app) {
       val userService = inject[UserService]
       await(userService.saveWithLoginInfo(TestGlobal.testUser))
-      prepareTestBooks()
+      val folder = prepareFolder()
+      prepareTestBooks(folder)
 
       AsResult(t)
     }
   }
 
-  def prepareTestBooks() = {
+  def prepareFolder() = {
+    val folderService = new FolderService
+
+    await(folderService.createRootForUser(TestGlobal.testUser))
+    await(folderService.appendToRoot(TestGlobal.testUser, "Sub1"))
+  }
+
+  def prepareTestBooks(folderToAddBooks: Folder) = {
+
     val bookService = new BookService
 
     val book = Book(
@@ -36,6 +45,7 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
     )
 
     bookService.save(TestGlobal.testUser, book)
+    bookService.addToFolder(TestGlobal.testUser, book, folderToAddBooks)
   }
 
   "Book Service" should {
@@ -49,6 +59,28 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
       // Then
       books must have size 1
     }
+    /*
+
+    "retrieve all books from a folder" in {
+      // Given
+      val bookService = new BookService
+      val folder = getBookFolder()
+
+      // When
+      val books = await(bookService.retrieveAllFromFolder(TestGlobal.testUser, folder))
+
+      // Then
+      books must have size 1
+    }
+
+
+    def getBookFolder(): Folder = {
+      val folderService = inject[FolderService]
+
+      val rootFolderChildren = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
+      rootFolderChildren(0)
+    }
+    */
   }
 
 

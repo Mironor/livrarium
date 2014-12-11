@@ -16,17 +16,15 @@ case class Book(id: Option[Long],
                 totalPages: Int = 0,
                 currentPage: Int = 0) {
 
-  def toDBBook(userId: Long): DBBook = {
-    DBBook(
-      id,
-      userId,
-      identifier,
-      name,
-      format,
-      totalPages,
-      currentPage
-    )
-  }
+  def toDBBook(userId: Long): DBBook = DBBook(
+    id,
+    userId,
+    identifier,
+    name,
+    format,
+    totalPages,
+    currentPage
+  )
 
 }
 
@@ -42,6 +40,7 @@ object Book {
 }
 
 class BookService(implicit inj: Injector) extends Injectable {
+
 
   val bookDAO = inject[BookDAO]
 
@@ -71,5 +70,11 @@ class BookService(implicit inj: Injector) extends Injectable {
 
     createdDBBookPromise.map(Book.fromDBBook)
   }
+
+  def addToFolder(user: User, book: Book, folder: Folder): Future[Book] = {
+    Future(book)
+  }
+
+  def retrieveAllFromFolder(user: User, folderId: Folder): Future[List[Book]] = ???
 
 }

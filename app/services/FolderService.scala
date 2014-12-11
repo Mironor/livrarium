@@ -62,7 +62,7 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @return list of immediate children of root's folder.
    */
   def retrieveUserFolderTree(user: User): Future[List[Folder]] = {
-    val dbFoldersPromise = folderDAO.findUserFolders(user)
+    val dbFoldersPromise = folderDAO.findAll(user)
     dbFoldersPromise.map {
       case rootFolder :: tail => generateChildren(0, rootFolder.right, tail)
       case Nil => Nil

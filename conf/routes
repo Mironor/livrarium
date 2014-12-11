@@ -20,7 +20,7 @@ GET           /folders/rootContent             @controllers.Cloud.getRootContent
 GET           /folders/content/:id             @controllers.Cloud.getContent(id:Long)
 POST          /folders/new                     @controllers.Cloud.createFolder
 
-POST          /upload                          @controllers.Cloud.upload
+POST          /upload/:folderId                @controllers.Cloud.upload(folderId:Long)
 
 GET           /books                           controllers.Books.index
 GET           /books/:id                       controllers.Books.info(id)

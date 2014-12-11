@@ -21,7 +21,14 @@ import scala.concurrent.Future
 case class User(id: Option[Long],
                 loginInfo: LoginInfo,
                 email: Option[String],
-                avatarURL: Option[String]) extends Identity
+                avatarURL: Option[String]) extends Identity {
+
+  def toDBUser: DBUser =  DBUser(id, email, avatarURL)
+}
+
+object User {
+  def fromDBUser(dbUser: DBUser, loginInfo: LoginInfo): User = User(dbUser.id, loginInfo, dbUser.email, dbUser.avatarURL)
+}
 
 
 /**
@@ -42,7 +49,7 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
   def retrieve(loginInfo: LoginInfo): Future[Option[User]] = {
     val dbUserPromise = userDAO.find(loginInfo)
     dbUserPromise.map(dbUserOption => dbUserOption.map {
-      dbUser => User(dbUser.id, loginInfo, dbUser.email, dbUser.avatarURL)
+      dbUser => User.fromDBUser(dbUser, loginInfo)
     })
   }
 
@@ -52,7 +59,7 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
    * @return The saved user.
    */
   def saveWithLoginInfo(user: User): Future[User] = {
-    val dbUser = DBUser(user.id, user.email, user.avatarURL)
+    val dbUser = user.toDBUser
     userDAO.insertOrUpdateWithLoginInfo(dbUser, user.loginInfo)
       .map(returnedDBUser => user.copy(id = returnedDBUser.id))
   }
@@ -72,13 +79,13 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
           user.id,
           profile.email,
           profile.avatarURL
-        )).map(dbUser => User(dbUser.id, profile.loginInfo, dbUser.email, dbUser.avatarURL))
+        )).map(dbUser => User.fromDBUser(dbUser, profile.loginInfo))
       case None => // Insert a new user
         userDAO.insertOrUpdateWithLoginInfo(DBUser(
           None,
           profile.email,
           profile.avatarURL
-        ), profile.loginInfo).map(dbUser => User(dbUser.id, profile.loginInfo, dbUser.email, dbUser.avatarURL))
+        ), profile.loginInfo).map(dbUser => User.fromDBUser(dbUser, profile.loginInfo))
     }
 
   }

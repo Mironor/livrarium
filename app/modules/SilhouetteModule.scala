@@ -5,10 +5,9 @@ import com.mohiva.play.silhouette.api.services.{AuthenticatorService, AvatarServ
 import com.mohiva.play.silhouette.api.util._
 import com.mohiva.play.silhouette.impl.authenticators._
 import com.mohiva.play.silhouette.impl.daos.DelegableAuthInfoDAO
-import com.mohiva.play.silhouette.impl.providers.credentials.hasher.BCryptPasswordHasher
 import com.mohiva.play.silhouette.impl.providers._
 import com.mohiva.play.silhouette.impl.services.{GravatarService, DelegableAuthInfoService}
-import com.mohiva.play.silhouette.impl.util.{DefaultFingerprintGenerator, SecureRandomIDGenerator, PlayCacheLayer}
+import com.mohiva.play.silhouette.impl.util.{BCryptPasswordHasher, DefaultFingerprintGenerator, SecureRandomIDGenerator, PlayCacheLayer}
 import models._
 import models.silhouette.{OAuth1InfoDAO, OAuth2InfoDAO, PasswordInfoDAO}
 import scaldi.Module

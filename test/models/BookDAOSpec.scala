@@ -56,5 +56,15 @@ class BookDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
       insertedBook.name must beEqualTo("book")
       insertedBook.format must beEqualTo(BookFormatHelper.PDF)
     }
+
+    /*
+    "relate book to a folder" in {
+      // Given
+      val bookDAO = new BookDAO
+
+      // When
+
+    }
+    */
   }
 }

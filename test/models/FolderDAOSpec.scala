@@ -66,7 +66,7 @@ class FolderDAOSpec extends LivrariumSpecification with AroundExample with Throw
       val folderDAO = new FolderDAO
 
       // When
-      val userFolders = await(folderDAO.findUserFolders(TestGlobal.testUser))
+      val userFolders = await(folderDAO.findAll(TestGlobal.testUser))
 
       // Then
       userFolders must have size 5
