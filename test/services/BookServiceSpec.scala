@@ -1,5 +1,6 @@
 package services
 
+import fixtures.{BookFixture, UserFixture, FolderFixture}
 import globals.TestGlobal
 import helpers.{BookFormatHelper, RandomIdGenerator, LivrariumSpecification}
 import org.specs2.execute.AsResult
@@ -9,7 +10,6 @@ import play.api.test.FakeApplication
 
 class BookServiceSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
 
-  def randomIdGenerator = inject[RandomIdGenerator]
 
   /**
    * This automatically handles up and down evolutions at the beginning and at the end of a spec respectively
@@ -17,35 +17,12 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
   def around[T: AsResult](t: => T) = {
     val app = FakeApplication(withGlobal = Some(TestGlobal), additionalConfiguration = inMemoryDatabase())
     running(app) {
-      val userService = inject[UserService]
-      await(userService.saveWithLoginInfo(TestGlobal.testUser))
-      val folder = prepareFolder()
-      prepareTestBooks(folder)
+      await(UserFixture.initFixture())
+      await(FolderFixture.initFixture())
+      await(BookFixture.initFixture())
 
       AsResult(t)
     }
-  }
-
-  def prepareFolder() = {
-    val folderService = new FolderService
-
-    await(folderService.createRootForUser(TestGlobal.testUser))
-    await(folderService.appendToRoot(TestGlobal.testUser, "Sub1"))
-  }
-
-  def prepareTestBooks(folderToAddBooks: Folder) = {
-
-    val bookService = new BookService
-
-    val book = Book(
-      None,
-      randomIdGenerator.generateBookId(),
-      "book",
-      BookFormatHelper.PDF
-    )
-
-    bookService.save(TestGlobal.testUser, book)
-    bookService.addToFolder(TestGlobal.testUser, book, folderToAddBooks)
   }
 
   "Book Service" should {
@@ -53,34 +30,41 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
       // Given
       val bookService = new BookService
 
+      val book = generateTestBook()
+
       // When
-      val books = await(bookService.retrieveAll(TestGlobal.testUser))
+      await(bookService.save(UserFixture.testUser, book))
+      val books = await(bookService.retrieveAll(UserFixture.testUser))
 
       // Then
-      books must have size 1
+      books must have size 3
     }
-    /*
+
+    def generateTestBook(): Book = {
+      def randomIdGenerator = inject[RandomIdGenerator]
+
+      Book(
+        None,
+        randomIdGenerator.generateBookId(),
+        "book",
+        BookFormatHelper.PDF
+      )
+    }
 
     "retrieve all books from a folder" in {
       // Given
       val bookService = new BookService
-      val folder = getBookFolder()
+
+      val book = generateTestBook()
 
       // When
-      val books = await(bookService.retrieveAllFromFolder(TestGlobal.testUser, folder))
+      val insertedBook = await(bookService.save(UserFixture.testUser, book))
+      await(bookService.addToFolder(UserFixture.testUser, insertedBook, FolderFixture.sub2Id))
+      val books = await(bookService.retrieveAllFromFolder(UserFixture.testUser, FolderFixture.sub2Id))
 
       // Then
       books must have size 1
     }
-
-
-    def getBookFolder(): Folder = {
-      val folderService = inject[FolderService]
-
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
-      rootFolderChildren(0)
-    }
-    */
   }
 
 

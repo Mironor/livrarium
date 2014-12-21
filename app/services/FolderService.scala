@@ -28,6 +28,8 @@ object Folder {
       (__ \ "label").read[String] and
       (__ \ "children").read[List[Folder]]
     )(Folder.apply _)
+
+  def fromDBFolder(dbFolder: DBFolder): Folder = Folder(dbFolder.id, dbFolder.name, List())
 }
 
 

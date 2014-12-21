@@ -1,28 +1,64 @@
 package models
 
-import models.DBTableDefinitions.{BookToFolder, BooksToFolders, DBBook, Books}
+import models.DBTableDefinitions.{BookToFolder, Books, BooksToFolders, DBBook}
+import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
-import services.User
-import play.api.Play.current
 
 import scala.concurrent.Future
-import scala.slick.lifted.TableQuery
 
 class BookDAO {
   val slickBooks = TableQuery[Books]
   val slickBooksToFolders = TableQuery[BooksToFolders]
 
-  def findAll(user: User): Future[List[DBBook]] = {
+  /**
+   * Finds all books for a specified userId
+   * @param userId user's id
+   * @return
+   */
+  def findAll(userId: Long): Future[List[DBBook]] = {
     Future.successful {
       DB withSession { implicit session =>
-        val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
         slickBooks.filter(_.idUser === userId).list
       }
     }
   }
 
-  def insertOrUpdate(book: DBBook): Future[DBBook] = {
+  /**
+   * Finds book by its id
+   * @param bookId book's id
+   * @return
+   */
+  def findById(bookId: Long): Future[Option[DBBook]] = {
+    Future.successful {
+      DB withSession { implicit session =>
+        slickBooks.filter(_.id === bookId).firstOption
+      }
+    }
+  }
+
+  /**
+   * Finds all books for a specified folderId
+   * @param folderId parent folder's id
+   * @return
+   */
+  def findAllInFolder(folderId: Long): Future[List[DBBook]] = {
+    Future.successful {
+      DB withSession { implicit session =>
+        (for {
+          bookToFolder <- slickBooksToFolders if bookToFolder.idFolder === folderId
+          book <- slickBooks if book.id === bookToFolder.idBook
+        } yield book).list
+      }
+    }
+  }
+
+  /**
+   * Inserts new book 
+   * @param book book to update/insert
+   * @return
+   */
+  def insert(book: DBBook): Future[DBBook] = {
     Future.successful {
       DB withSession { implicit session =>
         val insertedBookId = (slickBooks returning slickBooks.map(_.id)) += book
@@ -31,11 +67,31 @@ class BookDAO {
     }
   }
 
+  /**
+   * Updates book
+   * @param book book to update/insert
+   * @return
+   */
+  def update(book: DBBook): Future[DBBook] = {
+    Future.successful {
+      DB withSession { implicit session =>
+        slickBooks.filter(_.id === book.id).update(book)
+        book
+      }
+    }
+  }
+
+  /**
+   * Creates a relation book <=> folder
+   * @param book book's id
+   * @param folderId folder's id
+   * @return
+   */
   def relateBookToFolder(book: DBBook, folderId: Long): Future[DBBook] = {
     Future.successful {
       DB withSession { implicit session =>
         val bookId = book.id.getOrElse(throw new DAOException("Book's id is not defined"))
-//        slickBooksToFolders += BookToFolder(bookId, folderId)
+        slickBooksToFolders += BookToFolder(bookId, folderId)
         book
       }
     }

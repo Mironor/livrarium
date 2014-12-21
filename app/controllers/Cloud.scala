@@ -43,7 +43,7 @@ class Cloud(implicit inj: Injector)
       (__ \ 'name).read[String]
     ) tupled
 
-  implicit val uploadBookReads =  (__ \ 'idFolder).read[Long]
+  implicit val uploadBookReads = (__ \ 'idFolder).read[Long]
 
 
   def index = UserAwareAction.async { implicit request =>
@@ -164,9 +164,12 @@ class Cloud(implicit inj: Injector)
           totalPages
         )
 
-        val savedBookPromise = bookService.save(user, bookModel)
+        val uploadedBookModel = for {
+          insertedBook <- bookService.save(user, bookModel)
+          addedBook <- bookService.addToFolder(user, insertedBook, uploadFolderId)
+        } yield addedBook
 
-        savedBookPromise.map { book =>
+        uploadedBookModel.map { book: Book =>
           val bookId = book.id.getOrElse(throw new Exception("Book's id is not defined"))
           Ok(Json.obj(
             "id" -> bookId,
@@ -174,6 +177,7 @@ class Cloud(implicit inj: Injector)
             "name" -> name
           ))
         }
+
 
     }.getOrElse {
       Future.successful(BadRequest(

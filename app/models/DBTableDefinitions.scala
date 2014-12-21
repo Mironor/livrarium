@@ -119,7 +119,7 @@ object DBTableDefinitions {
 
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def idUser = column[Long]("id", O.NotNull)
+    def idUser = column[Long]("idUser", O.NotNull)
 
     def uuid = column[UUID]("uuid")
 
@@ -163,6 +163,7 @@ object DBTableDefinitions {
                       right: Int)
 
   class Folders(tag: Tag) extends Table[DBFolder](tag, "folders") {
+
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
     def idUser = column[Long]("idUser", O.NotNull)

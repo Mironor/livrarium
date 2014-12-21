@@ -1,5 +1,6 @@
 package services
 
+import fixtures.{UserFixture, FolderFixture}
 import globals.TestGlobal
 import helpers.LivrariumSpecification
 import org.specs2.execute.AsResult
@@ -16,32 +17,11 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
   def around[T: AsResult](t: => T) = {
     val app = FakeApplication(withGlobal = Some(TestGlobal), additionalConfiguration = inMemoryDatabase())
     running(app) {
-      val userService = inject[UserService]
-      await(userService.saveWithLoginInfo(TestGlobal.testUser))
-      constructUserTree()
+      await(UserFixture.initFixture())
+      await(FolderFixture.initFixture())
 
       AsResult(t)
     }
-  }
-
-  private def constructUserTree() = {
-
-    /**
-     * PLEASE KEEP UP TO DATE
-     * Mocked tree:
-     * root
-     *   Sub1
-     *     SubSub1
-     *     SubSub2
-     *   Sub2
-     */
-    val folderService = new FolderService
-
-    await(folderService.createRootForUser(TestGlobal.testUser))
-    val sub1Folder = await(folderService.appendToRoot(TestGlobal.testUser, "Sub1"))
-    await(folderService.appendToRoot(TestGlobal.testUser, "Sub2"))
-    await(folderService.appendTo(TestGlobal.testUser, sub1Folder, "SubSub1"))
-    await(folderService.appendTo(TestGlobal.testUser, sub1Folder, "SubSub2"))
   }
 
   "Folder service" should {
@@ -51,23 +31,23 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
       val folderService = new FolderService
 
       // When
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
+      val rootFolderChildren = await(folderService.retrieveUserFolderTree(UserFixture.testUser))
 
       // Then
       rootFolderChildren must have size 2
 
       val sub1 = rootFolderChildren(0)
-      sub1.name must beEqualTo("Sub1")
+      sub1.name must beEqualTo(FolderFixture.sub1Name)
       sub1.children must have size 2
 
       val subSub1 = sub1.children(0)
-      subSub1.name must beEqualTo("SubSub1")
+      subSub1.name must beEqualTo(FolderFixture.sub1sub1Name)
 
       val subSub2 = sub1.children(1)
-      subSub2.name must beEqualTo("SubSub2")
+      subSub2.name must beEqualTo(FolderFixture.sub1sub2Name)
 
       val sub2 = rootFolderChildren(1)
-      sub2.name must beEqualTo("Sub2")
+      sub2.name must beEqualTo(FolderFixture.sub2Name)
       sub2.children must have size 0
     }
 
@@ -77,8 +57,8 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
       val testFolderName = "testFolder"
 
       // When
-      await(folderService.appendToRoot(TestGlobal.testUser, testFolderName))
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
+      await(folderService.appendToRoot(UserFixture.testUser, testFolderName))
+      val rootFolderChildren = await(folderService.retrieveChildren(UserFixture.testUser, FolderFixture.rootId))
 
       // Then
       rootFolderChildren must have size 3
@@ -93,19 +73,16 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
       val folderService = new FolderService
 
       // When
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
-      val sub1FolderId = rootFolderChildren(0).id.getOrElse(fail("sub-folder's id is not defined"))
-      val sub1FolderChildren = await(folderService.retrieveChildren(TestGlobal.testUser, sub1FolderId))
+      val sub1FolderChildren = await(folderService.retrieveChildren(UserFixture.testUser, FolderFixture.sub1Id))
 
       // Then
       sub1FolderChildren must have size 2
 
       val subSub1 = sub1FolderChildren(0)
-      subSub1.name must beEqualTo("SubSub1")
+      subSub1.name must beEqualTo(FolderFixture.sub1sub1Name)
 
       val subSub2 = sub1FolderChildren(1)
-      subSub2.name must beEqualTo("SubSub2")
-
+      subSub2.name must beEqualTo(FolderFixture.sub1sub2Name)
     }
 
     "append a folder to another folder (not root)" in {
@@ -113,18 +90,14 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
       val folderService = new FolderService
       val testFolderName = "testFolder"
 
-      val rootFolderChildrenBeforeAppend = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
-      val sub1BeforeAppend = rootFolderChildrenBeforeAppend(0)
-
       // When
-      await(folderService.appendTo(TestGlobal.testUser, sub1BeforeAppend, testFolderName))
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
+      await(folderService.appendTo(UserFixture.testUser, FolderFixture.sub1Id, testFolderName))
+      val sub1Children = await(folderService.retrieveChildren(UserFixture.testUser, FolderFixture.sub1Id))
 
       // Then
-      val sub1 = rootFolderChildren(0)
-      sub1.children must have size 3
+      sub1Children must have size 3
 
-      val testFolder = sub1.children(2)
+      val testFolder = sub1Children(2)
       testFolder.name must beEqualTo(testFolderName)
       testFolder.children must have size 0
     }

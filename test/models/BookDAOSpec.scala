@@ -1,13 +1,13 @@
 package models
 
+import fixtures.{BookFixture, FolderFixture, UserFixture}
 import globals.TestGlobal
-import helpers.{BookFormatHelper, RandomIdGenerator, LivrariumSpecification}
+import helpers.{BookFormatHelper, LivrariumSpecification, RandomIdGenerator}
 import models.DBTableDefinitions.DBBook
 import org.specs2.execute.AsResult
 import org.specs2.matcher.ThrownMessages
 import org.specs2.specification.AroundExample
 import play.api.test.FakeApplication
-import services.UserService
 
 class BookDAOSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
 
@@ -16,27 +16,12 @@ class BookDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
   def around[T: AsResult](t: => T) = {
     val app = FakeApplication(withGlobal = Some(TestGlobal), additionalConfiguration = inMemoryDatabase())
     running(app) {
-      val userService = inject[UserService]
-      await(userService.saveWithLoginInfo(TestGlobal.testUser))
-      prepareTestBookModels()
+      await(UserFixture.initFixture())
+      await(FolderFixture.initFixture())
+      await(BookFixture.initFixture())
 
       AsResult(t)
     }
-  }
-
-  def prepareTestBookModels() = {
-
-    val bookDAO = new BookDAO
-    val userId = TestGlobal.testUser.id.getOrElse(fail("User's id is not defined"))
-    val book = DBBook(
-      None,
-      userId,
-      randomIdGenerator.generateBookId(),
-      "book",
-      BookFormatHelper.PDF
-    )
-
-    bookDAO.insertOrUpdate(book)
   }
 
   "Book DAO" should {
@@ -44,27 +29,73 @@ class BookDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
       // Given
       val bookDAO = new BookDAO
 
+      val book = generateTestBook()
+
       // When
-      val books = await(bookDAO.findAll(TestGlobal.testUser))
+      val insertedBook = await(bookDAO.insert(book))
+      val insertedBookId = insertedBook.id.getOrElse(fail("Inserted book has no id"))
+      val books = await(bookDAO.findAll(UserFixture.testUserId))
+
+      val testBookOption = await(bookDAO.findById(insertedBookId))
 
       // Then
-      books must have size 1
+      books must have size 3
 
-      val insertedBook = books(0)
-      val userId = TestGlobal.testUser.id.getOrElse(fail("User's id is not defined"))
-      insertedBook.userId must beEqualTo(userId)
-      insertedBook.name must beEqualTo("book")
-      insertedBook.format must beEqualTo(BookFormatHelper.PDF)
+      val testBook = testBookOption.getOrElse(fail("Inserted book was not found"))
+      testBook.userId must beEqualTo(UserFixture.testUserId)
+      testBook.name must beEqualTo(book.name)
+      testBook.format must beEqualTo(BookFormatHelper.PDF)
     }
 
-    /*
+    def generateTestBook(): DBBook = {
+      val randomIdGenerator = inject[RandomIdGenerator]
+      val generatedBookId = randomIdGenerator.generateBookId() // it generates the same id each time due to the injection
+
+      DBBook(
+        None,
+        UserFixture.testUserId,
+        generatedBookId,
+        "book",
+        BookFormatHelper.PDF
+      )
+    }
+
+    "update book if it already exists" in {
+      // Given
+      val bookDAO = new BookDAO
+
+      val updatedName = "updated book"
+
+      val book = generateTestBook()
+
+      // When
+      val insertedBook = await(bookDAO.insert(book))
+      val insertedBookId = insertedBook.id.getOrElse(fail("Inserted book has no id"))
+      await(bookDAO.update(insertedBook.copy(name = updatedName)))
+
+      val testBookOption = await(bookDAO.findById(insertedBookId))
+
+      // Then
+      val testBook = testBookOption.getOrElse(fail("Inserted/updated book was not found"))
+      testBook.name must beEqualTo(updatedName)
+    }
+
     "relate book to a folder" in {
       // Given
       val bookDAO = new BookDAO
 
+      val book = generateTestBook()
+
       // When
+      val insertedBook = await(bookDAO.insert(book))
+      await(bookDAO.relateBookToFolder(insertedBook, FolderFixture.sub2Id))
+      val books = await(bookDAO.findAllInFolder(FolderFixture.sub2Id))
+
+      // Then
+      books must have size 1
 
     }
-    */
+
+
   }
 }

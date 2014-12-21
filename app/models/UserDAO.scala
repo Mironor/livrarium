@@ -64,16 +64,16 @@ class UserDAO {
       case Some(userFound) =>
         slickUsers.filter(_.id === dbUser.id).update(dbUser)
         dbUser.id.get
-      case None => insert(dbUser)
+      case None => (slickUsers returning slickUsers.map(_.id)) += dbUser
     }
   }
-
-  private def insert(dbUser: DBUser)(implicit session: Session): Long = (slickUsers returning slickUsers.map(_.id)) += dbUser
 
   private def insertOrUpdateLoginInfo(loginInfo: LoginInfo, userId: Long)(implicit session: Session): Unit = {
     // Insert if it does not exist yet
     val dbLoginInfoOption = slickLoginInfos.filter(info => info.providerID === loginInfo.providerID && info.providerKey === loginInfo.providerKey)
       .firstOption
-    if (dbLoginInfoOption.isEmpty) slickLoginInfos.insert(DBLoginInfo(None, userId, loginInfo.providerID, loginInfo.providerKey))
+    if (dbLoginInfoOption.isEmpty) {
+      slickLoginInfos += DBLoginInfo(None, userId, loginInfo.providerID, loginInfo.providerKey)
+    }
   }
 }

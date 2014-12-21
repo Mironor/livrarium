@@ -5,8 +5,9 @@ import javax.imageio.ImageIO
 
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.test._
+import fixtures.{FolderFixture, UserFixture}
 import globals.TestGlobal
-import helpers.{BookFormatHelper, PDFTestHelper, LivrariumSpecification, RandomIdGenerator}
+import helpers.{BookFormatHelper, LivrariumSpecification, PDFTestHelper, RandomIdGenerator}
 import org.apache.commons.io.FileUtils
 import org.specs2.execute.AsResult
 import org.specs2.matcher.{FileMatchers, ThrownMessages}
@@ -17,7 +18,7 @@ import play.api.libs.json.{JsNumber, JsString, Json}
 import play.api.mvc.MultipartFormData
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.test._
-import services.{BookService, FolderContents, FolderService, UserService}
+import services.{BookService, FolderContents, FolderService}
 
 class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExample with ThrownMessages {
 
@@ -27,12 +28,8 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
   def around[T: AsResult](t: => T) = {
     val app = FakeApplication(withGlobal = Some(TestGlobal), additionalConfiguration = inMemoryDatabase())
     running(app) {
-      val userService = inject[UserService]
-      await(userService.saveWithLoginInfo(TestGlobal.testUser))
-
-      val folderService = inject[FolderService]
-      await(folderService.createRootForUser(TestGlobal.testUser))
-      await(folderService.appendToRoot(TestGlobal.testUser, "sub1"))
+      await(UserFixture.initFixture())
+      await(FolderFixture.initFixture())
 
       cleanUploadDirectories()
 
@@ -60,10 +57,7 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
 
     "return root's content" in {
       // Given
-      val folderService = inject[FolderService]
-      await(folderService.appendToRoot(TestGlobal.testUser, "sub2")) // additional sub folder
-
-      val request = FakeRequest().withAuthenticator[SessionAuthenticator](TestGlobal.testUser.loginInfo)
+      val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.testUser.loginInfo)
 
       val cloudController = new Cloud
 
@@ -78,38 +72,32 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
 
     "return some folder's (other than root) content" in {
       // Given
-      val folderService = inject[FolderService]
-
-      val sub2Folder = await(folderService.appendToRoot(TestGlobal.testUser, "sub2")) // additional sub folder
-      val sub2FolderId = sub2Folder.id.getOrElse(fail("sub-folder's id is not defined"))
-      await(folderService.appendTo(TestGlobal.testUser, sub2FolderId, "subSub1"))
-
-      val request = FakeRequest().withAuthenticator[SessionAuthenticator](TestGlobal.testUser.loginInfo)
+      val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.testUser.loginInfo)
 
       val cloudController = new Cloud
 
       // When
-      val result = cloudController.getContent(sub2FolderId)(request)
+      val result = cloudController.getContent(FolderFixture.sub1Id)(request)
 
       // Then
       status(result) mustEqual OK
       contentType(result) must beSome("application/json")
-      contentAsJson(result).as[FolderContents].folders must have size 1
+      contentAsJson(result).as[FolderContents].folders must have size 2
     }
 
     "create new folder" in {
       // Given
       val folderService = inject[FolderService]
-      await(folderService.createRootForUser(TestGlobal.testUser))
 
       val newFolderName = "testCreateFolder"
 
       val requestJson = Json.obj(
-        "idParent" -> JsNumber(1),
+        "idParent" -> JsNumber(FolderFixture.sub1Id),
         "name" -> JsString(newFolderName)
       )
+
       val request = FakeRequest(Helpers.POST, "", FakeHeaders(), requestJson)
-        .withAuthenticator[SessionAuthenticator](TestGlobal.testUser.loginInfo)
+        .withAuthenticator[SessionAuthenticator](UserFixture.testUser.loginInfo)
 
       val cloudController = new Cloud
 
@@ -117,16 +105,16 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
       await(cloudController.createFolder()(request))
 
       // Then
-      val userFolderTree = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
-      userFolderTree must have size 2
+      val userFolderTree = await(folderService.retrieveChildren(UserFixture.testUser, FolderFixture.sub1Id))
+      userFolderTree must have size 3
 
-      val createdFolder = userFolderTree(1)
+      val createdFolder = userFolderTree(2)
       createdFolder.name mustEqual newFolderName
     }
 
     "upload a pdf" in {
       // Given
-      val userId = TestGlobal.testUser.id.getOrElse(fail("User's id is not defined"))
+      val userId = UserFixture.testUserId
 
       val randomIdGenerator = inject[RandomIdGenerator]
       val generatedBookIdentifier = randomIdGenerator.generateBookId() // it generates the same id each time due to the injection
@@ -136,12 +124,10 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
 
       val request = generateRequestWithUploadedPdfFile()
 
-      val folderId = getUploadFolderId()
-
       val cloudController = new Cloud
 
       // When
-      await(cloudController.upload(folderId)(request))
+      await(cloudController.upload(FolderFixture.sub1Id)(request))
 
       // Then
       val uploadedPdf = new File(s"$uploadPath/$userId/$generatedBookIdentifier.pdf")
@@ -155,7 +141,8 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
       val uploadInputName = inject[String](identified by "books.uploadInputName")
       val part = FilePart[TemporaryFile](key = uploadInputName, filename = file.getName, contentType = Some("application/pdf"), ref = tempFile)
       val formData = MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq(), missingFileParts = Seq())
-      FakeRequest(Helpers.POST, "", FakeHeaders(), formData).withAuthenticator[SessionAuthenticator](TestGlobal.testUser.loginInfo)
+
+      FakeRequest(Helpers.POST, "", FakeHeaders(), formData).withAuthenticator[SessionAuthenticator](UserFixture.testUser.loginInfo)
     }
 
     def generateTemporaryPdfFile() = {
@@ -165,16 +152,9 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
       new File(filePath)
     }
 
-    def getUploadFolderId(): Long = {
-      val folderService = inject[FolderService]
-
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(TestGlobal.testUser))
-      rootFolderChildren(0).id.getOrElse(fail("sub-folder's id is not defined"))
-    }
-
     "generate image (with good width/height) from uploaded pdf" in {
       // Given
-      val userId = TestGlobal.testUser.id.getOrElse(fail("User's id is not defined"))
+      val userId = UserFixture.testUserId
 
       val randomIdGenerator = inject[RandomIdGenerator]
       val generatedBookId = randomIdGenerator.generateBookId() // it generates the same id each time due to the injection
@@ -184,12 +164,10 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
 
       val request = generateRequestWithUploadedPdfFile()
 
-      val folderId = getUploadFolderId()
-
       val cloudController = new Cloud
 
       // When
-      await(cloudController.upload(folderId)(request))
+      await(cloudController.upload(FolderFixture.sub1Id)(request))
 
       // Then
       val generatedPdfImage = new File(s"$generatedImagePath/$userId/$generatedBookId.jpg")
@@ -216,15 +194,13 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
 
       val request = generateRequestWithUploadedPdfFile()
 
-      val folderId = getUploadFolderId()
-
       val cloudController = new Cloud
 
       // When
-      await(cloudController.upload(folderId)(request))
+      await(cloudController.upload(FolderFixture.sub1Id)(request))
+      val books = await(bookService.retrieveAllFromFolder(UserFixture.testUser, FolderFixture.sub1Id))
 
       // Then
-      val books = await(bookService.retrieveAll(TestGlobal.testUser))
       books must have size 1
 
       val book = books(0)
