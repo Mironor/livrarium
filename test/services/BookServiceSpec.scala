@@ -3,6 +3,7 @@ package services
 import fixtures.{BookFixture, UserFixture, FolderFixture}
 import globals.TestGlobal
 import helpers.{BookFormatHelper, RandomIdGenerator, LivrariumSpecification}
+import models.Book
 import org.specs2.execute.AsResult
 import org.specs2.matcher.ThrownMessages
 import org.specs2.specification.AroundExample

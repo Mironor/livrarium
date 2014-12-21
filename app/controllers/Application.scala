@@ -1,6 +1,6 @@
 package controllers
 
-import _root_.services.{FolderService, User, UserService}
+import _root_.services.{FolderService, UserService}
 import com.mohiva.play.silhouette.api.Silhouette
 import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.{AccessDeniedException, AuthenticationException}
@@ -8,6 +8,7 @@ import com.mohiva.play.silhouette.api.services.{AuthInfoService, AvatarService}
 import com.mohiva.play.silhouette.api.util.{PasswordInfo, PasswordHasher, Credentials}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
+import models.User
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._

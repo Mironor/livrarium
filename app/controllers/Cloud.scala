@@ -9,15 +9,16 @@ import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.sksamuel.scrimage.{Format => ImgFormat, Image}
 import helpers.{PDFHelper, RandomIdGenerator, BookFormatHelper}
+import models.{Book, FolderContents, User}
 import org.apache.commons.io.FileUtils
 import play.api.Play
 import play.api.libs.Files
 import play.api.libs.concurrent.Execution.Implicits._
-import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.mvc._
 import scaldi.{Injectable, Injector}
 import services._
+import play.api.libs.functional.syntax._
 
 import scala.concurrent.Future
 import scala.language.postfixOps

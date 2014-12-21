@@ -1,17 +1,18 @@
 package modules
 
-import com.mohiva.play.silhouette.api.{Environment, EventBus}
-import com.mohiva.play.silhouette.api.services.{AuthenticatorService, AvatarService, AuthInfoService}
+import com.mohiva.play.silhouette.api.services.{AuthInfoService, AuthenticatorService, AvatarService}
 import com.mohiva.play.silhouette.api.util._
+import com.mohiva.play.silhouette.api.{Environment, EventBus}
 import com.mohiva.play.silhouette.impl.authenticators._
 import com.mohiva.play.silhouette.impl.daos.DelegableAuthInfoDAO
 import com.mohiva.play.silhouette.impl.providers._
-import com.mohiva.play.silhouette.impl.services.{GravatarService, DelegableAuthInfoService}
-import com.mohiva.play.silhouette.impl.util.{BCryptPasswordHasher, DefaultFingerprintGenerator, SecureRandomIDGenerator, PlayCacheLayer}
+import com.mohiva.play.silhouette.impl.services.{DelegableAuthInfoService, GravatarService}
+import com.mohiva.play.silhouette.impl.util.{BCryptPasswordHasher, DefaultFingerprintGenerator, PlayCacheLayer, SecureRandomIDGenerator}
+import daos.UserDAO
+import daos.silhouette.{OAuth1InfoDAO, OAuth2InfoDAO, PasswordInfoDAO}
 import models._
-import models.silhouette.{OAuth1InfoDAO, OAuth2InfoDAO, PasswordInfoDAO}
 import scaldi.Module
-import services.{User, UserService}
+import services.UserService
 
 /**
  * Silhouette module dependency injections

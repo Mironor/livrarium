@@ -8,6 +8,7 @@ import com.mohiva.play.silhouette.test._
 import fixtures.{FolderFixture, UserFixture}
 import globals.TestGlobal
 import helpers.{BookFormatHelper, LivrariumSpecification, PDFTestHelper, RandomIdGenerator}
+import models.FolderContents
 import org.apache.commons.io.FileUtils
 import org.specs2.execute.AsResult
 import org.specs2.matcher.{FileMatchers, ThrownMessages}
@@ -18,7 +19,7 @@ import play.api.libs.json.{JsNumber, JsString, Json}
 import play.api.mvc.MultipartFormData
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.test._
-import services.{BookService, FolderContents, FolderService}
+import services.{BookService, FolderService}
 
 class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExample with ThrownMessages {
 

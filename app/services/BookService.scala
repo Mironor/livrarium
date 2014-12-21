@@ -1,43 +1,12 @@
 package services
 
-import java.util.UUID
-
-import models.BookDAO
-import models.DBTableDefinitions.DBBook
-import scaldi.{Injectable, Injector}
+import daos.BookDAO
+import models.{Book, Folder, User}
 import play.api.libs.concurrent.Execution.Implicits._
+import scaldi.{Injectable, Injector}
 
 import scala.concurrent.Future
 
-case class Book(id: Option[Long],
-                identifier: UUID,
-                name: String,
-                format: String,
-                totalPages: Int = 0,
-                currentPage: Int = 0) {
-
-  def toDBBook(userId: Long): DBBook = DBBook(
-    id,
-    userId,
-    identifier,
-    name,
-    format,
-    totalPages,
-    currentPage
-  )
-
-}
-
-object Book {
-  def fromDBBook(dbBook: DBBook): Book = Book(
-    dbBook.id,
-    dbBook.uuid,
-    dbBook.name,
-    dbBook.format,
-    dbBook.totalPages,
-    dbBook.currentPage
-  )
-}
 
 class BookService(implicit inj: Injector) extends Injectable {
 

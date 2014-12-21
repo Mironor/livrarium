@@ -1,7 +1,7 @@
 package modules
 
-import helpers.{UUIDGenerator, RandomIdGenerator}
-import models.{BookDAO, FolderDAO}
+import daos.{BookDAO, FolderDAO}
+import helpers.{RandomIdGenerator, UUIDGenerator}
 import scaldi.Module
 import services.{BookService, FolderService}
 

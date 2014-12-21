@@ -2,8 +2,9 @@ package fixtures
 
 import java.util.UUID
 
+import daos.DBTableDefinitions
 import helpers.BookFormatHelper
-import models.DBTableDefinitions._
+import DBTableDefinitions._
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._

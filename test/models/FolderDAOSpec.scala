@@ -1,13 +1,13 @@
 package models
 
-import fixtures.{UserFixture, FolderFixture}
+import daos.FolderDAO
+import fixtures.{FolderFixture, UserFixture}
 import globals.TestGlobal
 import helpers.LivrariumSpecification
 import org.specs2.execute.AsResult
 import org.specs2.matcher.ThrownMessages
 import org.specs2.specification.AroundExample
 import play.api.test.FakeApplication
-import services.UserService
 
 class FolderDAOSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
 

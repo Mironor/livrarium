@@ -1,6 +1,6 @@
-package models
+package daos
 
-import models.DBTableDefinitions.{BookToFolder, Books, BooksToFolders, DBBook}
+import daos.DBTableDefinitions.{BookToFolder, Books, BooksToFolders, DBBook}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._

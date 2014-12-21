@@ -1,6 +1,7 @@
 package fixtures
 
-import models.DBTableDefinitions.{DBFolder, Folders}
+import daos.DBTableDefinitions
+import DBTableDefinitions.{DBFolder, Folders}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._

@@ -3,9 +3,9 @@ package helpers
 import com.mohiva.play.silhouette.api.Environment
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import globals.TestGlobal
+import models.User
 import play.api.test.PlaySpecification
 import scaldi.{Injectable, Injector}
-import services.User
 
 class LivrariumSpecification extends PlaySpecification with Injectable{
 

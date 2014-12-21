@@ -1,7 +1,7 @@
-package models
+package daos
 
 import com.mohiva.play.silhouette.api.LoginInfo
-import models.DBTableDefinitions.{Users, _}
+import daos.DBTableDefinitions.{DBLoginInfo, Users, LoginInfos, DBUser}
 import play.api.Play.current
 import play.api.db.slick._
 

@@ -1,15 +1,15 @@
-package models
+package daos
 
-import models.DBTableDefinitions.{DBFolder, Folders}
+import daos.DBTableDefinitions.{DBFolder, Folders}
+import models.User
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
-import services.User
 
 import scala.concurrent.Future
-import scala.slick.lifted.TableQuery
 import scala.slick.jdbc.JdbcBackend.Session
 import scala.slick.jdbc.StaticQuery.interpolation
+import scala.slick.lifted.TableQuery
 
 class FolderDAO {
 

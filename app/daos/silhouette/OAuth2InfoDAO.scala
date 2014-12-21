@@ -1,9 +1,9 @@
-package models.silhouette
+package daos.silhouette
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.impl.daos.DelegableAuthInfoDAO
 import com.mohiva.play.silhouette.impl.providers.OAuth2Info
-import models.DBTableDefinitions.{DBOAuth2Info, LoginInfos, OAuth2Infos}
+import daos.DBTableDefinitions.{OAuth2Infos, LoginInfos, DBOAuth2Info}
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._

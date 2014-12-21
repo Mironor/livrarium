@@ -1,11 +1,12 @@
 package fixtures
 
 import com.mohiva.play.silhouette.api.LoginInfo
-import models.DBTableDefinitions.{LoginInfos, DBLoginInfo, Users}
+import daos.DBTableDefinitions
+import DBTableDefinitions.{LoginInfos, DBLoginInfo, Users}
+import models.User
 import play.api.Play.current
 import play.api.db.slick.Config.driver.simple._
 import play.api.db.slick._
-import services.User
 
 import scala.concurrent.Future
 import scala.slick.lifted.TableQuery
