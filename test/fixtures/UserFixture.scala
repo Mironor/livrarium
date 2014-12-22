@@ -20,11 +20,18 @@ object UserFixture {
   val testUserLoginInfo = LoginInfo("key", "value")
   val testUser = User(Option(testUserId), testUserLoginInfo, None, None)
 
+  val otherUserId = 2
+  val otherUserLoginInfo = LoginInfo("key_other", "value_other")
+  val otherUser = User(Option(otherUserId), otherUserLoginInfo, None, None)
+
   def initFixture(): Future[_] = {
     Future.successful {
       DB withSession { implicit session =>
-        slickUsers += testUser.toDBUser
-        slickLoginInfos += DBLoginInfo(None, testUserId, testUserLoginInfo.providerID, testUserLoginInfo.providerKey)
+        slickUsers ++= Seq(testUser.toDBUser, otherUser.toDBUser)
+        slickLoginInfos ++= Seq(
+          DBLoginInfo(None, testUserId, testUserLoginInfo.providerID, testUserLoginInfo.providerKey),
+          DBLoginInfo(None, otherUserId, otherUserLoginInfo.providerID, otherUserLoginInfo.providerKey)
+        )
       }
     }
   }

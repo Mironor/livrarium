@@ -39,6 +39,7 @@ class BookDAO {
 
   /**
    * Finds all books for a specified folderId
+   * No checking is done that the folder is associated with current user, use Service instead
    * @param folderId parent folder's id
    * @return
    */
@@ -55,6 +56,7 @@ class BookDAO {
 
   /**
    * Inserts new book 
+   * No checking is done that the book is associated with current user, use Service instead
    * @param book book to update/insert
    * @return
    */
@@ -69,6 +71,7 @@ class BookDAO {
 
   /**
    * Updates book
+   * No checking is done that the book is associated with current user, use Service instead
    * @param book book to update/insert
    * @return
    */
@@ -83,6 +86,7 @@ class BookDAO {
 
   /**
    * Creates a relation book <=> folder
+   * No checking is done that the book and/or folder are associated with current user, use Service instead
    * @param book book's id
    * @param folderId folder's id
    * @return

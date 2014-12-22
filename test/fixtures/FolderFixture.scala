@@ -45,10 +45,14 @@ object FolderFixture {
   val sub2Name = "Sub2"
   val sub2 = DBFolder(Option(sub2Id), UserFixture.testUserId, sub2Name, 1, 7, 8)
 
+  val otherUserRootId = 6
+  val otherUserRootName = "__root__"
+  val otherUserRoot = DBFolder(Option(otherUserRootId), UserFixture.otherUserId, otherUserRootName, 0, 0, 1)
+
   def initFixture(): Future[_] = {
     Future.successful {
       DB withSession { implicit session =>
-        slickFolders ++= Seq( root, sub1, sub1sub1, sub1sub2, sub2)
+        slickFolders ++= Seq( root, sub1, sub1sub1, sub1sub2, sub2, otherUserRoot)
       }
     }
   }

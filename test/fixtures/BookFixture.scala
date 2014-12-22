@@ -44,12 +44,25 @@ object BookFixture {
 
   val sub1BookToFolderLink = BookToFolder(sub1BookId, FolderFixture.sub1Id)
 
+  val otherUserBookName = "sub 1 book"
+  val otherUserBookId = 2
+  val otherUserBookUUID = UUID.fromString("00000000-0000-4000-A000-300000000000")
+  val otherUserBook = DBBook(
+    Option(otherUserBookId),
+    UserFixture.otherUserId,
+    otherUserBookUUID,
+    otherUserBookName,
+    BookFormatHelper.PDF
+  )
+
+  val otherUserBookToFolderLink = BookToFolder(otherUserBookId, FolderFixture.otherUserRootId)
+
 
   def initFixture(): Future[_] = {
     Future.successful {
       DB withSession { implicit session =>
-        slickBooks ++= Seq(rootBook, sub1Book)
-        slickBookToFolder ++= Seq(rootBookToFolderLink, sub1BookToFolderLink)
+        slickBooks ++= Seq(rootBook, sub1Book, otherUserBook)
+        slickBookToFolder ++= Seq(rootBookToFolderLink, sub1BookToFolderLink, otherUserBookToFolderLink)
       }
     }
   }
