@@ -28,15 +28,36 @@ class BookService(implicit inj: Injector) extends Injectable {
   }
 
   /**
+   * Retrieves book by id (with user checking)
+   * @param user current user
+   * @param bookId the id of the book to retrieve
+   * @return
+   */
+  def retrieveById(user: User, bookId: Long): Future[Option[Book]] = {
+    val retrievedDBBookPromise = bookDAO.findById(bookId)
+
+    retrievedDBBookPromise.map {
+      _.map(Book.fromDBBook)
+    }
+  }
+
+  /**
    * Saves supplied book for the user
    * @param user current user
    * @param book book to save
    * @return
    */
   def save(user: User, book: Book): Future[Book] = {
+
     val userId = user.id.getOrElse(throw new Exception("User's id is not defined"))
     val bookToSave = book.toDBBook(userId)
-    val createdDBBookPromise = bookDAO.insert(bookToSave)
+
+    // Defined id is a good indicator that we should update the model instead of inserting it
+    val createdDBBookPromise = bookToSave.id match {
+      case Some(_: Long) => bookDAO.update(bookToSave)
+      case None => bookDAO.insert(bookToSave)
+
+    }
 
     createdDBBookPromise.map(Book.fromDBBook)
   }
@@ -90,7 +111,7 @@ class BookService(implicit inj: Injector) extends Injectable {
     val retrievedDBBooksPromise = bookDAO.findAllInFolder(folderId)
 
     retrievedDBBooksPromise.map {
-      retrievedDBBooks => retrievedDBBooks.map(Book.fromDBBook)
+      _.map(Book.fromDBBook)
     }
 
   }
