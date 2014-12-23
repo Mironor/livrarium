@@ -45,7 +45,7 @@ object BookFixture {
   val sub1BookToFolderLink = BookToFolder(sub1BookId, FolderFixture.sub1Id)
 
   val otherUserBookName = "sub 1 book"
-  val otherUserBookId = 2
+  val otherUserBookId = 3
   val otherUserBookUUID = UUID.fromString("00000000-0000-4000-A000-300000000000")
   val otherUserBook = DBBook(
     Option(otherUserBookId),

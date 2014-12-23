@@ -56,13 +56,13 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
       // Given
       val bookService = new BookService
 
-      val book = generateTestBook()
+      val book = Book.fromDBBook(BookFixture.rootBook)
 
       val updatedName = "updated book"
 
       // When
-      val insertedBook = await(bookService.save(UserFixture.testUser, book))
-      val updatedBook = await(bookService.save(UserFixture.testUser, insertedBook.copy(name = updatedName)))
+      val updatedBookOption = await(bookService.save(UserFixture.testUser, book.copy(name = updatedName)))
+      val updatedBook = updatedBookOption.getOrElse(fail("Updated book was not saved"))
       val updatedBookId = updatedBook.id.getOrElse(fail("Updated book has no id"))
       val retrievedBookOption = await(bookService.retrieveById(UserFixture.testUser, updatedBookId))
       val retrievedBook = retrievedBookOption.getOrElse(fail("Updated book cannot be found"))
@@ -78,14 +78,38 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
       val book = generateTestBook()
 
       // When
-      val insertedBook = await(bookService.save(UserFixture.testUser, book))
+      val insertedBookOption = await(bookService.save(UserFixture.testUser, book))
+      val insertedBook = insertedBookOption.getOrElse(fail("Inserted book was not saved"))
       await(bookService.addToFolder(UserFixture.testUser, insertedBook, FolderFixture.sub2Id))
       val books = await(bookService.retrieveAllFromFolder(UserFixture.testUser, FolderFixture.sub2Id))
 
       // Then
       books must have size 1
     }
+
+    "retrieve None if trying to retrieve another user's book" in {
+      // Given
+      val bookService = new BookService
+
+      // When
+      val book = await(bookService.retrieveById(UserFixture.testUser, BookFixture.otherUserBookId))
+
+      // Then
+      book must beNone
+    }
+
+    "not be able to save another user's book" in {
+      // Given
+      val bookService = new BookService
+
+      // When
+      val saveReturn = await(bookService.save(UserFixture.testUser, Book.fromDBBook(BookFixture.otherUserBook)))
+      val book = await(bookService.retrieveById(UserFixture.testUser, BookFixture.otherUserBookId))
+
+      // Then
+      saveReturn must beNone
+      book must beNone
+
+    }
   }
-
-
 }

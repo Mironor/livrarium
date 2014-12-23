@@ -165,8 +165,12 @@ class Cloud(implicit inj: Injector)
           totalPages
         )
 
+        val savedBookPromise = bookService.save(user, bookModel).map{
+          _.getOrElse(throw new Exception("Book could not be added"))
+        }
+
         val uploadedBookModel = for {
-          insertedBook <- bookService.save(user, bookModel)
+          insertedBook <- savedBookPromise
           addedBook <- bookService.addToFolder(user, insertedBook, uploadFolderId)
         } yield addedBook
 
