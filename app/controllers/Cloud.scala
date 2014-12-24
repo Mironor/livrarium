@@ -110,7 +110,7 @@ class Cloud(implicit inj: Injector)
     }
   }
 
-  private def uploadBook(user: User, uploadFolderId: Long)(implicit request: UserAwareRequest[MultipartFormData[Files.TemporaryFile]]) = {
+  private def uploadBook(user: User, uploadFolderId: Long)(implicit request: UserAwareRequest[MultipartFormData[Files.TemporaryFile]]): Future[Result] = {
     val uploadInputName = inject[String](identified by "books.uploadInputName")
     request.body.file(uploadInputName).map {
       book =>
@@ -165,7 +165,7 @@ class Cloud(implicit inj: Injector)
           totalPages
         )
 
-        val savedBookPromise = bookService.save(user, bookModel).map{
+        val savedBookPromise = bookService.save(user, bookModel).map {
           _.getOrElse(throw new Exception("Book could not be added"))
         }
 
@@ -174,13 +174,17 @@ class Cloud(implicit inj: Injector)
           addedBook <- bookService.addToFolder(user, insertedBook, uploadFolderId)
         } yield addedBook
 
-        uploadedBookModel.map { book: Book =>
-          val bookId = book.id.getOrElse(throw new Exception("Book's id is not defined"))
-          Ok(Json.obj(
-            "id" -> bookId,
-            "uuid" -> book.identifier,
-            "name" -> name
-          ))
+        uploadedBookModel.map {
+          case Some(addedBook) =>
+            val bookId = addedBook.id.getOrElse(throw new Exception("Book's id is not defined"))
+            Ok(Json.obj(
+              "id" -> bookId,
+              "uuid" -> addedBook.identifier,
+              "name" -> name
+            ))
+          case None => BadRequest(
+            Json.obj("code" -> inject[Int](identified by "errors.upload.noFileFound"))
+          )
         }
 
 
@@ -189,8 +193,5 @@ class Cloud(implicit inj: Injector)
         Json.obj("code" -> inject[Int](identified by "errors.upload.noFileFound"))
       ))
     }
-
-
   }
-
 }

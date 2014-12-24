@@ -75,16 +75,24 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
       // Given
       val bookService = new BookService
 
-      val book = generateTestBook()
-
       // When
-      val insertedBookOption = await(bookService.save(UserFixture.testUser, book))
-      val insertedBook = insertedBookOption.getOrElse(fail("Inserted book was not saved"))
-      await(bookService.addToFolder(UserFixture.testUser, insertedBook, FolderFixture.sub2Id))
-      val books = await(bookService.retrieveAllFromFolder(UserFixture.testUser, FolderFixture.sub2Id))
+      val books = await(bookService.retrieveAllFromFolder(UserFixture.testUser, FolderFixture.sub1Id))
+      val noBooks = await(bookService.retrieveAllFromFolder(UserFixture.testUser, FolderFixture.sub2Id))
 
       // Then
       books must have size 1
+      noBooks must beEmpty
+    }
+
+    "not retrieve books from other user's folder" in {
+      // Given
+      val bookService = new BookService
+
+      // When
+      val books = await(bookService.retrieveAllFromFolder(UserFixture.testUser, FolderFixture.otherUserRootId))
+
+      // Then
+      books must beEmpty
     }
 
     "retrieve None if trying to retrieve another user's book" in {
@@ -98,7 +106,58 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
       book must beNone
     }
 
-    "not be able to save another user's book" in {
+    "not save another user's book" in {
+      // Given
+      val bookService = new BookService
+
+      // When
+      val saveReturn = await(bookService.save(UserFixture.testUser, Book.fromDBBook(BookFixture.otherUserBook)))
+      val book = await(bookService.retrieveById(UserFixture.testUser, BookFixture.otherUserBookId))
+
+      // Then
+      saveReturn must beNone
+      book must beNone
+
+    }
+
+    "return None if user's id is not supplied" in {
+      // Given
+      val bookService = new BookService
+
+      val userWithoutId = UserFixture.testUser.copy(id = None)
+      val testBook = Book.fromDBBook(BookFixture.rootBook)
+      val testFolderId = FolderFixture.rootId
+
+      // When
+      val retrieveAll = await(bookService.retrieveAll(userWithoutId))
+      val retrieveById = await(bookService.retrieveById(userWithoutId, testFolderId))
+      val save = await(bookService.save(userWithoutId, testBook))
+      val addToFolder = await(bookService.addToFolder(userWithoutId, testBook, testFolderId))
+      val retrieveAllFromFolder = await(bookService.retrieveAllFromFolder(userWithoutId, testFolderId))
+
+      // Then
+      retrieveAll must beEmpty
+      retrieveById must beNone
+      save must beNone
+      addToFolder must beNone
+      retrieveAllFromFolder must beEmpty
+    }
+
+    "not add another user's book to current user's folder" in {
+      // Given
+      val bookService = new BookService
+
+      // When
+      val saveReturn = await(bookService.save(UserFixture.testUser, Book.fromDBBook(BookFixture.otherUserBook)))
+      val book = await(bookService.retrieveById(UserFixture.testUser, BookFixture.otherUserBookId))
+
+      // Then
+      saveReturn must beNone
+      book must beNone
+
+    }
+
+    "not add current user's book to another user's folder" in {
       // Given
       val bookService = new BookService
 

@@ -39,6 +39,18 @@ class FolderDAOSpec extends LivrariumSpecification with AroundExample with Throw
       rootFolderChildren(1).name must beEqualTo(FolderFixture.sub2Name)
     }
 
+    "find folder by id" in {
+      // Given
+      val folderDAO = new FolderDAO
+
+      // When
+      val folder = await(folderDAO.findById(FolderFixture.sub1Id))
+
+      //
+      folder must beSome
+      folder.get.name must beEqualTo(FolderFixture.sub1Name)
+    }
+
     "affect correct level to appended folder" in {
       // Given
       val folderDAO = new FolderDAO

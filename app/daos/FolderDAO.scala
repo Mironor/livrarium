@@ -33,16 +33,13 @@ class FolderDAO {
 
   /**
    * Gets folder by Id
-   * @param user user
    * @param folderId folder's id
    * @return
    */
-  def findById(user: User, folderId: Long): Future[Option[DBFolder]] = {
+  def findById(folderId: Long): Future[Option[DBFolder]] = {
     Future.successful {
       DB withSession { implicit session =>
-        val userId = user.id.getOrElse(throw new DAOException("User.id should be defined"))
-        slickFolders.filter(folder => folder.idUser === userId && folder.id === folderId)
-          .firstOption
+        slickFolders.filter(_.id === folderId).firstOption
       }
     }
   }

@@ -10,12 +10,12 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 
 
-
 /**
  * There should be no access to FolderDAO except through this class
  * Handles all transformations from DBFolder to Folder (including tree construction)
  */
 class FolderService(implicit inj: Injector) extends Injectable {
+
 
   val folderDAO = inject[FolderDAO]
 
@@ -39,6 +39,15 @@ class FolderService(implicit inj: Injector) extends Injectable {
       case dbFolder :: tail if dbFolder.left > currentLeft => Folder(dbFolder.id, dbFolder.name, generateChildren(dbFolder.left, dbFolder.right, tail)) :: generateChildren(dbFolder.right, currentRight, tail)
       case dbFolder :: tail => generateChildren(currentLeft, currentRight, tail)
       case Nil => Nil
+    }
+  }
+
+  def retrieveById(user: User, folderId: Long): Future[Option[Folder]] = {
+    user.id match {
+      case Some(userId) => folderDAO.findById(folderId).map {
+        _.filter(_.idUser == userId).map(Folder.fromDBFolder)
+      }
+      case None => Future(None)
     }
   }
 
@@ -69,7 +78,7 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @return
    */
   def retrieveChildren(user: User, parentFolderId: Long): Future[List[Folder]] = {
-    folderDAO.findChildrenById(user, parentFolderId).map{
+    folderDAO.findChildrenById(user, parentFolderId).map {
       _.map(dbFolder => Folder(dbFolder.id, dbFolder.name, List()))
     }
 
@@ -95,7 +104,7 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @return
    */
   def appendTo(user: User, parentFolderId: Long, folderName: String): Future[Folder] = {
-    val dbParentFolderPromise = folderDAO.findById(user, parentFolderId)
+    val dbParentFolderPromise = folderDAO.findById(parentFolderId)
     val appendedDBFolderPromise = appendToPromise(user, dbParentFolderPromise, folderName)
     appendedDBFolderPromise.map(dbFolder => Folder(dbFolder.id, dbFolder.name, Nil))
   }

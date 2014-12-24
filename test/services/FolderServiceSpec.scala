@@ -102,5 +102,28 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
       testFolder.children must have size 0
     }
 
+    "retrieve folder by id" in {
+      // Given
+      val folderService = new FolderService
+
+      // When
+      val folder = await(folderService.retrieveById(UserFixture.testUser, FolderFixture.sub1Id))
+
+      // Then
+      folder must beSome
+      folder.get.name must beEqualTo(FolderFixture.sub1Name)
+    }
+
+    "not retrieve another user's folder" in {
+      // Given
+      val folderService = new FolderService
+
+      // When
+      val folder = await(folderService.retrieveById(UserFixture.testUser, FolderFixture.otherUserRootId))
+
+      // Then
+      folder must beNone
+    }
+
   }
 }
