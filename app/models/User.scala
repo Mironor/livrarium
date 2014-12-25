@@ -1,7 +1,7 @@
 package models
 
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
-import daos.DBTableDefinitions.DBUser
+import daos.DBTableDefinitions.{DBBook, DBUser}
 
 /**
  * The user object.
@@ -17,6 +17,8 @@ case class User(id: Option[Long],
                 avatarURL: Option[String]) extends Identity {
 
   def toDBUser: DBUser =  DBUser(id, email, avatarURL)
+
+  def owns(dbBook: DBBook) = id.contains(dbBook.userId)
 }
 
 object User {

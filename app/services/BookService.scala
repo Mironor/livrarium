@@ -22,9 +22,10 @@ class BookService(implicit inj: Injector) extends Injectable {
    */
   def retrieveAll(user: User): Future[List[Book]] = {
     user.id match {
-      case Some(userId) => bookDAO.findAll(userId).map {
-        _.map(Book.fromDBBook)
-      }
+      case Some(userId) =>
+        bookDAO.findAll(userId).map {
+          _.map(Book.fromDBBook)
+        }
 
       case None => Future(Nil)
     }
@@ -37,11 +38,8 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @return
    */
   def retrieveById(user: User, bookId: Long): Future[Option[Book]] = {
-    user.id match {
-      case Some(userId) => bookDAO.findById(bookId).map {
-        _.filter(_.userId == userId).map(Book.fromDBBook)
-      }
-      case None => Future(None)
+    bookDAO.findById(bookId).map {
+      _.filter(user.owns).map(Book.fromDBBook)
     }
   }
 
@@ -53,33 +51,36 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @return updated book
    */
   def save(user: User, book: Book): Future[Option[Book]] = {
-    user.id match {
-      case Some(userId) =>
-        // defined id is an indicator that book already exists
-        book.id match {
-          case Some(bookId) => saveUpdate(userId, book, bookId)
-          case None => saveInsert(userId, book)
-        }
-
-      case None => Future(None)
+    // defined id is an indicator that book already exists
+    book.id match {
+      case Some(bookId) => saveUpdate(user, book, bookId)
+      case None => saveInsert(user, book)
     }
   }
 
-  private def saveUpdate(userId: Long, book: Book, bookId: Long): Future[Option[Book]] = {
-    val bookToSave = book.toDBBook(userId)
-
+  private def saveUpdate(user: User, book: Book, bookId: Long): Future[Option[Book]] = {
     bookDAO.findById(bookId).flatMap {
-      _.filter(_.userId == userId) match {
-        case Some(_) => bookDAO.update(bookToSave).map(dbBook => Option(Book.fromDBBook(dbBook)))
+      _.filter(user.owns) match {
+        case Some(dbBook) =>
+          bookDAO.update(book.toDBBook(dbBook.userId))
+            .map(Book.fromDBBook)
+            .map(Option.apply)
+
         case None => Future(None) // The book with supplied id belongs to another user
       }
     }
   }
 
-  private def saveInsert(userId: Long, book: Book): Future[Option[Book]] = {
-    val bookToSave = book.toDBBook(userId)
+  private def saveInsert(user: User, book: Book): Future[Option[Book]] = {
+    user.id match {
+      case Some(userId) =>
+        bookDAO.insert(book.toDBBook(userId))
+          .map(Book.fromDBBook)
+          .map(Option.apply)
 
-    bookDAO.insert(bookToSave).map(dbBook => Option(Book.fromDBBook(dbBook)))
+      case None => Future(None)
+    }
+
   }
 
   /**
@@ -125,7 +126,10 @@ class BookService(implicit inj: Injector) extends Injectable {
 
         book zip folder flatMap {
           case (Some(retrievedBook), Some(_)) =>
-            bookDAO.relateBookToFolder(retrievedBook.toDBBook(userId), folderId).map(dbBook => Option(Book.fromDBBook(dbBook)))
+            bookDAO.relateBookToFolder(retrievedBook.toDBBook(userId), folderId)
+              .map(Book.fromDBBook)
+              .map(Option.apply)
+
           case _ => Future(None) // Folder or Book does not belong to current user
         }
 
@@ -154,16 +158,12 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @return a list of Books from a folder (by folder's id)
    */
   def retrieveAllFromFolder(user: User, folderId: Long): Future[List[Book]] = {
-    user.id match {
-      case Some(userId) =>
-        folderService.retrieveById(user, folderId).flatMap {
-          case Some(_) => bookDAO.findAllInFolder(folderId).map {
-            _.map(Book.fromDBBook)
-          }
-          case None => Future(Nil) // The folder with supplied id belongs to another user
-        }
-
-      case None => Future(Nil)
+    folderService.retrieveById(user, folderId).flatMap {
+      case Some(_) => bookDAO.findAllInFolder(folderId).map {
+        _.map(Book.fromDBBook)
+      }
+      case None => Future(Nil) // The folder with supplied id belongs to another user
     }
   }
+
 }
