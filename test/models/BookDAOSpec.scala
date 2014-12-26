@@ -43,7 +43,7 @@ class BookDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
       books must have size 3
 
       val testBook = testBookOption.getOrElse(fail("Inserted book was not found"))
-      testBook.userId must beEqualTo(UserFixture.testUserId)
+      testBook.idUser must beEqualTo(UserFixture.testUserId)
       testBook.name must beEqualTo(book.name)
       testBook.format must beEqualTo(BookFormatHelper.PDF)
     }
@@ -89,7 +89,8 @@ class BookDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
 
       // When
       val insertedBook = await(bookDAO.insert(book))
-      await(bookDAO.relateBookToFolder(insertedBook, FolderFixture.sub2Id))
+      val insertedBookId = insertedBook.id.getOrElse(fail("Inserted book's id is not available"))
+      await(bookDAO.relateBookToFolder(insertedBookId, FolderFixture.sub2Id))
       val books = await(bookDAO.findAllInFolder(FolderFixture.sub2Id))
 
       // Then

@@ -62,7 +62,7 @@ class BookService(implicit inj: Injector) extends Injectable {
     bookDAO.findById(bookId).flatMap {
       _.filter(user.owns) match {
         case Some(dbBook) =>
-          bookDAO.update(book.toDBBook(dbBook.userId))
+          bookDAO.update(book.toDBBook(dbBook.idUser))
             .map(Book.fromDBBook)
             .map(Option.apply)
 
@@ -126,14 +126,18 @@ class BookService(implicit inj: Injector) extends Injectable {
 
         book zip folder flatMap {
           case (Some(retrievedBook), Some(_)) =>
-            bookDAO.relateBookToFolder(retrievedBook.toDBBook(userId), folderId)
-              .map(Book.fromDBBook)
-              .map(Option.apply)
+            retrievedBook.id match {
+              case Some(retrievedBookId) =>
+                bookDAO.relateBookToFolder(retrievedBookId, folderId)
+                  .map(_ => Option(retrievedBook))
 
-          case _ => Future(None) // Folder or Book does not belong to current user
+              case None => Future.successful(None)
+            }
+
+          case _ => Future.successful(None) // Folder or Book does not belong to current user
         }
 
-      case None => Future(None)
+      case None => Future.successful(None)
     }
 
   }

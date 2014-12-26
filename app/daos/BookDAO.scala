@@ -87,16 +87,15 @@ class BookDAO {
   /**
    * Creates a relation book <=> folder
    * No checking is done that the book and/or folder are associated with current user, use Service instead
-   * @param book book's id
+   * @param bookId book's id
    * @param folderId folder's id
    * @return
    */
-  def relateBookToFolder(book: DBBook, folderId: Long): Future[DBBook] = {
+  def relateBookToFolder(bookId: Long, folderId: Long): Future[Long] = {
     Future.successful {
       DB withSession { implicit session =>
-        val bookId = book.id.getOrElse(throw new DAOException("Book's id is not defined"))
         slickBooksToFolders += BookToFolder(bookId, folderId)
-        book
+        bookId
       }
     }
   }

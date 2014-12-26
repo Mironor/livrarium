@@ -26,29 +26,25 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
 
   "Folder service" should {
 
-    "return user's folder tree" in {
+
+    "return None/Nil if user's id is not supplied" in {
       // Given
       val folderService = new FolderService
+      val userWithoutId = UserFixture.testUser.copy(id = None)
 
       // When
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(UserFixture.testUser))
+      val retrieveById = await(folderService.retrieveById(userWithoutId, FolderFixture.rootId))
+      val createRootForUser = await(folderService.createRootForUser(userWithoutId))
+      val retrieveRoot = await(folderService.retrieveRoot(userWithoutId))
+      val appendToRoot = await(folderService.appendToRoot(userWithoutId, "test folder"))
+      val appendTo= await(folderService.appendTo(userWithoutId, FolderFixture.rootId, "test folder"))
 
       // Then
-      rootFolderChildren must have size 2
-
-      val sub1 = rootFolderChildren(0)
-      sub1.name must beEqualTo(FolderFixture.sub1Name)
-      sub1.children must have size 2
-
-      val subSub1 = sub1.children(0)
-      subSub1.name must beEqualTo(FolderFixture.sub1sub1Name)
-
-      val subSub2 = sub1.children(1)
-      subSub2.name must beEqualTo(FolderFixture.sub1sub2Name)
-
-      val sub2 = rootFolderChildren(1)
-      sub2.name must beEqualTo(FolderFixture.sub2Name)
-      sub2.children must have size 0
+      retrieveById must beNone
+      createRootForUser must beNone
+      retrieveRoot must beNone
+      appendToRoot must beNone
+      appendTo must beNone
     }
 
     "append a folder to root" in {

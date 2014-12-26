@@ -31,7 +31,7 @@ class FolderDAOSpec extends LivrariumSpecification with AroundExample with Throw
       val folderDAO = new FolderDAO
 
       // When
-      val rootFolderChildren = await(folderDAO.findChildren(UserFixture.testUser, FolderFixture.root))
+      val rootFolderChildren = await(folderDAO.findChildrenById(FolderFixture.rootId))
 
       // Then
       rootFolderChildren must have size 2
@@ -56,7 +56,7 @@ class FolderDAOSpec extends LivrariumSpecification with AroundExample with Throw
       val folderDAO = new FolderDAO
 
       // When
-      val userFolders = await(folderDAO.findAll(UserFixture.testUser))
+      val userFolders = await(folderDAO.findAll(UserFixture.testUserId))
 
       // Then
       userFolders must have size 5

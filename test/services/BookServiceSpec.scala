@@ -120,7 +120,7 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
 
     }
 
-    "return None if user's id is not supplied" in {
+    "return None/Nil if user's id is not supplied" in {
       // Given
       val bookService = new BookService
 

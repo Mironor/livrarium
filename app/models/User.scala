@@ -1,7 +1,7 @@
 package models
 
 import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
-import daos.DBTableDefinitions.{DBBook, DBUser}
+import daos.DBTableDefinitions.{DBFolder, DBBook, DBUser}
 
 /**
  * The user object.
@@ -18,7 +18,9 @@ case class User(id: Option[Long],
 
   def toDBUser: DBUser =  DBUser(id, email, avatarURL)
 
-  def owns(dbBook: DBBook) = id.contains(dbBook.userId)
+  def owns(dbBook: DBBook) = id.contains(dbBook.idUser)
+
+  def owns(dbFolder: DBFolder) = id.contains(dbFolder.idUser)
 }
 
 object User {

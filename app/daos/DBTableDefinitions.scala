@@ -104,7 +104,7 @@ object DBTableDefinitions {
   }
 
   case class DBBook(id: Option[Long],
-                    userId: Long,
+                    idUser: Long,
                     uuid: UUID,
                     name: String,
                     format: String,
