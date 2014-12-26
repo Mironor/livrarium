@@ -14,7 +14,7 @@ class BookDAO {
   /**
    * Finds all books for a specified userId
    * @param userId user's id
-   * @return
+   * @return a promiser with a list of user's folders
    */
   def findAll(userId: Long): Future[List[DBBook]] = {
     Future.successful {
@@ -27,7 +27,7 @@ class BookDAO {
   /**
    * Finds book by its id
    * @param bookId book's id
-   * @return
+   * @return a promise with a found book (None if no book was found)
    */
   def findById(bookId: Long): Future[Option[DBBook]] = {
     Future.successful {
@@ -39,9 +39,8 @@ class BookDAO {
 
   /**
    * Finds all books for a specified folderId
-   * No checking is done that the folder is associated with current user, use Service instead
    * @param folderId parent folder's id
-   * @return
+   * @return a promise of a list of books contained in the folder
    */
   def findAllInFolder(folderId: Long): Future[List[DBBook]] = {
     Future.successful {
@@ -55,10 +54,9 @@ class BookDAO {
   }
 
   /**
-   * Inserts new book 
-   * No checking is done that the book is associated with current user, use Service instead
+   * Inserts the supplied book
    * @param book book to update/insert
-   * @return
+   * @return a promise of the inserted book
    */
   def insert(book: DBBook): Future[DBBook] = {
     Future.successful {
@@ -73,7 +71,7 @@ class BookDAO {
    * Updates book
    * No checking is done that the book is associated with current user, use Service instead
    * @param book book to update/insert
-   * @return
+   * @return a promise of the updated book
    */
   def update(book: DBBook): Future[DBBook] = {
     Future.successful {
@@ -89,13 +87,15 @@ class BookDAO {
    * No checking is done that the book and/or folder are associated with current user, use Service instead
    * @param bookId book's id
    * @param folderId folder's id
-   * @return
+   * @return a promise of the link between the book and the folder
    */
-  def relateBookToFolder(bookId: Long, folderId: Long): Future[Long] = {
+  def relateBookToFolder(bookId: Long, folderId: Long): Future[BookToFolder] = {
     Future.successful {
       DB withSession { implicit session =>
-        slickBooksToFolders += BookToFolder(bookId, folderId)
-        bookId
+        val bookToFolderLink = BookToFolder(bookId, folderId)
+
+        slickBooksToFolders += bookToFolderLink
+        bookToFolderLink
       }
     }
   }
