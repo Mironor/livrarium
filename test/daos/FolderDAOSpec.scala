@@ -1,6 +1,5 @@
-package models
+package daos
 
-import daos.FolderDAO
 import fixtures.{FolderFixture, UserFixture}
 import globals.TestGlobal
 import helpers.LivrariumSpecification

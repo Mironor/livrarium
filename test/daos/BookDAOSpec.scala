@@ -1,10 +1,9 @@
-package models
+package daos
 
-import daos.{BookDAO, DBTableDefinitions}
+import daos.DBTableDefinitions.DBBook
 import fixtures.{BookFixture, FolderFixture, UserFixture}
 import globals.TestGlobal
 import helpers.{BookFormatHelper, LivrariumSpecification, RandomIdGenerator}
-import DBTableDefinitions.DBBook
 import org.specs2.execute.AsResult
 import org.specs2.matcher.ThrownMessages
 import org.specs2.specification.AroundExample
