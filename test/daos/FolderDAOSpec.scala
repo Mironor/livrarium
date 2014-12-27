@@ -43,11 +43,10 @@ class FolderDAOSpec extends LivrariumSpecification with AroundExample with Throw
       val folderDAO = new FolderDAO
 
       // When
-      val folder = await(folderDAO.findById(FolderFixture.sub1Id))
+      val folder = await(folderDAO.findById(FolderFixture.sub1Id)).getOrElse(fail("Folder was not found"))
 
-      //
-      folder must beSome
-      folder.get.name must beEqualTo(FolderFixture.sub1Name)
+      // Then
+      folder.name must beEqualTo(FolderFixture.sub1Name)
     }
 
     "affect correct level to appended folder" in {
@@ -55,13 +54,18 @@ class FolderDAOSpec extends LivrariumSpecification with AroundExample with Throw
       val folderDAO = new FolderDAO
 
       // When
-      val userFolders = await(folderDAO.findAll(UserFixture.testUserId))
+      val root = await(folderDAO.findById(FolderFixture.rootId)).getOrElse(fail("Folder was not found"))
+      val sub1 = await(folderDAO.findById(FolderFixture.sub1Id)).getOrElse(fail("Folder was not found"))
+      val sub1sub1 = await(folderDAO.findById(FolderFixture.sub1sub1Id)).getOrElse(fail("Folder was not found"))
+      val sub1sub2 = await(folderDAO.findById(FolderFixture.sub1sub2Id)).getOrElse(fail("Folder was not found"))
+      val sub2 = await(folderDAO.findById(FolderFixture.sub2Id)).getOrElse(fail("Folder was not found"))
 
       // Then
-      userFolders must have size 5
-
-      val userFoldersIds = userFolders.map(_.level)
-      userFoldersIds must contain(0, 1, 2, 2, 1).inOrder // This depends on FolderFixture folder tree
+      root.level must beEqualTo(0)
+      sub1.level must beEqualTo(1)
+      sub1sub1.level must beEqualTo(2)
+      sub1sub2.level must beEqualTo(2)
+      sub2.level must beEqualTo(1)
     }
   }
 

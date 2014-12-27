@@ -16,23 +16,23 @@ class FolderDAO {
   val slickFolders = TableQuery[Folders]
 
   /**
-   * Gets user's root folder
+   * Finds user's root folder
    * @param userId current user's id
-   * @return
+   * @return a promise of user's root folder (None if user does not have a root folder)
    */
   def findRoot(userId: Long): Future[Option[DBFolder]] = {
     Future.successful {
       DB withSession { implicit session =>
-        slickFolders.filter(folder => folder.idUser === userId && folder.left === 0)
+        slickFolders.filter(x => x.idUser === userId && x.left === 0)
           .firstOption
       }
     }
   }
 
   /**
-   * Gets folder by Id
+   * Finds folder by its id
    * @param folderId folder's id
-   * @return
+   * @return a promise of a folder with supplied id (None if no folder was found)
    */
   def findById(folderId: Long): Future[Option[DBFolder]] = {
     Future.successful {
@@ -43,23 +43,9 @@ class FolderDAO {
   }
 
   /**
-   * Gets all user's folders ordered by `left` field (see Nested Sets pattern)
-   * @param userId current user's id
-   * @return
-   */
-  def findAll(userId: Long): Future[List[DBFolder]] = {
-    Future.successful {
-      DB withSession { implicit session =>
-        slickFolders.filter(folder => folder.idUser === userId).sortBy(_.left.asc)
-          .list
-      }
-    }
-  }
-
-  /**
    * Find folder's immediate children
    * @param folderId parent's folder id
-   * @return
+   * @return a promise of a list of immediate children of a folder with supplied id
    */
   def findChildrenById(folderId: Long): Future[List[DBFolder]] = {
     Future.successful {
@@ -81,9 +67,9 @@ class FolderDAO {
   }
 
   /**
-   * Creates root folder for supplied User
+   * Creates root folder for a user with supplied id
    * @param userId Long
-   * @return
+   * @return a promise of a created folder
    */
   def insertRoot(userId: Long): Future[DBFolder] = {
     Future.successful {
@@ -96,10 +82,10 @@ class FolderDAO {
   }
 
   /**
-   * Appends sub folder to user's folder
+   * Appends sub folder to a folder with supplied id
    * @param parentFolderId parent folder's id
    * @param folderName new folder's name
-   * @return
+   * @return a promise of an appended folder (None if parent folder does not exist)
    */
   def appendToFolder(parentFolderId: Long, folderName: String): Future[Option[DBFolder]] = {
     Future.successful {
