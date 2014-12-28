@@ -19,8 +19,8 @@ class FolderService(implicit inj: Injector) extends Injectable {
 
   /**
    * Gets root folder for defined user
-   * @param user User
-   * @return
+   * @param user current user
+   * @return a promise of user's root folder (None if folder was not found)
    */
   def retrieveRoot(user: User): Future[Option[Folder]] = {
     user.id match {
@@ -34,10 +34,10 @@ class FolderService(implicit inj: Injector) extends Injectable {
   }
 
   /**
-   * Retrieves folder
+   * Retrieves folder by its id
    * @param user current user, folder's owner
    * @param folderId folder's id to retrieve
-   * @return
+   * @return a promise of a found folder (None if the folder was not found)
    */
   def retrieveById(user: User, folderId: Long): Future[Option[Folder]] = {
     folderDAO.findById(folderId).map {
@@ -46,9 +46,9 @@ class FolderService(implicit inj: Injector) extends Injectable {
   }
 
   /**
-   * Creates root folder for supplied user
-   * @param user User
-   * @return
+   * Creates root folder for a supplied user
+   * @param user current user
+   * @return a promise of a created root folder (None if the folder was not created)
    */
   def createRootForUser(user: User): Future[Option[Folder]] = {
     user.id match {
@@ -63,8 +63,8 @@ class FolderService(implicit inj: Injector) extends Injectable {
 
 
   /**
-   * Gets folder's children folders
-   * @param user User
+   * Retrieves folder's children
+   * @param user current user, folder's owner
    * @param parentFolderId parent folder's id
    * @return
    */
@@ -80,7 +80,7 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * Appends sub-folder to the root folder
    * @param user current user
    * @param folderName new folder's name
-   * @return
+   * @return a promise of appended folder (None if folder was not appended)
    */
   def appendToRoot(user: User, folderName: String): Future[Option[Folder]] = {
     retrieveRoot(user).flatMap {
@@ -91,10 +91,10 @@ class FolderService(implicit inj: Injector) extends Injectable {
 
   /**
    * Appends sub-folder to supplied folder
-   * @param user current user
+   * @param user current user, parent folder's owner
    * @param parentFolder parent folder
    * @param folderName new folder's name
-   * @return
+   * @return a promise of appended folder (None if folder was not appended)
    */
   def appendTo(user: User, parentFolder: Folder, folderName: String): Future[Option[Folder]] = {
     parentFolder.id match {
@@ -105,10 +105,10 @@ class FolderService(implicit inj: Injector) extends Injectable {
 
   /**
    * Appends sub-folder to a folder with supplied folder id
-   * @param user current user
+   * @param user current user, parent folder's owner
    * @param parentFolderId parent folder's id
    * @param folderName new folder's name
-   * @return
+   * @return a promise of appended folder (None if folder was not appended)
    */
   def appendTo(user: User, parentFolderId: Long, folderName: String): Future[Option[Folder]] = {
     retrieveById(user, parentFolderId).flatMap {
@@ -121,5 +121,3 @@ class FolderService(implicit inj: Injector) extends Injectable {
     }
   }
 }
-
-case class FolderNotFoundException(message: String) extends Exception(message)

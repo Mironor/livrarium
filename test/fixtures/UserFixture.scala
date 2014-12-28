@@ -18,7 +18,7 @@ object UserFixture {
 
   val testUserId = 1
   val testUserLoginInfo = LoginInfo("key", "value")
-  val testUser = User(Option(testUserId), testUserLoginInfo, None, None)
+  val testUser = User(Option(testUserId), testUserLoginInfo, Option("test@test.test"), Option("someUrl"))
 
   val otherUserId = 2
   val otherUserLoginInfo = LoginInfo("key_other", "value_other")

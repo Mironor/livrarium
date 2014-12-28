@@ -14,7 +14,7 @@ class BookDAO {
   /**
    * Finds all books for a specified userId
    * @param userId user's id
-   * @return a promiser with a list of user's folders
+   * @return a promise with a list of user's folders
    */
   def findAll(userId: Long): Future[List[DBBook]] = {
     Future.successful {

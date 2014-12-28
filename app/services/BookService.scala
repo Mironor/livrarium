@@ -33,7 +33,7 @@ class BookService(implicit inj: Injector) extends Injectable {
 
   /**
    * Retrieves book by id (with user checking)
-   * @param user current user
+   * @param user current user, book's owner
    * @param bookId the id of the book to retrieve
    * @return a promise of a book (None if no book was found)
    */
@@ -46,7 +46,7 @@ class BookService(implicit inj: Injector) extends Injectable {
   /**
    * Saves supplied book for the user
    * Checks if trying to update another user's book (returns Future(None) in this case)
-   * @param user current user
+   * @param user current user, book's owner
    * @param book book to save
    * @return a promise of the updated book (None if could not save the book)
    */
@@ -85,7 +85,7 @@ class BookService(implicit inj: Injector) extends Injectable {
 
   /**
    * Adds book to a supplied folder
-   * @param user current user
+   * @param user current user book's and folder's owner
    * @param book book to add
    * @param folder parent folder (should be owned by current user)
    * @return a promise of the added book (None if could not add the book to the folder)
@@ -99,7 +99,7 @@ class BookService(implicit inj: Injector) extends Injectable {
 
   /**
    * Adds book to a supplied folder's id
-   * @param user current user
+   * @param user current user book's and folder's owner
    * @param book book to add
    * @param folderId parent folder's id (should be owned by current user)
    * @return a promise of the added book (None if could not add the book to the folder)
@@ -113,7 +113,7 @@ class BookService(implicit inj: Injector) extends Injectable {
 
   /**
    * Adds book (by id) to the folder (also by id)
-   * @param user current user
+   * @param user current user book's and folder's owner
    * @param bookId id of the book that is to add to the folder
    * @param folderId  parent folder's id (should be owned by current user)
    * @return a promise of the added book (None if could not add the book to the folder)
@@ -144,7 +144,7 @@ class BookService(implicit inj: Injector) extends Injectable {
 
   /**
    * Retrieves all books from a folder
-   * @param user current user
+   * @param user current user, folder's owner
    * @param folder parent folder (should be owned by current user)
    * @return a promise of the books contained in the supplied folder
    */
@@ -157,7 +157,7 @@ class BookService(implicit inj: Injector) extends Injectable {
 
   /**
    * Retrieves all books from a folder (by folder's id)
-   * @param user current user
+   * @param user current user, folder's owner
    * @param folderId parent folder's id (should be owned by current user)
    * @return a promise of the books contained in the supplied folder
    */

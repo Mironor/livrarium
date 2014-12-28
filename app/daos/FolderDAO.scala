@@ -17,7 +17,7 @@ class FolderDAO {
 
   /**
    * Finds user's root folder
-   * @param userId current user's id
+   * @param userId user's id
    * @return a promise of user's root folder (None if user does not have a root folder)
    */
   def findRoot(userId: Long): Future[Option[DBFolder]] = {
@@ -52,11 +52,11 @@ class FolderDAO {
       DB withSession { implicit session =>
         slickFolders.filter(_.id === folderId).firstOption match {
           case Some(parentFolder) =>
-            slickFolders.filter(child =>
-              child.left > parentFolder.left
-                && child.left > parentFolder.left
-                && child.right < parentFolder.right
-                && child.level === (parentFolder.level + 1)
+            slickFolders.filter(x =>
+              x.left > parentFolder.left
+                && x.left > parentFolder.left
+                && x.right < parentFolder.right
+                && x.level === (parentFolder.level + 1)
             ).list
 
           case None => Nil
@@ -68,7 +68,7 @@ class FolderDAO {
 
   /**
    * Creates root folder for a user with supplied id
-   * @param userId Long
+   * @param userId user's id
    * @return a promise of a created folder
    */
   def insertRoot(userId: Long): Future[DBFolder] = {

@@ -36,12 +36,11 @@ class BookDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
       val insertedBookId = insertedBook.id.getOrElse(fail("Inserted book has no id"))
       val books = await(bookDAO.findAll(UserFixture.testUserId))
 
-      val testBookOption = await(bookDAO.findById(insertedBookId))
+      val testBook = await(bookDAO.findById(insertedBookId)).getOrElse(fail("Inserted book was not found"))
 
       // Then
       books must have size 3
 
-      val testBook = testBookOption.getOrElse(fail("Inserted book was not found"))
       testBook.idUser must beEqualTo(UserFixture.testUserId)
       testBook.name must beEqualTo(book.name)
       testBook.format must beEqualTo(BookFormatHelper.PDF)
@@ -73,10 +72,9 @@ class BookDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
       val insertedBookId = insertedBook.id.getOrElse(fail("Inserted book has no id"))
       await(bookDAO.update(insertedBook.copy(name = updatedName)))
 
-      val testBookOption = await(bookDAO.findById(insertedBookId))
+      val testBook = await(bookDAO.findById(insertedBookId)).getOrElse(fail("Inserted/updated book was not found"))
 
       // Then
-      val testBook = testBookOption.getOrElse(fail("Inserted/updated book was not found"))
       testBook.name must beEqualTo(updatedName)
     }
 
@@ -94,9 +92,6 @@ class BookDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
 
       // Then
       books must have size 1
-
     }
-
-
   }
 }

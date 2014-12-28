@@ -1,13 +1,12 @@
 package daos
 
 import com.mohiva.play.silhouette.api.LoginInfo
-import daos.DBTableDefinitions.{DBLoginInfo, Users, LoginInfos, DBUser}
+import daos.DBTableDefinitions.{DBUser, LoginInfos, Users}
 import play.api.Play.current
 import play.api.db.slick._
 
 import scala.concurrent.Future
 import scala.slick.driver.PostgresDriver.simple._
-import scala.slick.jdbc.JdbcBackend.Session
 
 
 class UserDAO {
@@ -16,19 +15,31 @@ class UserDAO {
   private val slickLoginInfos = TableQuery[LoginInfos]
 
   /**
+   * Finds a user by its id
+   * @param userId user's id
+   * @return The found user (None if user could not be found)
+   */
+  def findById(userId: Long): Future[Option[DBUser]] =
+    Future.successful {
+      DB withSession { implicit session =>
+        slickUsers.filter(_.id === userId).firstOption
+      }
+    }
+
+  /**
    * Finds a user by its login info.
-   *
    * @param loginInfo The login info of the user to find.
    * @return The found user or None if no user for the given login info could be found.
    */
-  def find(loginInfo: LoginInfo): Future[Option[DBUser]] = Future.successful {
-    DB withSession { implicit session =>
-      (for {
-        lInfo <- slickLoginInfos if lInfo.providerID === loginInfo.providerID && lInfo.providerKey === loginInfo.providerKey
-        user <- slickUsers if user.id === lInfo.idUser
-      } yield user).firstOption
+  def findByLoginInfo(loginInfo: LoginInfo): Future[Option[DBUser]] =
+    Future.successful {
+      DB withSession { implicit session =>
+        (for {
+          lInfo <- slickLoginInfos if lInfo.providerID === loginInfo.providerID && lInfo.providerKey === loginInfo.providerKey
+          user <- slickUsers if user.id === lInfo.idUser
+        } yield user).firstOption
+      }
     }
-  }
 
   /**
    * Saves a user.
@@ -36,44 +47,26 @@ class UserDAO {
    * @param user The user to save.
    * @return The saved user.
    */
-  def insertOrUpdate(user: DBUser): Future[DBUser] = Future.successful {
-    DB withSession { implicit session =>
-      val returnedUserId: Long = insertOrUpdate(user)
-      user.copy(id = Option(returnedUserId))
+  def insert(user: DBUser): Future[DBUser] =
+    Future.successful {
+      DB withSession { implicit session =>
+        val userId = (slickUsers returning slickUsers.map(_.id)) += user
+        user.copy(id = Option(userId))
+      }
     }
-  }
 
   /**
-   * Saves a user with login info.
+   * Saves a user.
+   *
    * @param user The user to save.
-   * @param loginInfo a user may have LoginInfo attached
    * @return The saved user.
    */
-  def insertOrUpdateWithLoginInfo(user: DBUser, loginInfo: LoginInfo): Future[DBUser] = Future.successful {
-    DB withSession { implicit session =>
-      val returnedUserId: Long = insertOrUpdate(user)
-
-      insertOrUpdateLoginInfo(loginInfo, returnedUserId)
-
-      user.copy(id = Option(returnedUserId))
+  def update(user: DBUser): Future[DBUser] =
+    Future.successful {
+      DB withSession { implicit session =>
+        slickUsers.filter(_.id === user.id).update(user)
+        user
+      }
     }
-  }
 
-  private def insertOrUpdate(dbUser: DBUser)(implicit session: Session): Long = {
-    slickUsers.filter(_.id === dbUser.id).firstOption match {
-      case Some(userFound) =>
-        slickUsers.filter(_.id === dbUser.id).update(dbUser)
-        dbUser.id.get
-      case None => (slickUsers returning slickUsers.map(_.id)) += dbUser
-    }
-  }
-
-  private def insertOrUpdateLoginInfo(loginInfo: LoginInfo, userId: Long)(implicit session: Session): Unit = {
-    // Insert if it does not exist yet
-    val dbLoginInfoOption = slickLoginInfos.filter(info => info.providerID === loginInfo.providerID && info.providerKey === loginInfo.providerKey)
-      .firstOption
-    if (dbLoginInfoOption.isEmpty) {
-      slickLoginInfos += DBLoginInfo(None, userId, loginInfo.providerID, loginInfo.providerKey)
-    }
-  }
 }

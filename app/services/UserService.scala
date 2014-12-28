@@ -29,7 +29,7 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
    * @return The retrieved user or None if no user could be retrieved for the given login info.
    */
   def retrieve(loginInfo: LoginInfo): Future[Option[User]] = {
-    val dbUserPromise = userDAO.find(loginInfo)
+    val dbUserPromise = userDAO.findByLoginInfo(loginInfo)
     dbUserPromise.map(dbUserOption => dbUserOption.map {
       dbUser => User.fromDBUser(dbUser, loginInfo)
     })
@@ -42,8 +42,7 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
    */
   def saveWithLoginInfo(user: User): Future[User] = {
     val dbUser = user.toDBUser
-    userDAO.insertOrUpdateWithLoginInfo(dbUser, user.loginInfo)
-      .map(returnedDBUser => user.copy(id = returnedDBUser.id))
+    userDAO.update(dbUser).map(returnedDBUser => user.copy(id = returnedDBUser.id))
   }
 
   /**
@@ -57,17 +56,17 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
 
     userPromise.flatMap {
       case Some(user) => // Update user with profile
-        userDAO.insertOrUpdate(DBUser(
+        userDAO.update(DBUser(
           user.id,
           profile.email,
           profile.avatarURL
         )).map(dbUser => User.fromDBUser(dbUser, profile.loginInfo))
       case None => // Insert a new user
-        userDAO.insertOrUpdateWithLoginInfo(DBUser(
+        userDAO.insert(DBUser(
           None,
           profile.email,
           profile.avatarURL
-        ), profile.loginInfo).map(dbUser => User.fromDBUser(dbUser, profile.loginInfo))
+        )).map(dbUser => User.fromDBUser(dbUser, profile.loginInfo))
     }
 
   }

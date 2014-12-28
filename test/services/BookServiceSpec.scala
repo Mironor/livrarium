@@ -61,11 +61,9 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
       val updatedName = "updated book"
 
       // When
-      val updatedBookOption = await(bookService.save(UserFixture.testUser, book.copy(name = updatedName)))
-      val updatedBook = updatedBookOption.getOrElse(fail("Updated book was not saved"))
+      val updatedBook = await(bookService.save(UserFixture.testUser, book.copy(name = updatedName))).getOrElse(fail("Updated book was not saved"))
       val updatedBookId = updatedBook.id.getOrElse(fail("Updated book has no id"))
-      val retrievedBookOption = await(bookService.retrieveById(UserFixture.testUser, updatedBookId))
-      val retrievedBook = retrievedBookOption.getOrElse(fail("Updated book cannot be found"))
+      val retrievedBook = await(bookService.retrieveById(UserFixture.testUser, updatedBookId)).getOrElse(fail("Updated book cannot be found"))
 
       // Then
       retrievedBook.name must equalTo(updatedName)
