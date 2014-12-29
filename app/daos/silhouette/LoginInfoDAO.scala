@@ -14,13 +14,14 @@ class LoginInfoDAO {
   private val slickLoginInfos = TableQuery[LoginInfos]
 
   /**
-   * Method created only for testing purposes
-   * @return a promise of all of the login infos
+   * Find supplied login info in the database
+   * @return a promise of found login info (None if not found)
    */
-  def findAll(): Future[List[DBLoginInfo]] =
+  def find(loginInfo: LoginInfo): Future[Option[DBLoginInfo]] =
     Future.successful {
       DB withSession { implicit session =>
-        slickLoginInfos.list
+        slickLoginInfos.filter(x => x.providerID === loginInfo.providerID && x.providerKey === loginInfo.providerKey)
+          .firstOption
       }
     }
 
@@ -30,7 +31,7 @@ class LoginInfoDAO {
    * @param userId the user to whom the login info will be attached
    * @return The saved user.
    */
-  def insertLoginInfo(loginInfo: LoginInfo, userId: Long): Future[DBLoginInfo] =
+  def insert(loginInfo: LoginInfo, userId: Long): Future[DBLoginInfo] =
     Future.successful {
       DB withSession { implicit session =>
         val loginInfoId = slickLoginInfos returning slickLoginInfos.map(_.id) += DBLoginInfo(None, userId, loginInfo.providerID, loginInfo.providerKey)

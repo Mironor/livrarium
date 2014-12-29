@@ -25,20 +25,42 @@ class LoginInfoDAOSpec extends LivrariumSpecification with AroundExample with Th
   }
 
   "LoginInfo DAO" should {
+    "find login info if it exists" in {
+      // Given
+      val loginInfoDAO = new LoginInfoDAO
+
+      // When
+      val foundLoginInfo = await(loginInfoDAO.find(UserFixture.testUserLoginInfo))
+
+      // Then
+      foundLoginInfo must beSome
+    }
+
+    "find None if login info does not exist" in {
+      // Given
+      val loginInfoDAO = new LoginInfoDAO
+
+      val loginInfo = LoginInfo("some id", "some key")
+
+      // When
+      val foundLoginInfo = await(loginInfoDAO.find(loginInfo))
+
+      // Then
+      foundLoginInfo must beNone
+    }
+
     "insert new LoginInfo" in {
       // Given
       val loginInfoDAO = new LoginInfoDAO
 
       val newLoginInfo = LoginInfo("some id", "some key")
 
-      val targetLoginInfosCountAfterInsert = await(loginInfoDAO.findAll()).length + 1
-
       // When
-      await(loginInfoDAO.insertLoginInfo(newLoginInfo, UserFixture.testUserId))
-      val loginInfosCountAfterInsert = await(loginInfoDAO.findAll()).length
+      await(loginInfoDAO.insert(newLoginInfo, UserFixture.testUserId))
+      val loginInfo = await(loginInfoDAO.find(newLoginInfo))
 
       // Then
-      loginInfosCountAfterInsert must beEqualTo(targetLoginInfosCountAfterInsert)
+      loginInfo must beSome
     }
   }
 }

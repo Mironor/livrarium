@@ -1,32 +1,23 @@
 package services
 
 import com.mohiva.play.silhouette.api.LoginInfo
-import com.mohiva.play.silhouette.api.services.{AuthInfo, IdentityService}
-import com.mohiva.play.silhouette.impl.providers.CommonSocialProfile
-import daos.DBTableDefinitions.DBUser
+import com.mohiva.play.silhouette.api.services.IdentityService
 import daos.UserDAO
+import daos.silhouette.LoginInfoDAO
 import models.User
 import play.api.libs.concurrent.Execution.Implicits._
 import scaldi.{Injectable, Injector}
 
 import scala.concurrent.Future
 
-
-
-/**
- * UserDAO should only handle database interactions to improve database abstraction
- * All interactions with UserDAO should go through this class
- * Thus UserDAO should not know about the existence of the User case class
- * It will handle all the casting between User <> DBUser
- */
 class UserService(implicit inj: Injector) extends IdentityService[User] with Injectable {
   val userDAO = inject[UserDAO]
+  val loginInfoDAO = inject[LoginInfoDAO]
 
   /**
    * Retrieves a user that matches the specified login info.
-   *
-   * @param loginInfo The login info to retrieve a user.
-   * @return The retrieved user or None if no user could be retrieved for the given login info.
+   * @param loginInfo login info to retrieve a user
+   * @return the retrieved user (None if the user could not be found)
    */
   def retrieve(loginInfo: LoginInfo): Future[Option[User]] = {
     val dbUserPromise = userDAO.findByLoginInfo(loginInfo)
@@ -36,38 +27,29 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
   }
 
   /**
-   * Saves a user with login info.
+   * Saves a user (with its login info).
    * @param user The user to save.
-   * @return The saved user.
+   * @return The saved user (None if user was new and he/she was not inserted).
    */
-  def saveWithLoginInfo(user: User): Future[User] = {
-    val dbUser = user.toDBUser
-    userDAO.update(dbUser).map(returnedDBUser => user.copy(id = returnedDBUser.id))
+  def save(user: User): Future[Option[User]] = {
+    saveUser(user).flatMap { savedUser =>
+      savedUser.id match {
+        case Some(userId) => saveLoginInfo(user.loginInfo, userId).map(_ => Option(savedUser))
+        case None => Future.successful(None) // user was not inserted, thus not inserting the login info
+      }
+    }
   }
 
-  /**
-   * Saves the social profile for a user.
-   * If a user exists for this profile then update the user, otherwise create a new user with the given profile.
-   * @param profile The social profile to save.
-   * @return The user for whom the profile was saved.
-   */
-  def save[A <: AuthInfo](profile: CommonSocialProfile): Future[User] = {
-    val userPromise = retrieve(profile.loginInfo)
-
-    userPromise.flatMap {
-      case Some(user) => // Update user with profile
-        userDAO.update(DBUser(
-          user.id,
-          profile.email,
-          profile.avatarURL
-        )).map(dbUser => User.fromDBUser(dbUser, profile.loginInfo))
-      case None => // Insert a new user
-        userDAO.insert(DBUser(
-          None,
-          profile.email,
-          profile.avatarURL
-        )).map(dbUser => User.fromDBUser(dbUser, profile.loginInfo))
+  private def saveUser(user: User): Future[User] = {
+    user.id match {
+      case Some(_) => userDAO.update(user.toDBUser).map(x => user.copy(id = x.id))
+      case None => userDAO.insert(user.toDBUser).map(x => user.copy(id = x.id))
     }
+  }
 
+  private def saveLoginInfo(loginInfo: LoginInfo, userId: Long): Future[_] = {
+    loginInfoDAO.find(loginInfo).map {
+      x => if (x.isEmpty) loginInfoDAO.insert(loginInfo, userId)
+    }
   }
 }

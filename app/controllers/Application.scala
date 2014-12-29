@@ -160,20 +160,21 @@ class Application(implicit inj: Injector)
 
     val userPromise = for {
       avatar <- avatarService.retrieveURL(email)
-      user <- userService.saveWithLoginInfo(user.copy(avatarURL = avatar))
+      user <- userService.save(user.copy(avatarURL = avatar))
     } yield user
 
     userPromise.flatMap { user =>
+      val savedUser = user.getOrElse(throw new Exception("user was not saved"))
       for {
-        folders <- folderService.createRootForUser(user)
+        folders <- folderService.createRootForUser(savedUser)
         authInfo <- authInfoService.save(loginInfo, password)
-        authenticator <- env.authenticatorService.create(user.loginInfo)
+        authenticator <- env.authenticatorService.create(savedUser.loginInfo)
         result <- env.authenticatorService.init(authenticator, Future.successful {
-          Ok(Json.obj("identity" -> user.email))
+          Ok(Json.obj("identity" -> savedUser.email))
         })
       } yield {
-        env.eventBus.publish(SignUpEvent(user, request, request2lang))
-        env.eventBus.publish(LoginEvent(user, request, request2lang))
+        env.eventBus.publish(SignUpEvent(savedUser, request, request2lang))
+        env.eventBus.publish(LoginEvent(savedUser, request, request2lang))
         result
       }
     }

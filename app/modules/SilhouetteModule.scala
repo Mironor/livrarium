@@ -9,7 +9,7 @@ import com.mohiva.play.silhouette.impl.providers._
 import com.mohiva.play.silhouette.impl.services.{DelegableAuthInfoService, GravatarService}
 import com.mohiva.play.silhouette.impl.util.{BCryptPasswordHasher, DefaultFingerprintGenerator, PlayCacheLayer, SecureRandomIDGenerator}
 import daos.UserDAO
-import daos.silhouette.{OAuth1InfoDAO, OAuth2InfoDAO, PasswordInfoDAO}
+import daos.silhouette.{LoginInfoDAO, OAuth1InfoDAO, OAuth2InfoDAO, PasswordInfoDAO}
 import models._
 import scaldi.Module
 import services.UserService
@@ -19,6 +19,7 @@ import services.UserService
  */
 class SilhouetteModule extends Module {
 
+  bind[LoginInfoDAO] to new LoginInfoDAO
   bind[PasswordInfoDAO] to new PasswordInfoDAO
   bind[OAuth1InfoDAO] to new OAuth1InfoDAO
   bind[OAuth2InfoDAO] to new OAuth2InfoDAO
