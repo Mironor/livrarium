@@ -1,11 +1,10 @@
 package controllers
 
 import _root_.services.{FolderService, UserService}
-import com.mohiva.play.silhouette.api.Silhouette
-import com.mohiva.play.silhouette.api._
+import com.mohiva.play.silhouette.api.{Silhouette, _}
 import com.mohiva.play.silhouette.api.exceptions.{AccessDeniedException, AuthenticationException}
 import com.mohiva.play.silhouette.api.services.{AuthInfoService, AvatarService}
-import com.mohiva.play.silhouette.api.util.{PasswordInfo, PasswordHasher, Credentials}
+import com.mohiva.play.silhouette.api.util.{Credentials, PasswordHasher, PasswordInfo}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import models.User
@@ -19,7 +18,7 @@ import scaldi.{Injectable, Injector}
 import scala.concurrent.Future
 
 /**
- * The basic application controller.
+ * Controller handles mostly sign up / sign in routines
  */
 class Application(implicit inj: Injector)
   extends Silhouette[User, SessionAuthenticator] with Injectable {
@@ -40,7 +39,7 @@ class Application(implicit inj: Injector)
   /**
    * Handles the index action.
    *
-   * @return The result to display.
+   * @return index page or cloud index page if user is authenticated
    */
   def index = UserAwareAction.async { implicit request =>
     request.identity match {
@@ -53,7 +52,7 @@ class Application(implicit inj: Injector)
    * Handles the signUp action.
    * Same as index, the client-side router will handle the sing up form rendering
    *
-   * @return The result to display.
+   * @return index page or cloud index page if user is authenticated
    */
   def signUp = index
 
@@ -64,53 +63,45 @@ class Application(implicit inj: Injector)
    */
   def signOut = SecuredAction.async { implicit request =>
     val result = Future.successful(Redirect(routes.Application.index()))
-    env.eventBus.publish(LogoutEvent(request.identity, request, request2lang))
-
     request.authenticator.discard(result)
   }
 
   /**
    * Authenticates a user against the credentials provider.
-   *
-   * @return The result to display.
+   * @return redirects to Cloud.index if authentication was successful, otherwise returns error in json format
    */
   def credentialsAuthenticationHandler = Action.async(BodyParsers.parse.json) { implicit request =>
+    request.body.validate[Credentials] match {
+      case JsSuccess(credentials, _) => authenticateUser(credentials)
 
-    val userCredentials = request.body.validate[Credentials]
-
-    userCredentials match {
-      case credentials: JsSuccess[Credentials] => authenticateUser(credentials.get)
-      case errors: JsError => Future.successful(BadRequest(Json.obj(
+      case JsError(errors) => Future.successful(BadRequest(Json.obj(
         "code" -> inject[Int](identified by "errors.auth.loginPasswordNotValid"),
         "fields" -> JsError.toFlatJson(errors)
       )))
     }
   }
 
-  def authenticateUser(userCredentials: Credentials)(implicit request: Request[_]) = {
+  def authenticateUser(userCredentials: Credentials)(implicit request: Request[_]): Future[Result] = {
     credentialsAuthentication(userCredentials).flatMap { loginInfo =>
       userService.retrieve(loginInfo).flatMap {
         case Some(user) => env.authenticatorService.create(user.loginInfo).flatMap { authenticator =>
           val result = Future.successful(Ok(Json.obj("identity" -> user.email)))
-          env.eventBus.publish(LoginEvent(user, request, request2lang))
           env.authenticatorService.init(authenticator, result)
         }
         case None => Future.successful {
           BadRequest(Json.obj(
-            "code" -> inject[Int](identified by "errors.auth.noAuthenticator")
+            "code" -> inject[Int](identified by "errors.auth.userNotFound")
           ))
         }
       }
-
-
+    } recover {
+      case e: AccessDeniedException => BadRequest(Json.obj(
+        "code" -> inject[Int](identified by "errors.auth.accessDenied")
+      ))
+      case e: AuthenticationException => BadRequest(Json.obj(
+        "code" -> inject[Int](identified by "errors.auth.notAuthenticated")
+      ))
     }
-  } recover {
-    case e: AccessDeniedException => BadRequest(Json.obj(
-      "code" -> inject[Int](identified by "errors.auth.accessDenied")
-    ))
-    case e: AuthenticationException => BadRequest(Json.obj(
-      "code" -> inject[Int](identified by "errors.auth.notAuthenticated")
-    ))
   }
 
   private def credentialsAuthentication(userCredentials: Credentials) = env.providers.get(CredentialsProvider.ID) match {
@@ -133,14 +124,14 @@ class Application(implicit inj: Injector)
         val email = credentials.get.identifier
         val password = credentials.get.password
         val loginInfo = LoginInfo(CredentialsProvider.ID, email)
-        val authInfo = passwordHasher.hash(password)
+        val hashedPassword = passwordHasher.hash(password)
 
         userService.retrieve(loginInfo).flatMap {
           case Some(_) => Future.successful(BadRequest(Json.obj(
             "code" -> inject[Int](identified by "errors.auth.userAlreadyExists")
           )))
 
-          case None => createNewUser(loginInfo, email, authInfo)
+          case None => createNewUser(loginInfo, email, hashedPassword)
         }
 
       case errors: JsError => Future.successful(BadRequest(Json.obj(
@@ -151,32 +142,27 @@ class Application(implicit inj: Injector)
   }
 
   def createNewUser(loginInfo: LoginInfo, email: String, password: PasswordInfo)(implicit request: Request[_]) = {
-    val user = User(
-      id = None,
-      loginInfo = loginInfo,
-      email = Some(email),
-      avatarURL = None
-    )
 
-    val userPromise = for {
-      avatar <- avatarService.retrieveURL(email)
-      user <- userService.save(user.copy(avatarURL = avatar))
-    } yield user
+    val result = for {
+      avatarURL <- avatarService.retrieveURL(email)
+      userOption <- userService.save(User(None, loginInfo, Some(email), avatarURL))
 
-    userPromise.flatMap { user =>
-      val savedUser = user.getOrElse(throw new Exception("user was not saved"))
-      for {
-        folders <- folderService.createRootForUser(savedUser)
-        authInfo <- authInfoService.save(loginInfo, password)
-        authenticator <- env.authenticatorService.create(savedUser.loginInfo)
-        result <- env.authenticatorService.init(authenticator, Future.successful {
-          Ok(Json.obj("identity" -> savedUser.email))
-        })
-      } yield {
-        env.eventBus.publish(SignUpEvent(savedUser, request, request2lang))
-        env.eventBus.publish(LoginEvent(savedUser, request, request2lang))
-        result
-      }
+      // User creation may go bad
+      user = userOption.getOrElse(throw new Exception("User was not created"))
+
+      _ <- folderService.createRootForUser(user)
+      _ <- authInfoService.save(loginInfo, password)
+      authenticator <- env.authenticatorService.create(user.loginInfo)
+      result <- env.authenticatorService.init(authenticator, Future.successful {
+        Ok(Json.obj("identity" -> email))
+      })
+    } yield result
+
+    result.recover {
+      case e: Exception => BadRequest(Json.obj(
+        "code" -> inject[Int](identified by "errors.application.couldNotCreateNewUser"),
+        "message" -> "Could not create new user"
+      ))
     }
   }
 }

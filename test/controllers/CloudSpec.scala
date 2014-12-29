@@ -58,7 +58,7 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
 
     "return root's content" in {
       // Given
-      val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.testUser.loginInfo)
+      val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.testUserLoginInfo)
 
       val cloudController = new Cloud
 
@@ -73,7 +73,7 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
 
     "return some folder's (other than root) content" in {
       // Given
-      val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.testUser.loginInfo)
+      val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.testUserLoginInfo)
 
       val cloudController = new Cloud
 
@@ -98,7 +98,7 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
       )
 
       val request = FakeRequest(Helpers.POST, "", FakeHeaders(), requestJson)
-        .withAuthenticator[SessionAuthenticator](UserFixture.testUser.loginInfo)
+        .withAuthenticator[SessionAuthenticator](UserFixture.testUserLoginInfo)
 
       val cloudController = new Cloud
 
@@ -143,7 +143,7 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
       val part = FilePart[TemporaryFile](key = uploadInputName, filename = file.getName, contentType = Some("application/pdf"), ref = tempFile)
       val formData = MultipartFormData(dataParts = Map(), files = Seq(part), badParts = Seq(), missingFileParts = Seq())
 
-      FakeRequest(Helpers.POST, "", FakeHeaders(), formData).withAuthenticator[SessionAuthenticator](UserFixture.testUser.loginInfo)
+      FakeRequest(Helpers.POST, "", FakeHeaders(), formData).withAuthenticator[SessionAuthenticator](UserFixture.testUserLoginInfo)
     }
 
     def generateTemporaryPdfFile() = {
