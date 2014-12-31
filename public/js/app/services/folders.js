@@ -1,9 +1,14 @@
 angular.module('lvr')
     .factory('folders', function ($http, constants, i18nEn, Folder) {
 
+        var rootFolder = new Folder({
+            name: 'root',
+            children: []
+        });
+
         return {
-            initRootFolder: function () {
-                $http.get(constants.applicationUrls.folders)
+            initFolderTree: function () {
+                $http.get(constants.applicationUrls.folderTree)
                     .success(function (data) {
                         _(data).forEach(function (folderData) {
                             rootFolder.children.push(new Folder(folderData));
@@ -13,15 +18,11 @@ angular.module('lvr')
             getRootFolder: function () {
                 return rootFolder;
             },
+
             saveRootFolder: function () {
                 $http.post(constants.applicationUrls.folders, this.getRootFolder().children);
-            },
-            getCurrentFolder: function () {
-                return currentFolder;
-            },
-            getCurrentPath: function () {
+            }/*,
 
-            },
             getNewFolderNameInCurrentFolder: function () {
                 var currentFolderChildren = this.getCurrentFolder().children,
                     expectedNumber = 1;
@@ -35,5 +36,6 @@ angular.module('lvr')
                 var postfix = ((expectedNumber > 1) ? i18nEn['content.numberSign'] + expectedNumber : '');
                 return i18nEn['content.folders.newFolderName'] + postfix;
             }
+            */
         }
     });

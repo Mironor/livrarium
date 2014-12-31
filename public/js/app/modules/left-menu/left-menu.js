@@ -6,7 +6,7 @@ angular.module('lvr.leftMenu', [
         restrict: 'E',
         templateUrl: constants.pathToApp + 'modules/left-menu/left-menu.html',
         controller: function (folders) {
-            folders.initRootFolder();
+            folders.initFolderTree();
         }
     };
 });

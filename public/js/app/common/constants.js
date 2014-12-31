@@ -9,7 +9,7 @@ angular.module('lvr')
             signIn: '/',
             signUp: '/sign-up',
             cloud: '/cloud',
-            folders: '/folders'
+            folderTree: '/folders/tree'
         },
 
         errorCodes: {

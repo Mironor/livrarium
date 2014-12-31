@@ -9,25 +9,28 @@ angular.module('lvr.signUp', [])
                 };
 
                 $scope.model = {
-                    "email": "",
-                    "password": ""
+                    email: "",
+                    password: "",
+                    rePassword: ""
                 };
 
                 $scope.submit = function () {
 
                     $scope.emailNotValid = $scope.credentials_sign_up_form.email.$invalid;
                     $scope.passwordNotValid = $scope.credentials_sign_up_form.password.$invalid;
+                    $scope.passwordsAreEqual = $scope.model.password === $scope.model.rePassword;
 
-                    if ($scope.credentials_sign_up_form.$valid) {
-                        $http.post('/sign-up', $scope.model)
-                            .success(function (data) {
-                                identity.email = data.identity;
-                                $location.path(constants.applicationUrls.cloud);
-                            })
-                            .error(function (data) {
-                                $scope.userAlreadyExists = data.code === constants.errorCodes.userAlreadyExists;
-                                $scope.existingEmail = $scope.model.email;
-                            });
+                    if ($scope.credentials_sign_up_form.$valid && !$scope.passwordsAreEqual) {
+                        $http.post('/sign-up', {
+                            "email": $scope.model.email,
+                            "password": $scope.model.password
+                        }).success(function (data) {
+                            identity.email = data.identity;
+                            $location.path(constants.applicationUrls.cloud);
+                        }).error(function (data) {
+                            $scope.userAlreadyExists = data.code === constants.errorCodes.userAlreadyExists;
+                            $scope.existingEmail = $scope.model.email;
+                        });
                     }
                 };
             }

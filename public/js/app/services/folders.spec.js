@@ -1,22 +1,22 @@
 describe('Folders', function () {
     var httpBackend, constants, i18n,
-        foldersService, Folder, Book,
-        folderTree = [
+        foldersService, Folder,
+        folderTreeFixture = [
             {
-                label: 'javascript',
+                name: 'javascript',
                 children: [
                     {
-                        label: 'BDD with Jasmine',
+                        name: 'BDD with Jasmine',
                         children: []
                     },
                     {
-                        label: 'Algorithms in js',
+                        name: 'Algorithms in js',
                         children: []
                     }
                 ]
             },
             {
-                label: 'database',
+                name: 'database',
                 children: [
                     {
                         label: 'Beginning with MongoDB',
@@ -34,12 +34,12 @@ describe('Folders', function () {
 
         httpBackend = $httpBackend;
         httpBackend.when('GET', constants.applicationUrls.folders)
-            .respond(folderTree);
+            .respond(folderTreeFixture);
 
         Folder = _Folder_;
 
         foldersService = folders;
-        foldersService.initRootFolder();
+        foldersService.initFolderTree();
 
         httpBackend.flush();
     }));
@@ -84,19 +84,7 @@ describe('Folders', function () {
         });
     });
 
-    it("should be able to save folder tree by sending it to the server", function () {
-        // Given
-        httpBackend.expectPOST(constants.applicationUrls.folders, folderTree).respond(200, {});
-
-        // When
-        foldersService.saveRootFolder();
-        httpBackend.flush();
-
-        // Then
-
-    });
-
-
+    /*
     it("should pick the the name for a new folder (if a folder with a default name already exists in current folder)", function () {
         // Given
         var currentFolder = foldersService.getCurrentFolder(),
@@ -123,4 +111,5 @@ describe('Folders', function () {
         expect(foldersService.getCurrentPath()).toBe()
 
     })
+    */
 });
