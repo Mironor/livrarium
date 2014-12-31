@@ -33,18 +33,45 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
       val userWithoutId = UserFixture.testUser.copy(id = None)
 
       // When
+      val retrieveUserFolderTree = await(folderService.retrieveUserFolderTree(userWithoutId))
       val retrieveById = await(folderService.retrieveById(userWithoutId, FolderFixture.rootId))
       val createRootForUser = await(folderService.createRootForUser(userWithoutId))
       val retrieveRoot = await(folderService.retrieveRoot(userWithoutId))
       val appendToRoot = await(folderService.appendToRoot(userWithoutId, "test folder"))
-      val appendTo= await(folderService.appendTo(userWithoutId, FolderFixture.rootId, "test folder"))
+      val appendTo = await(folderService.appendTo(userWithoutId, FolderFixture.rootId, "test folder"))
 
       // Then
+      retrieveUserFolderTree must beEmpty
       retrieveById must beNone
       createRootForUser must beNone
       retrieveRoot must beNone
       appendToRoot must beNone
       appendTo must beNone
+    }
+
+    "return user's folder tree" in {
+      // Given
+      val folderService = new FolderService
+
+      // When
+      val rootFolderChildren = await(folderService.retrieveUserFolderTree(UserFixture.testUser))
+
+      // Then
+      rootFolderChildren must have size 2
+
+      val sub1 = rootFolderChildren(0)
+      sub1.name must beEqualTo(FolderFixture.sub1Name)
+      sub1.children must have size 2
+
+      val subSub1 = sub1.children(0)
+      subSub1.name must beEqualTo(FolderFixture.sub1sub1Name)
+
+      val subSub2 = sub1.children(1)
+      subSub2.name must beEqualTo(FolderFixture.sub1sub2Name)
+
+      val sub2 = rootFolderChildren(1)
+      sub2.name must beEqualTo(FolderFixture.sub2Name)
+      sub2.children must have size 0
     }
 
     "append a folder to root" in {
@@ -61,7 +88,6 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
 
       val testFolder = rootFolderChildren(2)
       testFolder.name must beEqualTo(testFolderName)
-      testFolder.children must have size 0
     }
 
     "retrieve folder's children" in {
@@ -95,7 +121,6 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
 
       val testFolder = sub1Children(2)
       testFolder.name must beEqualTo(testFolderName)
-      testFolder.children must have size 0
     }
 
     "retrieve folder by id" in {

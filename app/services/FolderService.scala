@@ -1,5 +1,6 @@
 package services
 
+import daos.DBTableDefinitions.DBFolder
 import daos.FolderDAO
 import models.{Folder, User}
 import play.api.libs.concurrent.Execution.Implicits._
@@ -16,6 +17,33 @@ import scala.language.postfixOps
 class FolderService(implicit inj: Injector) extends Injectable {
 
   val folderDAO = inject[FolderDAO]
+
+  /**
+   * Root folder should never be exposed to api. Thus we return its immediate children with their children recursively
+   * Implementation of Nested Sets pattern
+   * @param user User
+   * @return list of immediate children of root's folder.
+   */
+  def retrieveUserFolderTree(user: User): Future[List[Folder]] = {
+    user.id match {
+      case Some(userId) =>
+        folderDAO.findAll(userId).map {
+          case rootFolder :: tail => generateChildren(0, rootFolder.right, tail)
+          case Nil => Nil
+        }
+
+      case None => Future.successful(Nil)
+    }
+  }
+
+  private def generateChildren(currentLeft: Int, currentRight: Int, dbFolders: Seq[DBFolder]): List[Folder] = {
+    dbFolders match {
+      case dbFolder :: tail if dbFolder.left > currentRight => Nil
+      case dbFolder :: tail if dbFolder.left > currentLeft => Folder(dbFolder.id, dbFolder.name, generateChildren(dbFolder.left, dbFolder.right, tail)) :: generateChildren(dbFolder.right, currentRight, tail)
+      case dbFolder :: tail => generateChildren(currentLeft, currentRight, tail)
+      case Nil => Nil
+    }
+  }
 
   /**
    * Gets root folder for defined user

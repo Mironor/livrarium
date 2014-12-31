@@ -16,6 +16,20 @@ class FolderDAO {
   val slickFolders = TableQuery[Folders]
 
   /**
+   * Gets all user's folders ordered by `left` field (see Nested Sets pattern)
+   * @param userId current user's id
+   * @return a promise of a list of user's folders ordered by `left` field
+   */
+  def findAll(userId: Long): Future[List[DBFolder]] = {
+    Future.successful {
+      DB withSession { implicit session =>
+        slickFolders.filter(_.idUser === userId).sortBy(_.left.asc)
+          .list
+      }
+    }
+  }
+
+  /**
    * Finds user's root folder
    * @param userId user's id
    * @return a promise of user's root folder (None if user does not have a root folder)
