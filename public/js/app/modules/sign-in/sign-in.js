@@ -11,22 +11,18 @@ angular.module('lvr.signIn', [])
                 };
 
                 $scope.submit = function () {
-
                     $scope.emailPasswordNotValid = $scope.credentials_sign_in_form.$invalid;
                     $scope.accessDenied = false;
 
-                    if ($scope.credentials_sign_in_form.$valid){
-                        $http.post('/authenticate/credentials', $scope.model)
+                    if ($scope.credentials_sign_in_form.$valid) {
+                        $http.post(constants.api.signInWithCredentials, $scope.model)
                             .success(function (data) {
                                 identity.email = data.email;
                                 $location.path(constants.applicationUrls.cloud);
                             })
                             .error(function (data) {
-                                if (data.code === constants.errorCodes.userNotFound){
+                                if (data.code === constants.errorCodes.userNotFound) {
                                     $scope.emailPasswordNotValid = true;
-                                }
-                                if (data.code === constants.errorCodes.accessDenied){
-                                    $scope.accessDenied = true;
                                 }
                             });
                     }

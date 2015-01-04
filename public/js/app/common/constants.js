@@ -5,6 +5,10 @@ angular.module('lvr')
     .constant('constants', {
         pathToApp: pathToApp,
 
+        api: {
+          signInWithCredentials: '/authenticate/credentials'
+        },
+
         applicationUrls: {
             signIn: '/',
             signUp: '/sign-up',

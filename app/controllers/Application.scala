@@ -89,17 +89,20 @@ class Application(implicit inj: Injector)
           env.authenticatorService.init(authenticator, result)
         }
         case None => Future.successful {
-          BadRequest(Json.obj(
-            "code" -> inject[Int](identified by "errors.auth.userNotFound")
+          InternalServerError(Json.obj(
+            "code" -> inject[Int](identified by "errors.auth.userNotFound"),
+          "message" -> "User was not found"
           ))
         }
       }
     } recover {
-      case e: AccessDeniedException => BadRequest(Json.obj(
-        "code" -> inject[Int](identified by "errors.auth.accessDenied")
+      case e: AccessDeniedException => InternalServerError(Json.obj(
+        "code" -> inject[Int](identified by "errors.auth.accessDenied"),
+        "message" -> "Access denied"
       ))
-      case e: AuthenticationException => BadRequest(Json.obj(
-        "code" -> inject[Int](identified by "errors.auth.notAuthenticated")
+      case e: AuthenticationException => InternalServerError(Json.obj(
+        "code" -> inject[Int](identified by "errors.auth.notAuthenticated"),
+        "message" -> "Not authenticated"
       ))
     }
   }
@@ -128,7 +131,8 @@ class Application(implicit inj: Injector)
 
         userService.retrieve(loginInfo).flatMap {
           case Some(_) => Future.successful(BadRequest(Json.obj(
-            "code" -> inject[Int](identified by "errors.auth.userAlreadyExists")
+            "code" -> inject[Int](identified by "errors.auth.userAlreadyExists"),
+            "message" -> "User already exists"
           )))
 
           case None => createNewUser(loginInfo, email, hashedPassword)
@@ -136,6 +140,7 @@ class Application(implicit inj: Injector)
 
       case errors: JsError => Future.successful(BadRequest(Json.obj(
         "code" -> inject[Int](identified by "errors.auth.loginPasswordNotValid"),
+        "message" -> "Login or password are not valid",
         "fields" -> JsError.toFlatJson(errors)
       )))
     }
