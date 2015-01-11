@@ -35,7 +35,7 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @param bookId the id of the book to retrieve
    * @return a promise of a book (None if no book was found)
    */
-  def retrieveById(user: User, bookId: Long): Future[Option[Book]] = {
+  def retrieve(user: User, bookId: Long): Future[Option[Book]] = {
     bookDAO.findById(bookId).map {
       _.filter(user.owns).map(Book.fromDBBook)
     }
@@ -62,7 +62,7 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @return a promise of the updated book (None if could not save the book)
    */
   def save(user: User, book: Book): Future[Option[Book]] = {
-    retrieveById(user, book.id).flatMap {
+    retrieve(user, book.id).flatMap {
       case Some(_) =>
         bookDAO.update(book.toDBBook(user.id))
           .map(Book.fromDBBook)
@@ -102,8 +102,8 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @return a promise of the added book (None if could not add the book to the folder)
    */
   def addToFolder(user: User, bookId: Long, folderId: Long): Future[Option[Book]] = {
-    val book = retrieveById(user, bookId)
-    val folder = folderService.retrieveById(user, folderId)
+    val book = retrieve(user, bookId)
+    val folder = folderService.retrieve(user, folderId)
 
     book zip folder flatMap {
       case (Some(retrievedBook), Some(_)) =>
@@ -131,7 +131,7 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @return a promise of the books contained in the supplied folder
    */
   def retrieveAllFromFolder(user: User, folderId: Long): Future[List[Book]] = {
-    folderService.retrieveById(user, folderId).flatMap {
+    folderService.retrieve(user, folderId).flatMap {
       case Some(_) => bookDAO.findAllInFolder(folderId).map {
         _.map(Book.fromDBBook)
       }

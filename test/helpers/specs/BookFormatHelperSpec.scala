@@ -1,8 +1,9 @@
 package helpers.specs
 
-import helpers.{BookFormatHelper, LivrariumSpecification}
+import helpers.BookFormatHelper
+import play.api.test.PlaySpecification
 
-class BookFormatHelperSpec extends LivrariumSpecification {
+class BookFormatHelperSpec extends PlaySpecification {
 
   "Book Format Helper" should {
     "detect pdf type from pdf application type" in {

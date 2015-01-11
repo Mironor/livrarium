@@ -58,7 +58,7 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @param folderId folder's id to retrieve
    * @return a promise of a found folder (None if the folder was not found)
    */
-  def retrieveById(user: User, folderId: Long): Future[Option[Folder]] = {
+  def retrieve(user: User, folderId: Long): Future[Option[Folder]] = {
     folderDAO.findById(folderId).map {
       _.filter(user.owns).map(Folder.fromDBFolder)
     }
@@ -83,7 +83,6 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @return
    */
   def retrieveChildren(user: User, parentFolderId: Long): Future[List[Folder]] = {
-    //    retrieveById(user, parentFolderId)
     folderDAO.findChildrenById(parentFolderId).map {
       _.map(Folder.fromDBFolder)
     }
@@ -122,7 +121,7 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @return a promise of appended folder (None if folder was not appended)
    */
   def appendTo(user: User, parentFolderId: Long, folderName: String): Future[Option[Folder]] = {
-    retrieveById(user, parentFolderId).flatMap {
+    retrieve(user, parentFolderId).flatMap {
       case Some(folder) =>
         folderDAO.appendToFolder(parentFolderId, folderName).map {
           _.map(Folder.fromDBFolder)

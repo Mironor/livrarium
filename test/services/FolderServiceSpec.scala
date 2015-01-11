@@ -1,27 +1,16 @@
 package services
 
-import fixtures.{UserFixture, FolderFixture}
-import globals.TestGlobal
+import fixtures.{FolderFixture, UserFixture}
 import helpers.LivrariumSpecification
-import org.specs2.execute.AsResult
 import org.specs2.matcher.ThrownMessages
 import org.specs2.specification.AroundExample
-import play.api.test.FakeApplication
 
 
 class FolderServiceSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
 
-  /**
-   * This automatically handles up and down evolutions at the beginning and at the end of a spec respectively
-   */
-  def around[T: AsResult](t: => T) = {
-    val app = FakeApplication(withGlobal = Some(TestGlobal), additionalConfiguration = inMemoryDatabase())
-    running(app) {
-      await(UserFixture.initFixture())
-      await(FolderFixture.initFixture())
-
-      AsResult(t)
-    }
+  protected def bootstrapFixtures(): Unit = {
+    await(UserFixture.initFixture())
+    await(FolderFixture.initFixture())
   }
 
   "Folder service" should {
@@ -105,7 +94,7 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
       val folderService = new FolderService
 
       // When
-      val folder = await(folderService.retrieveById(UserFixture.testUser, FolderFixture.sub1Id))
+      val folder = await(folderService.retrieve(UserFixture.testUser, FolderFixture.sub1Id))
 
       // Then
       folder must beSome
@@ -117,7 +106,7 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
       val folderService = new FolderService
 
       // When
-      val folder = await(folderService.retrieveById(UserFixture.testUser, FolderFixture.otherUserRootId))
+      val folder = await(folderService.retrieve(UserFixture.testUser, FolderFixture.otherUserRootId))
 
       // Then
       folder must beNone

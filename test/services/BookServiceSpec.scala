@@ -1,29 +1,18 @@
 package services
 
-import fixtures.{BookFixture, UserFixture, FolderFixture}
-import globals.TestGlobal
-import helpers.{BookFormatHelper, RandomIdGenerator, LivrariumSpecification}
+import fixtures.{BookFixture, FolderFixture, UserFixture}
+import helpers.{BookFormatHelper, LivrariumSpecification, RandomIdGenerator}
 import models.Book
-import org.specs2.execute.AsResult
 import org.specs2.matcher.ThrownMessages
 import org.specs2.specification.AroundExample
-import play.api.test.FakeApplication
 
 class BookServiceSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
 
 
-  /**
-   * This automatically handles up and down evolutions at the beginning and at the end of a spec respectively
-   */
-  def around[T: AsResult](t: => T) = {
-    val app = FakeApplication(withGlobal = Some(TestGlobal), additionalConfiguration = inMemoryDatabase())
-    running(app) {
-      await(UserFixture.initFixture())
-      await(FolderFixture.initFixture())
-      await(BookFixture.initFixture())
-
-      AsResult(t)
-    }
+  protected def bootstrapFixtures(): Unit = {
+    await(UserFixture.initFixture())
+    await(FolderFixture.initFixture())
+    await(BookFixture.initFixture())
   }
 
   "Book Service" should {
@@ -52,7 +41,7 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
 
       // When
       val updatedBook = await(bookService.save(UserFixture.testUser, book.copy(name = updatedName))).getOrElse(fail("Could not update book (does it belong tu the test user?)"))
-      val retrievedBook = await(bookService.retrieveById(UserFixture.testUser, updatedBook.id)).getOrElse(fail("Updated book cannot be found"))
+      val retrievedBook = await(bookService.retrieve(UserFixture.testUser, updatedBook.id)).getOrElse(fail("Updated book cannot be found"))
 
       // Then
       retrievedBook.name must equalTo(updatedName)
@@ -87,7 +76,7 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
       val bookService = new BookService
 
       // When
-      val book = await(bookService.retrieveById(UserFixture.testUser, BookFixture.otherUserBookId))
+      val book = await(bookService.retrieve(UserFixture.testUser, BookFixture.otherUserBookId))
 
       // Then
       book must beNone
@@ -99,7 +88,7 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
 
       // When
       val saveReturn = await(bookService.save(UserFixture.testUser, Book.fromDBBook(BookFixture.otherUserBook)))
-      val book = await(bookService.retrieveById(UserFixture.testUser, BookFixture.otherUserBookId))
+      val book = await(bookService.retrieve(UserFixture.testUser, BookFixture.otherUserBookId))
 
       // Then
       saveReturn must beNone
@@ -113,7 +102,7 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
 
       // When
       val saveReturn = await(bookService.save(UserFixture.testUser, Book.fromDBBook(BookFixture.otherUserBook)))
-      val book = await(bookService.retrieveById(UserFixture.testUser, BookFixture.otherUserBookId))
+      val book = await(bookService.retrieve(UserFixture.testUser, BookFixture.otherUserBookId))
 
       // Then
       saveReturn must beNone
@@ -127,7 +116,7 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
 
       // When
       val saveReturn = await(bookService.save(UserFixture.testUser, Book.fromDBBook(BookFixture.otherUserBook)))
-      val book = await(bookService.retrieveById(UserFixture.testUser, BookFixture.otherUserBookId))
+      val book = await(bookService.retrieve(UserFixture.testUser, BookFixture.otherUserBookId))
 
       // Then
       saveReturn must beNone

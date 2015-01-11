@@ -2,26 +2,16 @@ package daos
 
 import daos.DBTableDefinitions.DBBook
 import fixtures.{BookFixture, FolderFixture, UserFixture}
-import globals.TestGlobal
 import helpers.{BookFormatHelper, LivrariumSpecification, RandomIdGenerator}
-import org.specs2.execute.AsResult
 import org.specs2.matcher.ThrownMessages
 import org.specs2.specification.AroundExample
-import play.api.test.FakeApplication
 
 class BookDAOSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
 
-  def randomIdGenerator = inject[RandomIdGenerator]
-
-  def around[T: AsResult](t: => T) = {
-    val app = FakeApplication(withGlobal = Some(TestGlobal), additionalConfiguration = inMemoryDatabase())
-    running(app) {
-      await(UserFixture.initFixture())
-      await(FolderFixture.initFixture())
-      await(BookFixture.initFixture())
-
-      AsResult(t)
-    }
+  protected def bootstrapFixtures(): Unit = {
+    await(UserFixture.initFixture())
+    await(FolderFixture.initFixture())
+    await(BookFixture.initFixture())
   }
 
   "Book DAO" should {

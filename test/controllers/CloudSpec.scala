@@ -6,11 +6,9 @@ import javax.imageio.ImageIO
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.test._
 import fixtures.{FolderFixture, UserFixture}
-import globals.TestGlobal
 import helpers.{BookFormatHelper, LivrariumSpecification, PDFTestHelper, RandomIdGenerator}
 import models.FolderContents
 import org.apache.commons.io.FileUtils
-import org.specs2.execute.AsResult
 import org.specs2.matcher.{FileMatchers, ThrownMessages}
 import org.specs2.specification.AroundExample
 import play.api.Play
@@ -23,19 +21,10 @@ import services.{BookService, FolderService}
 
 class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExample with ThrownMessages {
 
-  /**
-   * This automatically handles up and down evolutions at the beginning and at the end of a spec respectively
-   */
-  def around[T: AsResult](t: => T) = {
-    val app = FakeApplication(withGlobal = Some(TestGlobal), additionalConfiguration = inMemoryDatabase())
-    running(app) {
-      await(UserFixture.initFixture())
-      await(FolderFixture.initFixture())
-
-      cleanUploadDirectories()
-
-      AsResult(t)
-    }
+  protected def bootstrapFixtures(): Unit = {
+    await(UserFixture.initFixture())
+    await(FolderFixture.initFixture())
+    cleanUploadDirectories()
   }
 
   private def cleanUploadDirectories() = {
