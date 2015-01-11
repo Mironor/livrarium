@@ -5,7 +5,6 @@ import daos.silhouette.LoginInfoDAO
 import fixtures.UserFixture
 import globals.TestGlobal
 import helpers.LivrariumSpecification
-import models.User
 import org.specs2.execute.AsResult
 import org.specs2.matcher.ThrownMessages
 import org.specs2.specification.AroundExample
@@ -41,13 +40,12 @@ class UserServiceSpec extends LivrariumSpecification with AroundExample with Thr
     "save a new user" in {
       // Given
       val userService = new UserService
-      val newEmail = Option("new email")
+      val newEmail = "new email"
       val newAvatarUrl = Option("new avatar url")
       val newLoginInfo = LoginInfo("new key", "new value")
-      val newUser = User(None, newLoginInfo, newEmail, newAvatarUrl)
 
       // When
-      await(userService.save(newUser))
+      await(userService.create(newLoginInfo, newEmail, newAvatarUrl))
       val user = await(userService.retrieve(newLoginInfo)).getOrElse(fail("User was not found"))
 
       // Then
@@ -55,15 +53,32 @@ class UserServiceSpec extends LivrariumSpecification with AroundExample with Thr
       user.avatarURL must beEqualTo(newAvatarUrl)
     }
 
+    "not create a new login info if it already exists" in {
+      // Given
+      val userService = new UserService
+      val loginInfoDAO = inject[LoginInfoDAO]
+
+      val newEmail = "new email"
+
+      // When
+      val loginInfoCountBefore = await(loginInfoDAO.findAll()).length
+      await(userService.create(UserFixture.testUserLoginInfo, newEmail, None))
+      val loginInfoCountAfter = await(loginInfoDAO.findAll()).length
+
+      // Then
+      loginInfoCountAfter must beEqualTo(loginInfoCountBefore)
+    }
+
     "create new login info attached to the user if the login info does not exist" in {
       // Given
       val userService = new UserService
       val loginInfoDAO = inject[LoginInfoDAO]
+
       val newLoginInfo = LoginInfo("new key", "new value")
-      val newUser = User(None, newLoginInfo, None, None)
+      val newEmail = "new email"
 
       // When
-      await(userService.save(newUser))
+      await(userService.create(newLoginInfo, newEmail, None))
       val loginInfo = await(loginInfoDAO.find(newLoginInfo))
 
       // Then
@@ -74,7 +89,7 @@ class UserServiceSpec extends LivrariumSpecification with AroundExample with Thr
       // Given
       val userService = new UserService
 
-      val updatedEmail = Option("updated email")
+      val updatedEmail = "updated email"
       val updatedAvatarUrl = Option("updated avatar url")
 
       // When

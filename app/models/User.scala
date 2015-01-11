@@ -11,19 +11,27 @@ import daos.DBTableDefinitions.{DBFolder, DBBook, DBUser}
  * @param email Maybe the email of the authenticated provider.
  * @param avatarURL Maybe the avatar URL of the authenticated provider.
  */
-case class User(id: Option[Long],
+case class User(id: Long,
                 loginInfo: LoginInfo,
-                email: Option[String],
+                email: String,
                 avatarURL: Option[String]) extends Identity {
 
-  def toDBUser: DBUser =  DBUser(id, email, avatarURL)
+  def toDBUser: DBUser = DBUser(Option(id), email, avatarURL)
 
-  def owns(dbBook: DBBook) = id.contains(dbBook.idUser)
+  def owns(dbBook: DBBook) = id == dbBook.idUser
 
-  def owns(dbFolder: DBFolder) = id.contains(dbFolder.idUser)
+  def owns(dbFolder: DBFolder) = id == dbFolder.idUser
 }
 
 object User {
-  def fromDBUser(dbUser: DBUser, loginInfo: LoginInfo): User = User(dbUser.id, loginInfo, dbUser.email, dbUser.avatarURL)
+  def fromDBUser(dbUser: DBUser, loginInfo: LoginInfo): User = {
+    val id = dbUser.id.getOrElse(throw new Exception(
+      """A user row in the database did not have
+        | an id (id field has autoincrement constraint, so it should not be null).
+        | Or you are trying to cast a user's row that does not have id (this is strange)""".stripMargin
+    ))
+
+    User(id, loginInfo, dbUser.email, dbUser.avatarURL)
+  }
 }
 

@@ -30,26 +30,16 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
     "create new book" in {
       // Given
       val bookService = new BookService
+      def randomIdGenerator = inject[RandomIdGenerator]
 
-      val book = generateTestBook()
+      val uuid = randomIdGenerator.generateBookId()
 
       // When
-      await(bookService.save(UserFixture.testUser, book))
+      await(bookService.create(UserFixture.testUser, uuid, "book", BookFormatHelper.PDF))
       val books = await(bookService.retrieveAll(UserFixture.testUser))
 
       // Then
       books must have size 3
-    }
-
-    def generateTestBook(): Book = {
-      def randomIdGenerator = inject[RandomIdGenerator]
-
-      Book(
-        None,
-        randomIdGenerator.generateBookId(),
-        "book",
-        BookFormatHelper.PDF
-      )
     }
 
     "update book if it already exists" in {
@@ -61,9 +51,8 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
       val updatedName = "updated book"
 
       // When
-      val updatedBook = await(bookService.save(UserFixture.testUser, book.copy(name = updatedName))).getOrElse(fail("Updated book was not saved"))
-      val updatedBookId = updatedBook.id.getOrElse(fail("Updated book has no id"))
-      val retrievedBook = await(bookService.retrieveById(UserFixture.testUser, updatedBookId)).getOrElse(fail("Updated book cannot be found"))
+      val updatedBook = await(bookService.save(UserFixture.testUser, book.copy(name = updatedName))).getOrElse(fail("Could not update book (does it belong tu the test user?)"))
+      val retrievedBook = await(bookService.retrieveById(UserFixture.testUser, updatedBook.id)).getOrElse(fail("Updated book cannot be found"))
 
       // Then
       retrievedBook.name must equalTo(updatedName)
@@ -116,29 +105,6 @@ class BookServiceSpec extends LivrariumSpecification with AroundExample with Thr
       saveReturn must beNone
       book must beNone
 
-    }
-
-    "return None/Nil if user's id is not supplied" in {
-      // Given
-      val bookService = new BookService
-
-      val userWithoutId = UserFixture.testUser.copy(id = None)
-      val testBook = Book.fromDBBook(BookFixture.rootBook)
-      val testFolderId = FolderFixture.rootId
-
-      // When
-      val retrieveAll = await(bookService.retrieveAll(userWithoutId))
-      val retrieveById = await(bookService.retrieveById(userWithoutId, testFolderId))
-      val save = await(bookService.save(userWithoutId, testBook))
-      val addToFolder = await(bookService.addToFolder(userWithoutId, testBook, testFolderId))
-      val retrieveAllFromFolder = await(bookService.retrieveAllFromFolder(userWithoutId, testFolderId))
-
-      // Then
-      retrieveAll must beEmpty
-      retrieveById must beNone
-      save must beNone
-      addToFolder must beNone
-      retrieveAllFromFolder must beEmpty
     }
 
     "not add another user's book to current user's folder" in {

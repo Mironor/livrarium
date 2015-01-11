@@ -32,7 +32,7 @@ class UserDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
       val user = await(userDAO.findById(UserFixture.testUserId)).getOrElse(fail("User cannot be found"))
 
       // Then
-      user.id must beEqualTo(UserFixture.testUser.id)
+      user.id must beSome(UserFixture.testUser.id)
       user.email must beEqualTo(UserFixture.testUser.email)
       user.avatarURL must beEqualTo(UserFixture.testUser.avatarURL)
     }
@@ -45,7 +45,7 @@ class UserDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
       val user = await(userDAO.findByLoginInfo(UserFixture.testUserLoginInfo)).getOrElse(fail("User cannot be found"))
 
       // Then
-      user.id must beEqualTo(UserFixture.testUser.id)
+      user.id must beSome(UserFixture.testUser.id)
       user.email must beEqualTo(UserFixture.testUser.email)
       user.avatarURL must beEqualTo(UserFixture.testUser.avatarURL)
     }
@@ -54,7 +54,7 @@ class UserDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
       // Given
       val userDAO = new UserDAO
 
-      val newEmail = Option("new email")
+      val newEmail = "new email"
       val newAvatarUrl = Option("new url")
       val newUser = DBUser(None, newEmail, newAvatarUrl)
 
@@ -72,13 +72,13 @@ class UserDAOSpec extends LivrariumSpecification with AroundExample with ThrownM
       // Given
       val userDAO = new UserDAO
 
-      val updatedEmail = Option("updated email")
+      val updatedEmail = "updated email"
       val updatedAvatarUrl = Option("updated url")
-      val updatedUser = UserFixture.testUser.copy(email = updatedEmail, avatarURL = updatedAvatarUrl)
+      val updatedUser = UserFixture.testUser.toDBUser.copy(email = updatedEmail, avatarURL = updatedAvatarUrl)
 
 
       // When
-      await(userDAO.update(updatedUser.toDBUser))
+      await(userDAO.update(updatedUser))
       val foundUser = await(userDAO.findById(UserFixture.testUserId)).getOrElse(fail("User cannot be found"))
 
       // Then

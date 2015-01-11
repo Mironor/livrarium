@@ -150,11 +150,7 @@ class Application(implicit inj: Injector)
 
     val result = for {
       avatarURL <- avatarService.retrieveURL(email)
-      userOption <- userService.save(User(None, loginInfo, Some(email), avatarURL))
-
-      // User creation may go bad
-      user = userOption.getOrElse(throw new Exception("User was not created"))
-
+      user <- userService.create(loginInfo, email, avatarURL)
       _ <- folderService.createRootForUser(user)
       _ <- authInfoService.save(loginInfo, password)
       authenticator <- env.authenticatorService.create(user.loginInfo)

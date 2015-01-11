@@ -18,11 +18,11 @@ object UserFixture {
 
   val testUserId = 1
   val testUserLoginInfo = LoginInfo("key", "value")
-  val testUser = User(Option(testUserId), testUserLoginInfo, Option("test@test.test"), Option("someUrl"))
+  val testUser = User(testUserId, testUserLoginInfo, "test@test.test", Option("someUrl"))
 
   val otherUserId = 2
   val otherUserLoginInfo = LoginInfo("key_other", "value_other")
-  val otherUser = User(Option(otherUserId), otherUserLoginInfo, None, None)
+  val otherUser = User(otherUserId, otherUserLoginInfo, "test@test.test", None)
 
   def initFixture(): Future[_] = {
     Future.successful {

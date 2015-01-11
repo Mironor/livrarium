@@ -1,6 +1,9 @@
 package services
 
+import java.util.UUID
+
 import daos.BookDAO
+import daos.DBTableDefinitions.DBBook
 import models.{Book, Folder, User}
 import play.api.libs.concurrent.Execution.Implicits._
 import scaldi.{Injectable, Injector}
@@ -21,13 +24,8 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @return a promise of a list of user's books
    */
   def retrieveAll(user: User): Future[List[Book]] = {
-    user.id match {
-      case Some(userId) =>
-        bookDAO.findAll(userId).map {
-          _.map(Book.fromDBBook)
-        }
-
-      case None => Future(Nil)
+    bookDAO.findAll(user.id).map {
+      _.map(Book.fromDBBook)
     }
   }
 
@@ -44,6 +42,19 @@ class BookService(implicit inj: Injector) extends Injectable {
   }
 
   /**
+   * Creates new book from supplied info
+   * @param user user to which the book will belong
+   * @param identifier future's book identifier
+   * @param name future book's name
+   * @param format future book's format
+   * @return a promise of a created book
+   */
+  def create(user: User, identifier: UUID, name: String, format: String, totalPages: Int = 0): Future[Book] = {
+    val dbBook = DBBook(None, user.id, identifier, name, format, totalPages)
+    bookDAO.insert(dbBook).map(Book.fromDBBook)
+  }
+
+  /**
    * Saves supplied book for the user
    * Checks if trying to update another user's book (returns Future(None) in this case)
    * @param user current user, book's owner
@@ -51,36 +62,14 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @return a promise of the updated book (None if could not save the book)
    */
   def save(user: User, book: Book): Future[Option[Book]] = {
-    // defined id is an indicator that book already exists
-    book.id match {
-      case Some(bookId) => saveUpdate(user, book, bookId)
-      case None => saveInsert(user, book)
-    }
-  }
-
-  private def saveUpdate(user: User, book: Book, bookId: Long): Future[Option[Book]] = {
-    bookDAO.findById(bookId).flatMap {
-      _.filter(user.owns) match {
-        case Some(dbBook) =>
-          bookDAO.update(book.toDBBook(dbBook.idUser))
-            .map(Book.fromDBBook)
-            .map(Option.apply)
-
-        case None => Future(None) // The book with supplied id belongs to another user
-      }
-    }
-  }
-
-  private def saveInsert(user: User, book: Book): Future[Option[Book]] = {
-    user.id match {
-      case Some(userId) =>
-        bookDAO.insert(book.toDBBook(userId))
+    retrieveById(user, book.id).flatMap {
+      case Some(_) =>
+        bookDAO.update(book.toDBBook(user.id))
           .map(Book.fromDBBook)
           .map(Option.apply)
 
-      case None => Future(None)
+      case None => Future(None) // The book with supplied id belongs to another user
     }
-
   }
 
   /**
@@ -91,10 +80,7 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @return a promise of the added book (None if could not add the book to the folder)
    */
   def addToFolder(user: User, book: Book, folder: Folder): Future[Option[Book]] = {
-    folder.id match {
-      case Some(folderId) => addToFolder(user, book, folderId)
-      case None => Future(None)
-    }
+    addToFolder(user, book, folder.id)
   }
 
   /**
@@ -105,10 +91,7 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @return a promise of the added book (None if could not add the book to the folder)
    */
   def addToFolder(user: User, book: Book, folderId: Long): Future[Option[Book]] = {
-    book.id match {
-      case Some(bookId) => addToFolder(user, bookId, folderId)
-      case None => Future(None)
-    }
+    addToFolder(user, book.id, folderId)
   }
 
   /**
@@ -119,27 +102,16 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @return a promise of the added book (None if could not add the book to the folder)
    */
   def addToFolder(user: User, bookId: Long, folderId: Long): Future[Option[Book]] = {
-    user.id match {
-      case Some(userId) =>
-        val book = retrieveById(user, bookId)
-        val folder = folderService.retrieveById(user, folderId)
+    val book = retrieveById(user, bookId)
+    val folder = folderService.retrieveById(user, folderId)
 
-        book zip folder flatMap {
-          case (Some(retrievedBook), Some(_)) =>
-            retrievedBook.id match {
-              case Some(retrievedBookId) =>
-                bookDAO.relateBookToFolder(retrievedBookId, folderId)
-                  .map(_ => Option(retrievedBook))
+    book zip folder flatMap {
+      case (Some(retrievedBook), Some(_)) =>
+        bookDAO.relateBookToFolder(retrievedBook.id, folderId)
+          .map(_ => Option(retrievedBook))
 
-              case None => Future.successful(None)
-            }
-
-          case _ => Future.successful(None) // Folder or Book does not belong to current user
-        }
-
-      case None => Future.successful(None)
+      case _ => Future.successful(None) // Folder or Book does not belong to current user
     }
-
   }
 
   /**
@@ -149,10 +121,7 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @return a promise of the books contained in the supplied folder
    */
   def retrieveAllFromFolder(user: User, folder: Folder): Future[List[Book]] = {
-    folder.id match {
-      case Some(folderId) => retrieveAllFromFolder(user, folderId)
-      case None => Future(Nil)
-    }
+    retrieveAllFromFolder(user, folder.id)
   }
 
   /**

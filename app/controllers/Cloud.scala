@@ -8,17 +8,17 @@ import com.mohiva.play.silhouette.api.util.Credentials
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.sksamuel.scrimage.{Format => ImgFormat, Image}
-import helpers.{PDFHelper, RandomIdGenerator, BookFormatHelper}
-import models.{Book, FolderContents, User}
+import helpers.{BookFormatHelper, PDFHelper, RandomIdGenerator}
+import models.{FolderContents, User}
 import org.apache.commons.io.FileUtils
 import play.api.Play
 import play.api.libs.Files
 import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.functional.syntax._
 import play.api.libs.json._
 import play.api.mvc._
 import scaldi.{Injectable, Injector}
 import services._
-import play.api.libs.functional.syntax._
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -59,8 +59,7 @@ class Cloud(implicit inj: Injector)
     request.identity match {
       case Some(user) => folderService.retrieveRoot(user).flatMap { rootFolderOption =>
         val rootFolder = rootFolderOption.getOrElse(throw new Exception("Root folder not found"))
-        val rootFolderId = rootFolder.id.getOrElse(throw new Exception("Root folder does not have id"))
-        val rootFolderContentPromise = getFolderContents(user, rootFolderId)
+        val rootFolderContentPromise = getFolderContents(user, rootFolder.id)
 
         rootFolderContentPromise.map(rootContent => Ok(Json.toJson(rootContent)))
       }
@@ -120,7 +119,7 @@ class Cloud(implicit inj: Injector)
         val uuid = randomIdGenerator.generateBookId()
 
         val applicationPath = Play.current.path
-        val userId = user.id.getOrElse(throw new Exception("User's id is not defined"))
+        val userId = user.id
         val uploadFolder = applicationPath + inject[String](identified by "folders.uploadPath")
         val generatedImageFolder = applicationPath + inject[String](identified by "folders.generatedImagePath")
 
@@ -157,28 +156,15 @@ class Cloud(implicit inj: Injector)
 
         val totalPages = PDFHelper.getTotalPages(uploadedBookPath)
 
-        val bookModel = Book(
-          None,
-          uuid,
-          name,
-          fileType,
-          totalPages
-        )
-
-        val savedBookPromise = bookService.save(user, bookModel).map {
-          _.getOrElse(throw new Exception("Book could not be added"))
-        }
-
         val uploadedBookModel = for {
-          insertedBook <- savedBookPromise
+          insertedBook <- bookService.create(user, uuid, name, fileType, totalPages)
           addedBook <- bookService.addToFolder(user, insertedBook, uploadFolderId)
         } yield addedBook
 
         uploadedBookModel.map {
           case Some(addedBook) =>
-            val bookId = addedBook.id.getOrElse(throw new Exception("Book's id is not defined"))
             Ok(Json.obj(
-              "id" -> bookId,
+              "id" -> addedBook.id,
               "uuid" -> addedBook.identifier,
               "name" -> name
             ))

@@ -26,6 +26,17 @@ class LoginInfoDAO {
     }
 
   /**
+   * Returns all login infos stored in the database
+   * @return a promise of a list of all login infos in the database
+   */
+  def findAll(): Future[List[DBLoginInfo]] =
+    Future.successful {
+      DB withSession { implicit session =>
+        slickLoginInfos.list
+      }
+    }
+
+  /**
    * Inserts a new LoginInfo in the database
    * @param loginInfo new login info
    * @param userId the user to whom the login info will be attached

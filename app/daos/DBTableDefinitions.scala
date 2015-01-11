@@ -10,13 +10,13 @@ import play.api.db.slick.Config.driver.simple._
 object DBTableDefinitions {
 
   case class DBUser(id: Option[Long],
-                    email: Option[String],
+                    email: String,
                     avatarURL: Option[String])
 
   class Users(tag: Tag) extends Table[DBUser](tag, "users") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def email = column[Option[String]]("email")
+    def email = column[String]("email")
 
     def avatarURL = column[Option[String]]("avatarURL")
 

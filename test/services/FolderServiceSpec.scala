@@ -26,29 +26,6 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
 
   "Folder service" should {
 
-
-    "return None/Nil if user's id is not supplied" in {
-      // Given
-      val folderService = new FolderService
-      val userWithoutId = UserFixture.testUser.copy(id = None)
-
-      // When
-      val retrieveUserFolderTree = await(folderService.retrieveUserFolderTree(userWithoutId))
-      val retrieveById = await(folderService.retrieveById(userWithoutId, FolderFixture.rootId))
-      val createRootForUser = await(folderService.createRootForUser(userWithoutId))
-      val retrieveRoot = await(folderService.retrieveRoot(userWithoutId))
-      val appendToRoot = await(folderService.appendToRoot(userWithoutId, "test folder"))
-      val appendTo = await(folderService.appendTo(userWithoutId, FolderFixture.rootId, "test folder"))
-
-      // Then
-      retrieveUserFolderTree must beEmpty
-      retrieveById must beNone
-      createRootForUser must beNone
-      retrieveRoot must beNone
-      appendToRoot must beNone
-      appendTo must beNone
-    }
-
     "return user's folder tree" in {
       // Given
       val folderService = new FolderService

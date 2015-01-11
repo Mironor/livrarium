@@ -35,7 +35,7 @@ object PDFHelper {
 
   /**
    * Returns the number of pages in supplied pdf
-   * @param pdfPath
+   * @param pdfPath path to the pdf
    * @return
    */
   def getTotalPages(pdfPath: String) = {

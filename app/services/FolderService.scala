@@ -25,21 +25,17 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @return list of immediate children of root's folder.
    */
   def retrieveUserFolderTree(user: User): Future[List[Folder]] = {
-    user.id match {
-      case Some(userId) =>
-        folderDAO.findAll(userId).map {
-          case rootFolder :: tail => generateChildren(0, rootFolder.right, tail)
-          case Nil => Nil
-        }
-
-      case None => Future.successful(Nil)
+    folderDAO.findAll(user.id).map {
+      case rootFolder :: tail => generateChildren(0, rootFolder.right, tail)
+      case Nil => Nil
     }
   }
 
   private def generateChildren(currentLeft: Int, currentRight: Int, dbFolders: Seq[DBFolder]): List[Folder] = {
     dbFolders match {
       case dbFolder :: tail if dbFolder.left > currentRight => Nil
-      case dbFolder :: tail if dbFolder.left > currentLeft => Folder(dbFolder.id, dbFolder.name, generateChildren(dbFolder.left, dbFolder.right, tail)) :: generateChildren(dbFolder.right, currentRight, tail)
+      case dbFolder :: tail if dbFolder.left > currentLeft =>
+        Folder.fromDBFolderWithChildren(dbFolder, generateChildren(dbFolder.left, dbFolder.right, tail)) :: generateChildren(dbFolder.right, currentRight, tail)
       case dbFolder :: tail => generateChildren(currentLeft, currentRight, tail)
       case Nil => Nil
     }
@@ -51,13 +47,8 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @return a promise of user's root folder (None if folder was not found)
    */
   def retrieveRoot(user: User): Future[Option[Folder]] = {
-    user.id match {
-      case Some(userId) =>
-        folderDAO.findRoot(userId).map {
-          _.map(Folder.fromDBFolder)
-        }
-
-      case None => Future.successful(None)
+    folderDAO.findRoot(user.id).map {
+      _.map(Folder.fromDBFolder)
     }
   }
 
@@ -79,14 +70,9 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @return a promise of a created root folder (None if the folder was not created)
    */
   def createRootForUser(user: User): Future[Option[Folder]] = {
-    user.id match {
-      case Some(userId) =>
-        folderDAO.insertRoot(userId)
-          .map(Folder.fromDBFolder)
-          .map(Option.apply)
-
-      case None => Future.successful(None)
-    }
+    folderDAO.insertRoot(user.id)
+      .map(Folder.fromDBFolder)
+      .map(Option.apply)
   }
 
 
@@ -125,10 +111,7 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @return a promise of appended folder (None if folder was not appended)
    */
   def appendTo(user: User, parentFolder: Folder, folderName: String): Future[Option[Folder]] = {
-    parentFolder.id match {
-      case Some(folderId) => appendTo(user, folderId, folderName)
-      case None => Future.successful(None)
-    }
+    appendTo(user, parentFolder.id, folderName)
   }
 
   /**
