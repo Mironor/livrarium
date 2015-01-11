@@ -85,13 +85,15 @@ class Application(implicit inj: Injector)
     credentialsAuthentication(userCredentials).flatMap { loginInfo =>
       userService.retrieve(loginInfo).flatMap {
         case Some(user) => env.authenticatorService.create(user.loginInfo).flatMap { authenticator =>
-          val result = Future.successful(Ok(Json.obj("identity" -> user.email)))
+          val result = Future.successful(
+            Ok(Json.obj("email" -> user.email))
+          )
           env.authenticatorService.init(authenticator, result)
         }
         case None => Future.successful {
           InternalServerError(Json.obj(
             "code" -> inject[Int](identified by "errors.auth.userNotFound"),
-          "message" -> "User was not found"
+            "message" -> "User was not found"
           ))
         }
       }
@@ -130,7 +132,7 @@ class Application(implicit inj: Injector)
         val hashedPassword = passwordHasher.hash(password)
 
         userService.retrieve(loginInfo).flatMap {
-          case Some(_) => Future.successful(BadRequest(Json.obj(
+          case Some(_) => Future.successful(InternalServerError(Json.obj(
             "code" -> inject[Int](identified by "errors.auth.userAlreadyExists"),
             "message" -> "User already exists"
           )))
@@ -138,7 +140,7 @@ class Application(implicit inj: Injector)
           case None => createNewUser(loginInfo, email, hashedPassword)
         }
 
-      case errors: JsError => Future.successful(BadRequest(Json.obj(
+      case errors: JsError => Future.successful(InternalServerError(Json.obj(
         "code" -> inject[Int](identified by "errors.auth.loginPasswordNotValid"),
         "message" -> "Login or password are not valid",
         "fields" -> JsError.toFlatJson(errors)
@@ -155,12 +157,12 @@ class Application(implicit inj: Injector)
       _ <- authInfoService.save(loginInfo, password)
       authenticator <- env.authenticatorService.create(user.loginInfo)
       result <- env.authenticatorService.init(authenticator, Future.successful {
-        Ok(Json.obj("identity" -> email))
+        Ok(Json.obj("email" -> email))
       })
     } yield result
 
     result.recover {
-      case e: Exception => BadRequest(Json.obj(
+      case e: Exception => InternalServerError(Json.obj(
         "code" -> inject[Int](identified by "errors.application.couldNotCreateNewUser"),
         "message" -> "Could not create new user"
       ))

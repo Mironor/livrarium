@@ -1,14 +1,14 @@
 /**
  * This spec was created to verify that test system works as expected
  */
-describe('Sign in', function () {
+describe('Sign up', function () {
     var $httpBackend, $location, scope,
         element, form, constants, identity,
-        validTemplate = '<lvr-credentials-sign-in-form></lvr-credentials-sign-in-form>';
+        validTemplate = '<lvr-credentials-sign-up-form></lvr-credentials-sign-up-form>';
 
-    beforeEach(module('lvr', 'lvr.signIn'));
+    beforeEach(module('lvr', 'lvr.signUp'));
 
-    beforeEach(module('public/js/app/modules/sign-in/credentials-sign-in-form.html', 'public/js/app/modules/sign-in/social-sign-in.html'));
+    beforeEach(module('public/js/app/modules/sign-up/credentials-sign-up-form.html', 'public/js/app/modules/sign-up/social-sign-up.html'));
 
     beforeEach(inject(function (_$httpBackend_, _$location_, $rootScope, $compile, _constants_, _identity_) {
         $httpBackend = _$httpBackend_;
@@ -22,10 +22,10 @@ describe('Sign in', function () {
 
         scope.$apply();
 
-        form = scope.credentials_sign_in_form;
+        form = scope.credentials_sign_up_form;
     }));
 
-    afterEach(function() {
+    afterEach(function () {
         $httpBackend.verifyNoOutstandingExpectation();
         $httpBackend.verifyNoOutstandingRequest();
     });
@@ -44,37 +44,53 @@ describe('Sign in', function () {
         // Given
         form.email.$setViewValue("invalid@}@email.com");
         form.password.$setViewValue("valid_password");
+        form.repassword.$setViewValue("valid_password");
 
         // When
         scope.submit();
         scope.$digest();
 
         // Then
-        expect(element.find('.email-password-not-valid').hasClass('ng-hide')).toBeFalsy()
+        expect(element.find('.email-not-valid').hasClass('ng-hide')).toBeFalsy()
     });
 
     it('should show error if password is too short', function () {
         // Given
         form.email.$setViewValue("valid@email.com");
         form.password.$setViewValue("pass");
+        form.repassword.$setViewValue("pass");
 
         // When
         scope.submit();
         scope.$digest();
 
         // Then
-        expect(element.find('.email-password-not-valid').hasClass('ng-hide')).toBeFalsy()
+        expect(element.find('.password-not-valid').hasClass('ng-hide')).toBeFalsy()
     });
 
-    it('should show error if user does not exist', function () {
+    it('should show error if passwords are not the same', function () {
         // Given
         form.email.$setViewValue("valid@email.com");
         form.password.$setViewValue("valid_password");
+        form.repassword.$setViewValue("second_valid_password");
 
-        $httpBackend.expectPOST(constants.api.signInWithCredentials)
-            .respond(500, {
-                "code": constants.errorCodes.userNotFound
-            });
+        // When
+        scope.submit();
+        scope.$digest();
+
+        // Then
+        expect(element.find('.passwords-not-equal').hasClass('ng-hide')).toBeFalsy()
+    });
+
+    it('should show error if user already exists', function () {
+        // Given
+        form.email.$setViewValue("valid@email.com");
+        form.password.$setViewValue("valid_password");
+        form.repassword.$setViewValue("valid_password");
+
+        $httpBackend.expectPOST(constants.api.signUp).respond(500, {
+            "code": constants.errorCodes.userAlreadyExists
+        });
 
         // When
         scope.submit();
@@ -82,19 +98,19 @@ describe('Sign in', function () {
         scope.$digest();
 
         // Then
-        expect(element.find('.email-password-not-valid').hasClass('ng-hide')).toBeFalsy()
+        expect(element.find('.user-already-exists').hasClass('ng-hide')).toBeFalsy()
     });
 
-    it('should modify identity value on successful log in', function () {
+    it('should modify identity value on successful sign up', function () {
         // Given
         var email = "valid@email.com";
         form.email.$setViewValue(email);
         form.password.$setViewValue("valid_password");
+        form.repassword.$setViewValue("valid_password");
 
-        $httpBackend.expectPOST(constants.api.signInWithCredentials)
-            .respond({
-                "email": email
-            });
+        $httpBackend.expectPOST(constants.api.signUp).respond({
+            "email": email
+        });
 
         // When
         scope.submit();
@@ -110,11 +126,11 @@ describe('Sign in', function () {
         var email = "valid@email.com";
         form.email.$setViewValue(email);
         form.password.$setViewValue("valid_password");
+        form.repassword.$setViewValue("valid_password");
 
-        $httpBackend.expectPOST(constants.api.signInWithCredentials)
-            .respond({
-                "email": email
-            });
+        $httpBackend.expectPOST(constants.api.signUp).respond({
+            "email": email
+        });
 
         // When
         scope.submit();

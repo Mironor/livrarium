@@ -6,7 +6,8 @@ angular.module('lvr')
         pathToApp: pathToApp,
 
         api: {
-          signInWithCredentials: '/authenticate/credentials'
+            signInWithCredentials: '/authenticate/credentials',
+            signUp: '/sign-up'
         },
 
         applicationUrls: {

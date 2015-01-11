@@ -25,7 +25,7 @@ describe('Sign in', function () {
         form = scope.credentials_sign_in_form;
     }));
 
-    afterEach(function() {
+    afterEach(function () {
         $httpBackend.verifyNoOutstandingExpectation();
         $httpBackend.verifyNoOutstandingRequest();
     });
@@ -71,10 +71,9 @@ describe('Sign in', function () {
         form.email.$setViewValue("valid@email.com");
         form.password.$setViewValue("valid_password");
 
-        $httpBackend.expectPOST(constants.api.signInWithCredentials)
-            .respond(500, {
-                "code": constants.errorCodes.userNotFound
-            });
+        $httpBackend.expectPOST(constants.api.signInWithCredentials).respond(500, {
+            "code": constants.errorCodes.userNotFound
+        });
 
         // When
         scope.submit();
@@ -91,10 +90,9 @@ describe('Sign in', function () {
         form.email.$setViewValue(email);
         form.password.$setViewValue("valid_password");
 
-        $httpBackend.expectPOST(constants.api.signInWithCredentials)
-            .respond({
-                "email": email
-            });
+        $httpBackend.expectPOST(constants.api.signInWithCredentials).respond({
+            "email": email
+        });
 
         // When
         scope.submit();
@@ -111,10 +109,9 @@ describe('Sign in', function () {
         form.email.$setViewValue(email);
         form.password.$setViewValue("valid_password");
 
-        $httpBackend.expectPOST(constants.api.signInWithCredentials)
-            .respond({
-                "email": email
-            });
+        $httpBackend.expectPOST(constants.api.signInWithCredentials).respond({
+            "email": email
+        });
 
         // When
         scope.submit();
