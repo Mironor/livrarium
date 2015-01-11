@@ -20,9 +20,9 @@ angular.module('lvr.signUp', [])
                     var form = $scope.credentials_sign_up_form;
                     $scope.emailNotValid = form.email.$invalid;
                     $scope.passwordNotValid = form.password.$invalid || form.repassword.$invalid;
-                    $scope.passwordsAreEqual = !($scope.model.password === $scope.model.rePassword);
+                    $scope.passwordsAreEqual = $scope.model.password === $scope.model.rePassword;
 
-                    if (form.$valid && !$scope.passwordsAreEqual) {
+                    if (form.$valid && $scope.passwordsAreEqual) {
                         $http.post('/sign-up', {
                             "email": $scope.model.email,
                             "password": $scope.model.password

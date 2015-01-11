@@ -11,7 +11,7 @@ angular.module('lvr')
         "login.error.invalidEmailOrPassword": "No such user found",
         "login.error.invalidEmail": "Email is not valid",
         "login.error.invalidPassword": "Password should be minimum 6 characters long",
-        "login.error.notEqualPassword": "Passwords are not the same",
+        "login.error.notEqualPasswords": "Passwords are not the same",
         "login.error.accessDenied": "Password is invalid",
         "login.error.userAlreadyExists": "User {{existingEmail}} already exists",
 
