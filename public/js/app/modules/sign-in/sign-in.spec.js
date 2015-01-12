@@ -17,7 +17,7 @@ describe('Sign in', function () {
         identity = _identity_;
 
         scope = $rootScope.$new();
-        element = angular.element(validTemplate);
+        element = jQuery(validTemplate);
         $compile(element)(scope);
 
         scope.$apply();
@@ -32,7 +32,7 @@ describe('Sign in', function () {
 
     it('doesn\'t show any error by default', function () {
         // Given
-        var $shownErrorDivs = $(element).find('.error').not('.ng-hide');
+        var $shownErrorDivs = element.find('.error').not('.ng-hide');
 
         // When
 
@@ -50,7 +50,8 @@ describe('Sign in', function () {
         scope.$digest();
 
         // Then
-        expect(element.find('.email-password-not-valid').hasClass('ng-hide')).toBeFalsy()
+        expect(element.find('.email-password-not-valid')).toExist();
+        expect(element.find('.email-password-not-valid')).not.toHaveClass('ng-hide');
     });
 
     it('should show error if password is too short', function () {
@@ -63,7 +64,8 @@ describe('Sign in', function () {
         scope.$digest();
 
         // Then
-        expect(element.find('.email-password-not-valid').hasClass('ng-hide')).toBeFalsy()
+        expect(element.find('.email-password-not-valid')).toExist();
+        expect(element.find('.email-password-not-valid')).not.toHaveClass('ng-hide');
     });
 
     it('should show error if user does not exist', function () {
@@ -81,7 +83,8 @@ describe('Sign in', function () {
         scope.$digest();
 
         // Then
-        expect(element.find('.email-password-not-valid').hasClass('ng-hide')).toBeFalsy()
+        expect(element.find('.email-password-not-valid')).toExist();
+        expect(element.find('.email-password-not-valid')).not.toHaveClass('ng-hide');
     });
 
     it('should modify identity value on successful log in', function () {

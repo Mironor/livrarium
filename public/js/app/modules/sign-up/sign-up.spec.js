@@ -17,7 +17,7 @@ describe('Sign up', function () {
         identity = _identity_;
 
         scope = $rootScope.$new();
-        element = angular.element(validTemplate);
+        element = jQuery(validTemplate);
         $compile(element)(scope);
 
         scope.$apply();
@@ -32,7 +32,7 @@ describe('Sign up', function () {
 
     it('doesn\'t show any error by default', function () {
         // Given
-        var $shownErrorDivs = $(element).find('.error').not('.ng-hide');
+        var $shownErrorDivs = element.find('.error').not('.ng-hide');
 
         // When
 
@@ -51,7 +51,8 @@ describe('Sign up', function () {
         scope.$digest();
 
         // Then
-        expect(element.find('.email-not-valid').hasClass('ng-hide')).toBeFalsy()
+        expect(element.find('.email-not-valid')).toExist();
+        expect(element.find('.email-not-valid')).not.toHaveClass('ng-hide')
     });
 
     it('should show error if password is too short', function () {
@@ -65,7 +66,8 @@ describe('Sign up', function () {
         scope.$digest();
 
         // Then
-        expect(element.find('.password-not-valid').hasClass('ng-hide')).toBeFalsy()
+        expect(element.find('.password-not-valid')).toExist();
+        expect(element.find('.password-not-valid')).not.toHaveClass('ng-hide');
     });
 
     it('should show error if passwords are not the same', function () {
@@ -79,7 +81,8 @@ describe('Sign up', function () {
         scope.$digest();
 
         // Then
-        expect(element.find('.passwords-not-equal').hasClass('ng-hide')).toBeFalsy()
+        expect(element.find('.passwords-not-equal')).toExist();
+        expect(element.find('.passwords-not-equal')).not.toHaveClass('ng-hide')
     });
 
     it('should show error if user already exists', function () {
@@ -98,7 +101,8 @@ describe('Sign up', function () {
         scope.$digest();
 
         // Then
-        expect(element.find('.user-already-exists').hasClass('ng-hide')).toBeFalsy()
+        expect(element.find('.user-already-exists')).toExist();
+        expect(element.find('.user-already-exists')).not.toHaveClass('ng-hide');
     });
 
     it('should modify identity value on successful sign up', function () {

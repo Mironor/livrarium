@@ -10,7 +10,7 @@ angular.module('lvr.uploadButton', [
                 for (var i = 0; i < $files.length; i++) {
                     var file = $files[i];
                     $scope.upload = $upload.upload({
-                        url: '/upload', //upload.php script, node.js route, or servlet url
+                        url: '/upload',
                         method: 'POST',
                         // withCredentials: true,
                         data: {

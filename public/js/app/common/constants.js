@@ -7,7 +7,10 @@ angular.module('lvr')
 
         api: {
             signInWithCredentials: '/authenticate/credentials',
-            signUp: '/sign-up'
+            signUp: '/sign-up',
+            upload: function(folderId) {
+                return '/upload/' + folderId
+            }
         },
 
         applicationUrls: {
