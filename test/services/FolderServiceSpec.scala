@@ -20,7 +20,7 @@ class FolderServiceSpec extends LivrariumSpecification with AroundExample with T
       val folderService = new FolderService
 
       // When
-      val rootFolderChildren = await(folderService.retrieveUserFolderTree(UserFixture.testUser))
+      val rootFolderChildren = await(folderService.retrieveFolderTree(UserFixture.testUser))
 
       // Then
       rootFolderChildren must have size 2

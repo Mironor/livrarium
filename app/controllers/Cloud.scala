@@ -1,15 +1,13 @@
 package controllers
 
-//import java.io.File
 
 import java.io.File
 
-import com.mohiva.play.silhouette.api.util.Credentials
 import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.sksamuel.scrimage.{Format => ImgFormat, Image}
 import helpers.{BookFormatHelper, PDFHelper, RandomIdGenerator}
-import models.{FolderContents, User}
+import models.{Folder, FolderContents, User}
 import org.apache.commons.io.FileUtils
 import play.api.Play
 import play.api.libs.Files
@@ -51,7 +49,16 @@ class Cloud(implicit inj: Injector)
     request.identity match {
       case Some(user) => Future.successful(Ok(views.html.index()))
 
-      case None => applicationController.authenticateUser(Credentials("meanor@gmail.com", "aaaaaa"))
+      case None => Future.successful(Ok(views.html.index())) //applicationController.authenticateUser(Credentials("meanor@gmail.com", "aaaaaa"))
+    }
+  }
+
+  def getFolderTree = UserAwareAction.async { implicit request =>
+    request.identity match {
+      case Some(user) =>
+        val folders: Future[List[Folder]] = folderService.retrieveFolderTree(user)
+        folders.map(folder => Ok(Json.toJson(folder)))
+      case None => Future.successful(Ok(views.html.index()))
     }
   }
 
@@ -61,7 +68,7 @@ class Cloud(implicit inj: Injector)
         val rootFolder = rootFolderOption.getOrElse(throw new Exception("Root folder not found"))
         val rootFolderContentPromise = getFolderContents(user, rootFolder.id)
 
-        rootFolderContentPromise.map(rootContent => Ok(Json.toJson(rootContent)))
+        rootFolderContentPromise.map(x => Ok(Json.toJson(x)))
       }
 
       case None => Future.successful(Ok(views.html.index()))
@@ -172,8 +179,6 @@ class Cloud(implicit inj: Injector)
             Json.obj("code" -> inject[Int](identified by "errors.upload.noFileFound"))
           )
         }
-
-
     }.getOrElse {
       Future.successful(BadRequest(
         Json.obj("code" -> inject[Int](identified by "errors.upload.noFileFound"))

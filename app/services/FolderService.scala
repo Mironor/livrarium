@@ -24,13 +24,14 @@ class FolderService(implicit inj: Injector) extends Injectable {
    * @param user User
    * @return list of immediate children of root's folder.
    */
-  def retrieveUserFolderTree(user: User): Future[List[Folder]] = {
+  def retrieveFolderTree(user: User): Future[List[Folder]] = {
     folderDAO.findAll(user.id).map {
       case rootFolder :: tail => generateChildren(0, rootFolder.right, tail)
       case Nil => Nil
     }
   }
 
+  // this is not tail-rec, so possible overflows on very large folder trees
   private def generateChildren(currentLeft: Int, currentRight: Int, dbFolders: Seq[DBFolder]): List[Folder] = {
     dbFolders match {
       case dbFolder :: tail if dbFolder.left > currentRight => Nil

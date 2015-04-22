@@ -7,7 +7,7 @@ import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.test._
 import fixtures.{FolderFixture, UserFixture}
 import helpers.{BookFormatHelper, LivrariumSpecification, PDFTestHelper, RandomIdGenerator}
-import models.FolderContents
+import models.{Folder, FolderContents}
 import org.apache.commons.io.FileUtils
 import org.specs2.matcher.{FileMatchers, ThrownMessages}
 import org.specs2.specification.AroundExample
@@ -45,6 +45,31 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
 
   "Cloud controller" should {
 
+    "return folder tree" in {
+      // Given
+      val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.testUserLoginInfo)
+
+      val cloudController = new Cloud
+
+      // When
+      val result = cloudController.getFolderTree()(request)
+
+      // Then
+      status(result) mustEqual OK
+      contentType(result) must beSome("application/json")
+
+      val rootChildren = contentAsJson(result).as[List[Folder]]
+      rootChildren must have size 2
+
+      val sub1 = rootChildren.head
+      sub1.name must beEqualTo(FolderFixture.sub1Name)
+      sub1.children.head.name must beEqualTo(FolderFixture.sub1sub1Name)
+      sub1.children(1).name must beEqualTo(FolderFixture.sub1sub2Name)
+
+      val sub2 = rootChildren(1)
+      sub2.name must beEqualTo(FolderFixture.sub2Name)
+    }
+
     "return root's content" in {
       // Given
       val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.testUserLoginInfo)
@@ -57,7 +82,10 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
       // Then
       status(result) mustEqual OK
       contentType(result) must beSome("application/json")
-      contentAsJson(result).as[FolderContents].folders must have size 2
+      val folderContents = contentAsJson(result).as[FolderContents]
+      folderContents.folders must have size 2
+      folderContents.folders(0).name must beEqualTo(FolderFixture.sub1Name)
+      folderContents.folders(1).name must beEqualTo(FolderFixture.sub2Name)
     }
 
     "return some folder's (other than root) content" in {
@@ -193,7 +221,7 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
       // Then
       books must have size 1
 
-      val book = books(0)
+      val book = books.head
       book.identifier mustEqual generatedBookId
       book.format mustEqual BookFormatHelper.PDF
       book.name mustEqual "book"

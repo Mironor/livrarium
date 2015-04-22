@@ -1,6 +1,3 @@
-/**
- * This spec was created to verify that test system works as expected
- */
 describe('Sign up', function () {
     var $httpBackend, $location, scope,
         element, form, constants, identity,

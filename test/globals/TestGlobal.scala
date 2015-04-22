@@ -14,8 +14,12 @@ import scaldi.play.{ControllerInjector, ScaldiSupport}
 
 object TestGlobal extends GlobalSettings with ScaldiSupport {
 
+  private val fakeEnvironment = FakeEnvironment[User, SessionAuthenticator](Seq(
+    UserFixture.testUserLoginInfo -> UserFixture.testUser)
+  )
+
   def applicationModule = new Module {
-    bind[Environment[User, SessionAuthenticator]] to FakeEnvironment[User, SessionAuthenticator](UserFixture.testUser)
+    bind[Environment[User, SessionAuthenticator]] to fakeEnvironment
     bind[RandomIdGenerator] to new PseudoUUIDGenerator
     bind[PasswordHasher] to new TestPasswordHasher
 

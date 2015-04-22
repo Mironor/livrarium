@@ -1,57 +1,60 @@
-describe('Folders', function () {
-    var httpBackend, constants, i18n,
+describe('Folders', function() {
+    var $httpBackend, constants, i18n,
         foldersService, Folder,
-        folderTreeFixture = [
-            {
-                name: 'javascript',
-                children: [
-                    {
-                        name: 'BDD with Jasmine',
-                        children: []
-                    },
-                    {
-                        name: 'Algorithms in js',
-                        children: []
-                    }
-                ]
-            },
-            {
-                name: 'database',
-                children: [
-                    {
-                        label: 'Beginning with MongoDB',
-                        children: []
-                    }
-                ]
-            }
-        ];
+    // function instead of value to regenerate folder tree each time (as we are working with mutable objects)
+        generateFolderTreeFixture = function() {
+            return [
+                {
+                    name: 'javascript',
+                    children: [
+                        {
+                            name: 'BDD with Jasmine',
+                            children: []
+                        },
+                        {
+                            name: 'Algorithms in js',
+                            children: []
+                        }
+                    ]
+                },
+                {
+                    name: 'database',
+                    children: [
+                        {
+                            label: 'Beginning with MongoDB',
+                            children: []
+                        }
+                    ]
+                }
+            ];
+        };
 
     beforeEach(module('lvr'));
 
-    beforeEach(inject(function ($httpBackend, _constants_, i18nEn, folders, _Folder_) {
+    beforeEach(inject(function(_$httpBackend_, _constants_, i18nEn, folders, _Folder_) {
         constants = _constants_;
         i18n = i18nEn;
 
-        httpBackend = $httpBackend;
-        httpBackend.when('GET', constants.applicationUrls.folders)
-            .respond(folderTreeFixture);
-
+        foldersService = folders;
         Folder = _Folder_;
 
-        foldersService = folders;
+        $httpBackend = _$httpBackend_;
+        $httpBackend.when('GET', constants.applicationUrls.folders)
+            .respond(generateFolderTreeFixture());
+
         foldersService.initFolderTree();
 
-        httpBackend.flush();
+        $httpBackend.flush();
     }));
 
-    afterEach(function () {
-        httpBackend.verifyNoOutstandingExpectation();
-        httpBackend.verifyNoOutstandingRequest();
+    afterEach(function() {
+        $httpBackend.verifyNoOutstandingExpectation();
+        $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it("should correctly initialize root folder", function () {
+    it("should correctly initialize root folder", function() {
         // Given
-        var rootFolder = foldersService.getRootFolder();
+        var rootFolder = foldersService.getCurrentFolder();
 
         // When
 
@@ -59,13 +62,24 @@ describe('Folders', function () {
         expect(rootFolder.children.length).toEqual(2);
     });
 
-    it("should recursively contain only Folders as children", function () {
+    it("should retrieve root folder", function() {
         // Given
-        var rootFolder = foldersService.getRootFolder(),
+        var rootFolder = foldersService.getRootFolder();
+
+        // When
+
+        // Then
+        expect(rootFolder.name).toEqual(constants.folders.rootFolderName);
+        expect(rootFolder.children.length).toEqual(2);
+    });
+
+    it("should recursively contain only Folders as children", function() {
+        // Given
+        var rootFolder = foldersService.getCurrentFolder(),
             foldersArray;
 
         function flattenRecursiveFolders(stack, children) {
-            _(children).forEach(function (child) {
+            _(children).forEach(function(child) {
                 stack.push(child);
                 flattenRecursiveFolders(stack, child.children);
             });
@@ -79,37 +93,37 @@ describe('Folders', function () {
         // Then
         expect(foldersArray.length).toEqual(5);
 
-        _(foldersArray).forEach(function (folder) {
+        _(foldersArray).forEach(function(folder) {
             expect(folder instanceof Folder).toBeTruthy();
         });
     });
 
     /*
-    it("should pick the the name for a new folder (if a folder with a default name already exists in current folder)", function () {
-        // Given
-        var currentFolder = foldersService.getCurrentFolder(),
-            newFolder = new Folder({
-                label: i18n['content.folders.newFolderName']
-            });
+     it("should pick the the name for a new folder (if a folder with a default name already exists in current folder)", function () {
+     // Given
+     var currentFolder = foldersService.getCurrentFolder(),
+     newFolder = new Folder({
+     label: i18n['content.folders.newFolderName']
+     });
 
-        currentFolder.children.push(newFolder);
+     currentFolder.children.push(newFolder);
 
-        // When
-        var secondNewFolderName = foldersService.getNewFolderNameInCurrentFolder();
+     // When
+     var secondNewFolderName = foldersService.getNewFolderNameInCurrentFolder();
 
-        // Then
-        expect(secondNewFolderName).toBe(i18n['content.folders.newFolderName'] + i18n['content.numberSign'] + '2')
-    });
+     // Then
+     expect(secondNewFolderName).toBe(i18n['content.folders.newFolderName'] + i18n['content.numberSign'] + '2')
+     });
 
-    it("should generate correct path to current folder", function () {
-        // Given
-        var expectedPath = "/database/Beginning with MongoDB";
+     it("should generate correct path to current folder", function () {
+     // Given
+     var expectedPath = "/database/Beginning with MongoDB";
 
-        // When
+     // When
 
-        // Then
-        expect(foldersService.getCurrentPath()).toBe()
+     // Then
+     expect(foldersService.getCurrentPath()).toBe()
 
-    })
-    */
+     })
+     */
 });

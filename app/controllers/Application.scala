@@ -2,7 +2,7 @@ package controllers
 
 import _root_.services.{FolderService, UserService}
 import com.mohiva.play.silhouette.api.{Silhouette, _}
-import com.mohiva.play.silhouette.api.exceptions.{AccessDeniedException, AuthenticationException}
+import com.mohiva.play.silhouette.api.exceptions.{NotAuthorizedException, NotAuthenticatedException}
 import com.mohiva.play.silhouette.api.services.{AuthInfoService, AvatarService}
 import com.mohiva.play.silhouette.api.util.{Credentials, PasswordHasher, PasswordInfo}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
@@ -88,7 +88,10 @@ class Application(implicit inj: Injector)
           val result = Future.successful(
             Ok(Json.obj("email" -> user.email))
           )
-          env.authenticatorService.init(authenticator, result)
+
+          env.authenticatorService.init(authenticator).flatMap { value =>
+            env.authenticatorService.embed(value, result)
+          }
         }
         case None => Future.successful {
           InternalServerError(Json.obj(
@@ -98,11 +101,11 @@ class Application(implicit inj: Injector)
         }
       }
     } recover {
-      case e: AccessDeniedException => InternalServerError(Json.obj(
+      case e: NotAuthorizedException => InternalServerError(Json.obj(
         "code" -> inject[Int](identified by "errors.auth.accessDenied"),
         "message" -> "Access denied"
       ))
-      case e: AuthenticationException => InternalServerError(Json.obj(
+      case e: NotAuthenticatedException => InternalServerError(Json.obj(
         "code" -> inject[Int](identified by "errors.auth.notAuthenticated"),
         "message" -> "Not authenticated"
       ))
@@ -111,7 +114,7 @@ class Application(implicit inj: Injector)
 
   private def credentialsAuthentication(userCredentials: Credentials) = env.providers.get(CredentialsProvider.ID) match {
     case Some(credentialsProvider: CredentialsProvider) => credentialsProvider.authenticate(userCredentials)
-    case _ => Future.failed(new AuthenticationException(s"Cannot find credentials provider"))
+    case _ => Future.failed(new NotAuthenticatedException(s"Cannot find credentials provider"))
   }
 
 
@@ -156,7 +159,8 @@ class Application(implicit inj: Injector)
       _ <- folderService.createRootForUser(user)
       _ <- authInfoService.save(loginInfo, password)
       authenticator <- env.authenticatorService.create(user.loginInfo)
-      result <- env.authenticatorService.init(authenticator, Future.successful {
+      value <- env.authenticatorService.init(authenticator)
+      result <- env.authenticatorService.embed(value, Future.successful {
         Ok(Json.obj("email" -> email))
       })
     } yield result
