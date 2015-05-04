@@ -19,7 +19,7 @@ class LoginInfoDAO {
    */
   def find(loginInfo: LoginInfo): Future[Option[DBLoginInfo]] =
     Future.successful {
-      DB withSession { implicit session =>
+      DB.withSession { implicit session =>
         slickLoginInfos.filter(x => x.providerID === loginInfo.providerID && x.providerKey === loginInfo.providerKey)
           .firstOption
       }
@@ -31,7 +31,7 @@ class LoginInfoDAO {
    */
   def findAll(): Future[List[DBLoginInfo]] =
     Future.successful {
-      DB withSession { implicit session =>
+      DB.withSession { implicit session =>
         slickLoginInfos.list
       }
     }
@@ -44,8 +44,8 @@ class LoginInfoDAO {
    */
   def insert(loginInfo: LoginInfo, userId: Long): Future[DBLoginInfo] =
     Future.successful {
-      DB withSession { implicit session =>
-        val loginInfoId = slickLoginInfos returning slickLoginInfos.map(_.id) += DBLoginInfo(None, userId, loginInfo.providerID, loginInfo.providerKey)
+      DB.withSession { implicit session =>
+        val loginInfoId = slickLoginInfos.returning(slickLoginInfos.map(_.id)) += DBLoginInfo(None, userId, loginInfo.providerID, loginInfo.providerKey)
         DBLoginInfo(Option(loginInfoId), userId, loginInfo.providerID, loginInfo.providerKey)
       }
     }

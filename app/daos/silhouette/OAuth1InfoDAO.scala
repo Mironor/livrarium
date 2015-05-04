@@ -24,14 +24,14 @@ class OAuth1InfoDAO extends DelegableAuthInfoDAO[OAuth1Info] {
    */
   def find(loginInfo: LoginInfo): Future[Option[OAuth1Info]] = {
     Future.successful(
-      DB withSession { implicit session =>
+      DB.withSession { implicit session =>
 
-        val dbOAuth1InfoOption = (for {
+        val dbOAuth1Info = (for {
           dbLoginInfo <- slickLoginInfos if dbLoginInfo.providerID === loginInfo.providerID && dbLoginInfo.providerKey === loginInfo.providerKey
           dbOAuth1Info <- slickOAuth1Infos if dbOAuth1Info.idLoginInfo === dbLoginInfo.id
         } yield dbOAuth1Info).firstOption
 
-        dbOAuth1InfoOption.flatMap(dbOAuth1Info => Option(OAuth1Info(dbOAuth1Info.token, dbOAuth1Info.secret)))
+        dbOAuth1Info.map(dbOAuth1Info => OAuth1Info(dbOAuth1Info.token, dbOAuth1Info.secret))
       }
     )
   }
@@ -45,22 +45,22 @@ class OAuth1InfoDAO extends DelegableAuthInfoDAO[OAuth1Info] {
    */
   def save(loginInfo: LoginInfo, authInfo: OAuth1Info): Future[OAuth1Info] = {
     Future.successful(
-      DB withSession { implicit session =>
+      DB.withSession { implicit session =>
 
-        val loginInfoOption = slickLoginInfos
-          .filter(x => x.providerID === loginInfo.providerID && x.providerKey === loginInfo.providerKey)
+        val foundLoginInfo = slickLoginInfos.filter(x => x.providerID === loginInfo.providerID && x.providerKey === loginInfo.providerKey)
           .firstOption
 
-        val loginInfoIdOption = loginInfoOption.flatMap(_.id)
+        val loginInfoIdOption = foundLoginInfo.flatMap(_.id)
 
         val loginInfoId = loginInfoIdOption.getOrElse(throw new SilhouetteDAOException("Associated LoginInfo not found"))
 
         val dbOAuth1Info = slickOAuth1Infos.filter(_.idLoginInfo === loginInfoId).firstOption
 
         dbOAuth1Info match {
-          case Some(a1Info) => slickOAuth1Infos update DBOAuth1Info(loginInfoId, authInfo.token, authInfo.secret)
-          case None => slickOAuth1Infos insert DBOAuth1Info(loginInfoId, authInfo.token, authInfo.secret)
+          case Some(a1Info) => slickOAuth1Infos.update(DBOAuth1Info(loginInfoId, authInfo.token, authInfo.secret))
+          case None => slickOAuth1Infos.insert(DBOAuth1Info(loginInfoId, authInfo.token, authInfo.secret))
         }
+
         authInfo
       }
     )

@@ -24,14 +24,19 @@ class OAuth2InfoDAO extends DelegableAuthInfoDAO[OAuth2Info] {
    */
   def find(loginInfo: LoginInfo): Future[Option[OAuth2Info]] = {
     Future.successful(
-      DB withSession { implicit session =>
+      DB.withSession { implicit session =>
 
-        val dbOAuth2InfoOption = (for {
+        val dbOAuth2Info = (for {
           dbLoginInfo <- slickLoginInfos if dbLoginInfo.providerID === loginInfo.providerID && dbLoginInfo.providerKey === loginInfo.providerKey
           dbOAuth2Info <- slickOAuth2Infos if dbOAuth2Info.idLoginInfo === dbLoginInfo.id
         } yield dbOAuth2Info).firstOption
 
-        dbOAuth2InfoOption.flatMap(dbOAuth1Info => Some(OAuth2Info(dbOAuth1Info.accessToken, dbOAuth1Info.tokenType, dbOAuth1Info.expiresIn, dbOAuth1Info.refreshToken)))
+        dbOAuth2Info.map(dbOAuth1Info => OAuth2Info(
+          dbOAuth1Info.accessToken,
+          dbOAuth1Info.tokenType,
+          dbOAuth1Info.expiresIn,
+          dbOAuth1Info.refreshToken
+        ))
       }
     )
   }
@@ -45,21 +50,21 @@ class OAuth2InfoDAO extends DelegableAuthInfoDAO[OAuth2Info] {
    */
   def save(loginInfo: LoginInfo, authInfo: OAuth2Info): Future[OAuth2Info] = {
     Future.successful(
-      DB withSession { implicit session =>
+      DB.withSession { implicit session =>
 
-        val loginInfoOption = slickLoginInfos
+        val savedLoginInfo = slickLoginInfos
           .filter(x => x.providerID === loginInfo.providerID && x.providerKey === loginInfo.providerKey)
           .firstOption
 
-        val loginInfoIdOption = loginInfoOption.flatMap(_.id)
+        val loginInfoIdOption = savedLoginInfo.flatMap(_.id)
 
         val loginInfoId = loginInfoIdOption.getOrElse(throw new SilhouetteDAOException("Associated LoginInfo not found"))
 
         val dbOAuth2Info = slickOAuth2Infos.filter(_.idLoginInfo === loginInfoId).firstOption
 
         dbOAuth2Info match {
-          case Some(a2Info) => slickOAuth2Infos update DBOAuth2Info(loginInfoId, authInfo.accessToken, authInfo.tokenType, authInfo.expiresIn, authInfo.refreshToken)
-          case None => slickOAuth2Infos insert DBOAuth2Info(loginInfoId, authInfo.accessToken, authInfo.tokenType, authInfo.expiresIn, authInfo.refreshToken)
+          case Some(a2Info) => slickOAuth2Infos.update(DBOAuth2Info(loginInfoId, authInfo.accessToken, authInfo.tokenType, authInfo.expiresIn, authInfo.refreshToken))
+          case None => slickOAuth2Infos.insert(DBOAuth2Info(loginInfoId, authInfo.accessToken, authInfo.tokenType, authInfo.expiresIn, authInfo.refreshToken))
         }
         authInfo
       }

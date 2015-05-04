@@ -13,8 +13,8 @@ resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
 libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-slick" % "0.8.0",
   "org.postgresql" % "postgresql" % "9.3-1102-jdbc4",
-  "com.mohiva" %% "play-silhouette" % "2.0-RC2",
-  "com.mohiva" %% "play-silhouette-testkit" % "2.0-RC2" % "test",
+  "com.mohiva" %% "play-silhouette" % "2.0",
+  "com.mohiva" %% "play-silhouette-testkit" % "2.0" % "test",
   "org.scaldi" %% "scaldi-play" % "0.4.1",
   "com.sksamuel.scrimage" %% "scrimage-core" % "1.4.1",
   "com.sksamuel.scrimage" %% "scrimage-canvas" % "1.4.1",

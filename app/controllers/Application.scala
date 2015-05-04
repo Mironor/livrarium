@@ -41,10 +41,10 @@ class Application(implicit inj: Injector)
    *
    * @return index page or cloud index page if user is authenticated
    */
-  def index = UserAwareAction.async { implicit request =>
+  def index = UserAwareAction { implicit request =>
     request.identity match {
-      case Some(user) => Future.successful(Redirect(routes.Cloud.index()))
-      case None => Future.successful(Ok(views.html.index()))
+      case Some(user) => Redirect(routes.Cloud.index())
+      case None => Ok(views.html.index())
     }
   }
 
@@ -61,8 +61,8 @@ class Application(implicit inj: Injector)
    *
    * @return The result to display.
    */
-  def signOut = SecuredAction.async { implicit request =>
-    val result = Future.successful(Redirect(routes.Application.index()))
+  def signOut = SecuredAction { implicit request =>
+    val result = Redirect(routes.Application.index())
     request.authenticator.discard(result)
   }
 
@@ -100,7 +100,7 @@ class Application(implicit inj: Injector)
           ))
         }
       }
-    } recover {
+    }.recover {
       case e: NotAuthorizedException => InternalServerError(Json.obj(
         "code" -> inject[Int](identified by "errors.auth.accessDenied"),
         "message" -> "Access denied"
@@ -128,22 +128,22 @@ class Application(implicit inj: Injector)
     val userCredentials = request.body.validate[Credentials]
 
     userCredentials match {
-      case credentials: JsSuccess[Credentials] =>
-        val email = credentials.get.identifier
-        val password = credentials.get.password
+      case JsSuccess(credentials, _) =>
+        val email = credentials.identifier
+        val password = credentials.password
         val loginInfo = LoginInfo(CredentialsProvider.ID, email)
         val hashedPassword = passwordHasher.hash(password)
 
         userService.retrieve(loginInfo).flatMap {
+          case None => createNewUser(loginInfo, email, hashedPassword)
+
           case Some(_) => Future.successful(InternalServerError(Json.obj(
             "code" -> inject[Int](identified by "errors.auth.userAlreadyExists"),
             "message" -> "User already exists"
           )))
-
-          case None => createNewUser(loginInfo, email, hashedPassword)
         }
 
-      case errors: JsError => Future.successful(InternalServerError(Json.obj(
+      case JsError(errors) => Future.successful(InternalServerError(Json.obj(
         "code" -> inject[Int](identified by "errors.auth.loginPasswordNotValid"),
         "message" -> "Login or password are not valid",
         "fields" -> JsError.toFlatJson(errors)
@@ -151,7 +151,7 @@ class Application(implicit inj: Injector)
     }
   }
 
-  def createNewUser(loginInfo: LoginInfo, email: String, password: PasswordInfo)(implicit request: Request[_]) = {
+  private def createNewUser(loginInfo: LoginInfo, email: String, password: PasswordInfo)(implicit request: Request[_]) = {
 
     val result = for {
       avatarURL <- avatarService.retrieveURL(email)

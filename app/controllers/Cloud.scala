@@ -27,16 +27,15 @@ class Cloud(implicit inj: Injector)
   implicit val env = inject[Environment[User, SessionAuthenticator]]
 
   val applicationController = inject[Application]
-
   val folderService = inject[FolderService]
   val bookService = inject[BookService]
-
   val randomIdGenerator = inject[RandomIdGenerator]
 
 
-  /** Readers and Writers to handle json requests
-    * https://www.playframework.com/documentation/2.1.0/ScalaJsonRequests
-    */
+  /**
+   * Readers and Writers to handle json requests
+   * https://www.playframework.com/documentation/2.1.0/ScalaJsonRequests
+   */
   implicit val appendFolderReads = (
     (__ \ 'idParent).read[Long] and
       (__ \ 'name).read[String]
@@ -45,11 +44,10 @@ class Cloud(implicit inj: Injector)
   implicit val uploadBookReads = (__ \ 'idFolder).read[Long]
 
 
-  def index = UserAwareAction.async { implicit request =>
+  def index = UserAwareAction { implicit request =>
     request.identity match {
-      case Some(user) => Future.successful(Ok(views.html.index()))
-
-      case None => Future.successful(Ok(views.html.index())) //applicationController.authenticateUser(Credentials("meanor@gmail.com", "aaaaaa"))
+      case Some(user) => Ok(views.html.index())
+      case None => Ok(views.html.index()) //applicationController.authenticateUser(Credentials("meanor@gmail.com", "aaaaaa"))
     }
   }
 
@@ -57,7 +55,8 @@ class Cloud(implicit inj: Injector)
     request.identity match {
       case Some(user) =>
         val folders: Future[List[Folder]] = folderService.retrieveFolderTree(user)
-        folders.map(folder => Ok(Json.toJson(folder)))
+        folders.map(folders => Ok(Json.toJson(folders)))
+
       case None => Future.successful(Ok(views.html.index()))
     }
   }
@@ -66,9 +65,9 @@ class Cloud(implicit inj: Injector)
     request.identity match {
       case Some(user) => folderService.retrieveRoot(user).flatMap { rootFolderOption =>
         val rootFolder = rootFolderOption.getOrElse(throw new Exception("Root folder not found"))
-        val rootFolderContentPromise = getFolderContents(user, rootFolder.id)
+        val rootFolderContent = getFolderContents(user, rootFolder.id)
 
-        rootFolderContentPromise.map(x => Ok(Json.toJson(x)))
+        rootFolderContent.map(x => Ok(Json.toJson(x)))
       }
 
       case None => Future.successful(Ok(views.html.index()))
@@ -83,8 +82,8 @@ class Cloud(implicit inj: Injector)
   def getContent(id: Long) = UserAwareAction.async { implicit request =>
     request.identity match {
       case Some(user) =>
-        val folderContentsPromise = getFolderContents(user, id)
-        folderContentsPromise.map(rootContent => Ok(Json.toJson(rootContent)))
+        val folderContent: Future[FolderContents] = getFolderContents(user, id)
+        folderContent.map(rootContent => Ok(Json.toJson(rootContent)))
 
       case None => Future.successful(Ok(views.html.index()))
     }
@@ -118,6 +117,7 @@ class Cloud(implicit inj: Injector)
 
   private def uploadBook(user: User, uploadFolderId: Long)(implicit request: UserAwareRequest[MultipartFormData[Files.TemporaryFile]]): Future[Result] = {
     val uploadInputName = inject[String](identified by "books.uploadInputName")
+
     request.body.file(uploadInputName).map {
       book =>
         val filename = book.filename
@@ -175,6 +175,7 @@ class Cloud(implicit inj: Injector)
               "uuid" -> addedBook.identifier,
               "name" -> name
             ))
+
           case None => BadRequest(
             Json.obj("code" -> inject[Int](identified by "errors.upload.noFileFound"))
           )
