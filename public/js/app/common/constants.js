@@ -32,7 +32,5 @@ angular.module('lvr')
         },
 
         folders: {
-            rootFolderName: "__root__",
-            rootFolderId: 0
         }
     });

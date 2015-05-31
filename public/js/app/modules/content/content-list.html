@@ -16,8 +16,8 @@
         <td></td>
         <td></td>
     </tr>
-    <tr ng-repeat="book in books">
-        <td class="thumbnail"><img ng-src="/assets/img/{{book.id}}-small.png" alt=""/></td>
+    <tr ng-repeat="book in getBooks()">
+        <td class="thumbnail"><img ng-src="/assets/img/{{currentFolder.id}}/{{book.identifier}}-small.png" alt=""/></td>
         <td>
             {{book.name}}
             <lvr-book-progressbar class="progressbar" bars="book.progressBars"></lvr-book-progressbar>

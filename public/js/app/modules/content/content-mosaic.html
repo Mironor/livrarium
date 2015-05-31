@@ -4,9 +4,9 @@
     </div>
 </div>
 <div class="books">
-    <div ng-repeat="book in books" class="book">
+    <div ng-repeat="book in getBooks()" class="book">
         <div class="thumbnail">
-            <img ng-src="/assets/img/{{book.id}}.png" alt=""/>
+            <img ng-src="/assets/img/{{currentFolder.id}}/{{book.identifier}}.png" alt=""/>
         </div>
         <lvr-book-progressbar class="progressbar" bars="book.progressBars"></lvr-book-progressbar>
     </div>

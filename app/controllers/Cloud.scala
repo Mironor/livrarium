@@ -44,20 +44,30 @@ class Cloud(implicit inj: Injector)
   implicit val uploadBookReads = (__ \ 'idFolder).read[Long]
 
 
-  def index = UserAwareAction { implicit request =>
+  def index = UserAwareAction.async { implicit request =>
     request.identity match {
-      case Some(user) => Ok(views.html.index())
-      case None => Ok(views.html.index()) //applicationController.authenticateUser(Credentials("meanor@gmail.com", "aaaaaa"))
+      case Some(user) =>
+        val rootFolder: Future[Folder] = folderService.retrieveFolderTree(user)
+        rootFolder.map{
+          folder => Ok(views.html.index(Json.obj(
+
+            "rootFolder" -> Json.toJson(folder)
+
+          ).toString()))
+        }
+
+
+      case None => Future.successful(Redirect(routes.Application.index())) //applicationController.authenticateUser(Credentials("meanor@gmail.com", "aaaaaa"))
     }
   }
 
   def getFolderTree = UserAwareAction.async { implicit request =>
     request.identity match {
       case Some(user) =>
-        val folders: Future[List[Folder]] = folderService.retrieveFolderTree(user)
-        folders.map(folders => Ok(Json.toJson(folders)))
+        val rootFolder: Future[Folder] = folderService.retrieveFolderTree(user)
+        rootFolder.map(folder => Ok(Json.toJson(folder)))
 
-      case None => Future.successful(Ok(views.html.index()))
+      case None => Future.successful(Redirect(routes.Application.index()))
     }
   }
 
@@ -70,7 +80,7 @@ class Cloud(implicit inj: Injector)
         rootFolderContent.map(x => Ok(Json.toJson(x)))
       }
 
-      case None => Future.successful(Ok(views.html.index()))
+      case None => Future.successful(Redirect(routes.Application.index()))
     }
   }
 
@@ -85,7 +95,7 @@ class Cloud(implicit inj: Injector)
         val folderContent: Future[FolderContents] = getFolderContents(user, id)
         folderContent.map(rootContent => Ok(Json.toJson(rootContent)))
 
-      case None => Future.successful(Ok(views.html.index()))
+      case None => Future.successful(Redirect(routes.Application.index()))
     }
   }
 
@@ -104,14 +114,14 @@ class Cloud(implicit inj: Injector)
           )))
         }
 
-      case None => Future.successful(Ok(views.html.index()))
+      case None => Future.successful(Redirect(routes.Application.index()))
     }
   }
 
   def upload(uploadFolderId: Long) = UserAwareAction.async(parse.multipartFormData) { implicit request =>
     request.identity match {
       case Some(user) => uploadBook(user, uploadFolderId)
-      case None => Future.successful(Ok(views.html.index()))
+      case None => Future.successful(Redirect(routes.Application.index()))
     }
   }
 
@@ -170,11 +180,7 @@ class Cloud(implicit inj: Injector)
 
         uploadedBookModel.map {
           case Some(addedBook) =>
-            Ok(Json.obj(
-              "id" -> addedBook.id,
-              "uuid" -> addedBook.identifier,
-              "name" -> name
-            ))
+            Ok(Json.toJson(addedBook))
 
           case None => BadRequest(
             Json.obj("code" -> inject[Int](identified by "errors.upload.noFileFound"))

@@ -5,7 +5,7 @@ angular.module('lvr')
 
             id: '',
             name: '',
-            createDate: 0,
+            identifier: '',
             formats: [],
             pages: 0,
             currentPage: 0,
@@ -59,6 +59,7 @@ angular.module('lvr')
 
         var Book = function (data) {
             angular.extend(this, data);
+            this.initProgressBars();
         };
 
         angular.extend(Book.prototype, bookModel);

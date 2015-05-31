@@ -23,7 +23,7 @@ class ApplicationSpec extends LivrariumSpecification with FileMatchers with Arou
 
       val applicationController = new Application
 
-      val expectedHtml = contentAsString(views.html.index())
+      val expectedHtml = contentAsString(views.html.index(""))
 
       // When
       val result = applicationController.index()(request)

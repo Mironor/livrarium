@@ -1,15 +1,13 @@
 angular.module('lvr')
-    .factory('folders', function ($http, constants, i18nEn, Folder) {
-
-        var rootFolder = new Folder({
-                name: constants.folders.rootFolderName,
-                children: []
-            }),
-
-            currentFolder = rootFolder;
+    .factory('folders', function($http, constants, i18nEn, bootstrapData, Folder) {
 
         return {
-            initFolderTree: function () {
+            // These public fields are only for angular binding, otherwise use helper functions instead
+            rootFolder: new Folder(bootstrapData.rootFolder),
+
+            currentFolder: this.rootFolder,
+
+            fetchRootFolder: function () {
                 $http.get(constants.applicationUrls.folderTree)
                     .success(function (data) {
                         _(data).forEach(function (folderData) {
@@ -22,16 +20,19 @@ angular.module('lvr')
                 return currentFolder;
             },
 
+            getCurrentSubFolders: function() {
+                return currentFolder.children;
+            },
 
-            getRootFolder: function () {
+            getRootFolder: function() {
                 return rootFolder;
             }
 
             // Legacy
             /*
-            saveRootFolder: function () {
-                $http.post(constants.applicationUrls.folders, this.getRootFolder().children);
-            },
+             saveRootFolder: function () {
+             $http.post(constants.applicationUrls.folders, this.getRootFolder().children);
+             },
 
              getNewFolderNameInCurrentFolder: function () {
              var currentFolderChildren = this.getCurrentFolder().children,

@@ -58,7 +58,8 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
       status(result) mustEqual OK
       contentType(result) must beSome("application/json")
 
-      val rootChildren = contentAsJson(result).as[List[Folder]]
+      val rootFolder = contentAsJson(result).as[Folder]
+      val rootChildren = rootFolder.children
       rootChildren must have size 2
 
       val sub1 = rootChildren.head

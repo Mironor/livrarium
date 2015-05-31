@@ -19,15 +19,17 @@ class FolderService(implicit inj: Injector) extends Injectable {
   val folderDAO = inject[FolderDAO]
 
   /**
-   * Root folder should never be exposed to api. Thus we return its immediate children with their children recursively
+   * User's folder tree starting with root folder
    * Implementation of Nested Sets pattern
    * @param user User
-   * @return list of immediate children of root's folder.
+   * @return root folder with recursive children folders (creates root folder if not found)
    */
-  def retrieveFolderTree(user: User): Future[List[Folder]] = {
-    folderDAO.findAll(user.id).map {
-      case rootFolder :: tail => generateChildren(0, rootFolder.right, tail)
-      case Nil => Nil
+  def retrieveFolderTree(user: User): Future[Folder] = {
+    folderDAO.findAll(user.id).flatMap {
+      case rootFolder :: tail => Future.successful {
+        Folder.fromDBFolderWithChildren(rootFolder, generateChildren(0, rootFolder.right, tail))
+      }
+      case Nil => createRootForUser(user)
     }
   }
 
@@ -68,12 +70,11 @@ class FolderService(implicit inj: Injector) extends Injectable {
   /**
    * Creates root folder for a supplied user
    * @param user current user
-   * @return a promise of a created root folder (None if the folder was not created)
+   * @return a promise of a created root folder
    */
-  def createRootForUser(user: User): Future[Option[Folder]] = {
+  def createRootForUser(user: User): Future[Folder] = {
     folderDAO.insertRoot(user.id)
       .map(Folder.fromDBFolder)
-      .map(Option.apply)
   }
 
 

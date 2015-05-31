@@ -12,7 +12,7 @@ import scala.slick.lifted.TableQuery
 
 class FolderDAO {
 
-  val rootFolderName = "__root__"
+  val rootFolderName = ""
   val slickFolders = TableQuery[Folders]
 
   /**

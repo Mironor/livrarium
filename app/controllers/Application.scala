@@ -44,7 +44,7 @@ class Application(implicit inj: Injector)
   def index = UserAwareAction { implicit request =>
     request.identity match {
       case Some(user) => Redirect(routes.Cloud.index())
-      case None => Ok(views.html.index())
+      case None => Ok(views.html.index(""))
     }
   }
 

@@ -1,9 +1,13 @@
 describe('Folders', function() {
     var $httpBackend, constants, i18n,
-        foldersService, Folder,
+        foldersService, Folder;
+
     // function instead of value to regenerate folder tree each time (as we are working with mutable objects)
-        generateFolderTreeFixture = function() {
-            return [
+    var generateFolderTreeFixture = function() {
+        return {
+            id: 1,
+            name: "",
+            children:[
                 {
                     name: 'javascript',
                     children: [
@@ -26,10 +30,15 @@ describe('Folders', function() {
                         }
                     ]
                 }
-            ];
+            ]
         };
+    };
 
-    beforeEach(module('lvr'));
+    beforeEach(module('lvr', function($provide) {
+        $provide.value('bootstrapData', {
+            rootFolder: generateFolderTreeFixture()
+        })
+    }));
 
     beforeEach(inject(function(_$httpBackend_, _constants_, i18nEn, folders, _Folder_) {
         constants = _constants_;
@@ -39,12 +48,6 @@ describe('Folders', function() {
         Folder = _Folder_;
 
         $httpBackend = _$httpBackend_;
-        $httpBackend.when('GET', constants.applicationUrls.folders)
-            .respond(generateFolderTreeFixture());
-
-        foldersService.initFolderTree();
-
-        $httpBackend.flush();
     }));
 
     afterEach(function() {
@@ -69,7 +72,7 @@ describe('Folders', function() {
         // When
 
         // Then
-        expect(rootFolder.name).toEqual(constants.folders.rootFolderName);
+        expect(rootFolder.name).toEqual("");
         expect(rootFolder.children.length).toEqual(2);
     });
 
