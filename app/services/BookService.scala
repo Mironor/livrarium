@@ -23,7 +23,7 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @param user current user
    * @return a promise of a list of user's books
    */
-  def retrieveAll(user: User): Future[List[Book]] = {
+  def retrieveAll(user: User): Future[Seq[Book]] = {
     bookDAO.findAll(user.id).map {
       _.map(Book.fromDBBook)
     }
@@ -120,7 +120,7 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @param folder parent folder (should be owned by current user)
    * @return a promise of the books contained in the supplied folder
    */
-  def retrieveAllFromFolder(user: User, folder: Folder): Future[List[Book]] = {
+  def retrieveAllFromFolder(user: User, folder: Folder): Future[Seq[Book]] = {
     retrieveAllFromFolder(user, folder.id)
   }
 
@@ -130,7 +130,7 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @param folderId parent folder's id (should be owned by current user)
    * @return a promise of the books contained in the supplied folder
    */
-  def retrieveAllFromFolder(user: User, folderId: Long): Future[List[Book]] = {
+  def retrieveAllFromFolder(user: User, folderId: Long): Future[Seq[Book]] = {
     folderService.retrieve(user, folderId).flatMap {
       case Some(_) => bookDAO.findAllInFolder(folderId).map {
         _.map(Book.fromDBBook)

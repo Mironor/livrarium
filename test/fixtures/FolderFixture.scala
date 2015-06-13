@@ -1,13 +1,10 @@
 package fixtures
 
-import daos.DBTableDefinitions
-import DBTableDefinitions.{DBFolder, Folders}
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick._
+import daos.DBTableDefinitions.{DBFolder, Folders}
+import slick.driver.PostgresDriver.api._
+import slick.lifted.TableQuery
 
 import scala.concurrent.Future
-import scala.slick.lifted.TableQuery
 
 /**
  * Initialise basic folder hierarchy with each folder's id available
@@ -15,13 +12,14 @@ import scala.slick.lifted.TableQuery
  * PLEASE KEEP UP TO DATE
  * Mocked tree:
  * root
- *   Sub1
- *     SubSub1
- *     SubSub2
- *   Sub2
+ * Sub1
+ * SubSub1
+ * SubSub2
+ * Sub2
  *
  */
-object FolderFixture {
+object FolderFixture{
+  lazy val database = Database.forConfig("slick.dbs.default.db")
 
   val slickFolders = TableQuery[Folders]
 
@@ -49,11 +47,7 @@ object FolderFixture {
   val otherUserRootName = "__root__"
   val otherUserRoot = DBFolder(Option(otherUserRootId), UserFixture.otherUserId, otherUserRootName, 0, 0, 1)
 
-  def initFixture(): Future[_] = {
-    Future.successful {
-      DB withSession { implicit session =>
-        slickFolders ++= Seq( root, sub1, sub1sub1, sub1sub2, sub2, otherUserRoot)
-      }
-    }
+  def initFixture(): Future[_] = database.run {
+    slickFolders ++= Seq(root, sub1, sub1sub1, sub1sub2, sub2, otherUserRoot)
   }
 }

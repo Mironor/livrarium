@@ -3,10 +3,10 @@ package services
 import fixtures.{FolderFixture, UserFixture}
 import helpers.LivrariumSpecification
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.AroundExample
+import org.specs2.specification.AroundEach
 
 
-class FolderServiceSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
+class FolderServiceSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
 
   protected def bootstrapFixtures(): Unit = {
     await(UserFixture.initFixture())

@@ -1,17 +1,17 @@
 package fixtures
 
 import com.mohiva.play.silhouette.api.LoginInfo
-import daos.DBTableDefinitions
-import DBTableDefinitions.{LoginInfos, DBLoginInfo, Users}
+import daos.DBTableDefinitions.{DBLoginInfo, LoginInfos, Users}
 import models.User
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick._
+import slick.driver.PostgresDriver.api._
+import slick.lifted.TableQuery
 
-import scala.concurrent.Future
-import scala.slick.lifted.TableQuery
+import scala.concurrent.duration._
+import scala.concurrent.{Await, Future}
 
-object UserFixture {
+object UserFixture{
+
+  lazy val database = Database.forConfig("slick.dbs.default.db")
 
   val slickUsers = TableQuery[Users]
   val slickLoginInfos = TableQuery[LoginInfos]
@@ -25,15 +25,15 @@ object UserFixture {
   val otherUser = User(otherUserId, otherUserLoginInfo, "test@test.test", None)
 
   def initFixture(): Future[_] = {
-    Future.successful {
-      DB withSession { implicit session =>
-        slickUsers ++= Seq(testUser.toDBUser, otherUser.toDBUser)
+    println(Await.result(database.run{slickLoginInfos.result}, 1 second))
+    database.run {
+      DBIO.seq(
+        slickUsers ++= Seq(testUser.toDBUser, otherUser.toDBUser) ,
         slickLoginInfos ++= Seq(
           DBLoginInfo(None, testUserId, testUserLoginInfo.providerID, testUserLoginInfo.providerKey),
           DBLoginInfo(None, otherUserId, otherUserLoginInfo.providerID, otherUserLoginInfo.providerKey)
         )
-      }
+      )
     }
   }
-
 }

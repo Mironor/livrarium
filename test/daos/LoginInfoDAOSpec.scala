@@ -5,9 +5,9 @@ import daos.silhouette.LoginInfoDAO
 import fixtures.UserFixture
 import helpers.LivrariumSpecification
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.AroundExample
+import org.specs2.specification.AroundEach
 
-class LoginInfoDAOSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
+class LoginInfoDAOSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
 
   protected def bootstrapFixtures(): Unit = {
     await(UserFixture.initFixture())
@@ -15,6 +15,7 @@ class LoginInfoDAOSpec extends LivrariumSpecification with AroundExample with Th
 
   "LoginInfo DAO" should {
     "find login info if it exists" in {
+      println("SPEC1")
       // Given
       val loginInfoDAO = new LoginInfoDAO
 
@@ -26,6 +27,7 @@ class LoginInfoDAOSpec extends LivrariumSpecification with AroundExample with Th
     }
 
     "find None if login info does not exist" in {
+      println("SPEC2")
       // Given
       val loginInfoDAO = new LoginInfoDAO
 
@@ -39,6 +41,7 @@ class LoginInfoDAOSpec extends LivrariumSpecification with AroundExample with Th
     }
 
     "insert new LoginInfo" in {
+      println("SPEC3")
       // Given
       val loginInfoDAO = new LoginInfoDAO
 
@@ -52,4 +55,5 @@ class LoginInfoDAOSpec extends LivrariumSpecification with AroundExample with Th
       loginInfo must beSome
     }
   }
+
 }

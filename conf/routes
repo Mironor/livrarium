@@ -23,16 +23,16 @@ POST          /folders/new                     @controllers.Cloud.createFolder
 
 POST          /upload/:folderId                @controllers.Cloud.upload(folderId:Long)
 
-GET           /books                           controllers.Books.index
-GET           /books/:id                       controllers.Books.info(id)
-GET           /books/read/:id                  controllers.Books.read(id)
-POST          /books/move/:id                  controllers.Books.move(id)
-POST          /books/toRead/:id                controllers.Books.toRead(id)
-POST          /books/update/:id                controllers.Books.update(id)
-POST          /books/archive/:id               controllers.Books.archive(id)
-DELETE        /books/:id                       controllers.Books.delete(id)
+#GET           /books                           controllers.Books.index
+#GET           /books/:id                       controllers.Books.info(id)
+#GET           /books/read/:id                  controllers.Books.read(id)
+#POST          /books/move/:id                  controllers.Books.move(id)
+#POST          /books/toRead/:id                controllers.Books.toRead(id)
+#POST          /books/update/:id                controllers.Books.update(id)
+#POST          /books/archive/:id               controllers.Books.archive(id)
+#DELETE        /books/:id                       controllers.Books.delete(id)
 
-GET           /search/:query                   controllers.Search.search(query)
+#GET           /search/:query                   controllers.Search.search(query)
 
-GET           /settings                        controllers.Settings.index
-POST          /settings/update                 controllers.Settings.update
+#GET           /settings                        controllers.Settings.index
+#POST          /settings/update                 controllers.Settings.update

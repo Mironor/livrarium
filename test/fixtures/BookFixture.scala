@@ -2,17 +2,18 @@ package fixtures
 
 import java.util.UUID
 
-import daos.DBTableDefinitions
+import daos.DBTableDefinitions._
 import helpers.BookFormatHelper
-import DBTableDefinitions._
-import play.api.Play.current
-import play.api.db.slick.Config.driver.simple._
-import play.api.db.slick._
+import play.api.test.PlaySpecification
+import slick.driver.PostgresDriver.api._
+import slick.lifted.TableQuery
+import scala.concurrent.duration._
 
-import scala.concurrent.Future
-import scala.slick.lifted.TableQuery
+import scala.concurrent.{Await, Future}
 
-object BookFixture {
+object BookFixture extends PlaySpecification {
+  lazy val database = Database.forConfig("slick.dbs.default.db")
+
 
   val slickBooks = TableQuery[Books]
   val slickBookToFolder = TableQuery[BooksToFolders]
@@ -59,11 +60,14 @@ object BookFixture {
 
 
   def initFixture(): Future[_] = {
-    Future.successful {
-      DB withSession { implicit session =>
-        slickBooks ++= Seq(rootBook, sub1Book, otherUserBook)
-        slickBookToFolder ++= Seq(rootBookToFolderLink, sub1BookToFolderLink, otherUserBookToFolderLink)
-      }
+    println("BOOK uiid", rootBook.uuid)
+
+    println(Await.result(database.run{slickBooks.result}, 1 second))
+    database.run {
+      DBIO.seq(
+        slickBooks ++= Seq(rootBook/*, sub1Book, otherUserBook*/)//,
+        //      slickBookToFolder ++= Seq(rootBookToFolderLink, sub1BookToFolderLink, otherUserBookToFolderLink)
+      )
     }
   }
 

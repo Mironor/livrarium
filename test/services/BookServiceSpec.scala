@@ -4,9 +4,9 @@ import fixtures.{BookFixture, FolderFixture, UserFixture}
 import helpers.{BookFormatHelper, LivrariumSpecification, RandomIdGenerator}
 import models.Book
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.AroundExample
+import org.specs2.specification.AroundEach
 
-class BookServiceSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
+class BookServiceSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
 
 
   protected def bootstrapFixtures(): Unit = {

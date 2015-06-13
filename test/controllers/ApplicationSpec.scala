@@ -4,11 +4,11 @@ import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.test._
 import fixtures.UserFixture
 import helpers.LivrariumSpecification
-import org.specs2.matcher.{FileMatchers, ThrownMessages}
-import org.specs2.specification.AroundExample
+import org.specs2.matcher.ThrownMessages
+import org.specs2.specification.AroundEach
 import play.api.test._
 
-class ApplicationSpec extends LivrariumSpecification with FileMatchers with AroundExample with ThrownMessages {
+class ApplicationSpec extends LivrariumSpecification  with AroundEach with ThrownMessages {
 
   protected def bootstrapFixtures(): Unit = {
     await(UserFixture.initFixture())

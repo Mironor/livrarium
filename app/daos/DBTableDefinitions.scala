@@ -2,7 +2,10 @@ package daos
 
 import java.util.UUID
 
-import play.api.db.slick.Config.driver.simple._
+import slick.lifted.Tag
+import slick.driver.PostgresDriver.api._
+import slick.lifted.TableQuery
+import slick.model.ForeignKeyAction
 
 /**
  * Tables definitions for slick
@@ -31,7 +34,7 @@ object DBTableDefinitions {
   class LoginInfos(tag: Tag) extends Table[DBLoginInfo](tag, "logininfos") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def idUser = column[Long]("idUser", O.NotNull)
+    def idUser = column[Long]("idUser")
 
     def providerID = column[String]("providerID")
 
@@ -119,7 +122,7 @@ object DBTableDefinitions {
 
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def idUser = column[Long]("idUser", O.NotNull)
+    def idUser = column[Long]("idUser")
 
     def uuid = column[UUID]("uuid")
 
@@ -142,9 +145,9 @@ object DBTableDefinitions {
                           idFolder: Long)
 
   class BooksToFolders(tag: Tag) extends Table[BookToFolder](tag, "books_to_folders") {
-    def idBook = column[Long]("idBook", O.NotNull)
+    def idBook = column[Long]("idBook")
 
-    def idFolder = column[Long]("idFolder", O.NotNull)
+    def idFolder = column[Long]("idFolder")
 
     def pk = primaryKey("pk_books_to_folders", (idBook, idFolder))
 
@@ -166,7 +169,7 @@ object DBTableDefinitions {
 
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 
-    def idUser = column[Long]("idUser", O.NotNull)
+    def idUser = column[Long]("idUser")
 
     def name = column[String]("name")
 

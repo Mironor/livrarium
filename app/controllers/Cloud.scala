@@ -10,6 +10,7 @@ import helpers.{BookFormatHelper, PDFHelper, RandomIdGenerator}
 import models.{Folder, FolderContents, User}
 import org.apache.commons.io.FileUtils
 import play.api.Play
+import play.api.i18n.MessagesApi
 import play.api.libs.Files
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
@@ -24,6 +25,7 @@ import scala.language.postfixOps
 class Cloud(implicit inj: Injector)
   extends Silhouette[User, SessionAuthenticator] with Injectable {
 
+  implicit val messagesApi = inject[MessagesApi]
   implicit val env = inject[Environment[User, SessionAuthenticator]]
 
   val applicationController = inject[Application]
@@ -110,7 +112,7 @@ class Cloud(implicit inj: Injector)
         }.recoverTotal {
           error => Future.successful(BadRequest(Json.obj(
             "code" -> inject[Int](identified by "errors.request.badRequest"),
-            "fields" -> JsError.toFlatJson(error)
+            "fields" -> JsError.toJson(error)
           )))
         }
 

@@ -1,13 +1,15 @@
 package controllers
 
 import _root_.services.{FolderService, UserService}
-import com.mohiva.play.silhouette.api.{Silhouette, _}
-import com.mohiva.play.silhouette.api.exceptions.{NotAuthorizedException, NotAuthenticatedException}
-import com.mohiva.play.silhouette.api.services.{AuthInfoService, AvatarService}
+import com.mohiva.play.silhouette.api.exceptions.{NotAuthenticatedException, NotAuthorizedException}
+import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
+import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.{Credentials, PasswordHasher, PasswordInfo}
+import com.mohiva.play.silhouette.api.{Silhouette, _}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import models.User
+import play.api.i18n.MessagesApi
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads._
@@ -23,11 +25,13 @@ import scala.concurrent.Future
 class Application(implicit inj: Injector)
   extends Silhouette[User, SessionAuthenticator] with Injectable {
 
+  implicit val messagesApi = inject[MessagesApi]
   implicit val env = inject[Environment[User, SessionAuthenticator]]
 
   val userService = inject[UserService]
   val folderService = inject[FolderService]
-  val authInfoService = inject[AuthInfoService]
+  val authInfoService = inject[AuthInfoRepository]
+  val credentialsProvider = inject[CredentialsProvider]
   val avatarService = inject[AvatarService]
   val passwordHasher = inject[PasswordHasher]
 
@@ -61,9 +65,9 @@ class Application(implicit inj: Injector)
    *
    * @return The result to display.
    */
-  def signOut = SecuredAction { implicit request =>
+  def signOut = SecuredAction.async { implicit request =>
     val result = Redirect(routes.Application.index())
-    request.authenticator.discard(result)
+    env.authenticatorService.discard(request.authenticator, result)
   }
 
   /**
@@ -76,18 +80,16 @@ class Application(implicit inj: Injector)
 
       case JsError(errors) => Future.successful(BadRequest(Json.obj(
         "code" -> inject[Int](identified by "errors.auth.loginPasswordNotValid"),
-        "fields" -> JsError.toFlatJson(errors)
+        "fields" -> JsError.toJson(errors)
       )))
     }
   }
 
   def authenticateUser(userCredentials: Credentials)(implicit request: Request[_]): Future[Result] = {
-    credentialsAuthentication(userCredentials).flatMap { loginInfo =>
+    credentialsProvider.authenticate(userCredentials).flatMap { loginInfo =>
       userService.retrieve(loginInfo).flatMap {
         case Some(user) => env.authenticatorService.create(user.loginInfo).flatMap { authenticator =>
-          val result = Future.successful(
-            Ok(Json.obj("email" -> user.email))
-          )
+          val result = Ok(Json.obj("email" -> user.email))
 
           env.authenticatorService.init(authenticator).flatMap { value =>
             env.authenticatorService.embed(value, result)
@@ -110,11 +112,6 @@ class Application(implicit inj: Injector)
         "message" -> "Not authenticated"
       ))
     }
-  }
-
-  private def credentialsAuthentication(userCredentials: Credentials) = env.providers.get(CredentialsProvider.ID) match {
-    case Some(credentialsProvider: CredentialsProvider) => credentialsProvider.authenticate(userCredentials)
-    case _ => Future.failed(new NotAuthenticatedException(s"Cannot find credentials provider"))
   }
 
 
@@ -146,7 +143,7 @@ class Application(implicit inj: Injector)
       case JsError(errors) => Future.successful(InternalServerError(Json.obj(
         "code" -> inject[Int](identified by "errors.auth.loginPasswordNotValid"),
         "message" -> "Login or password are not valid",
-        "fields" -> JsError.toFlatJson(errors)
+        "fields" -> JsError.toJson(errors)
       )))
     }
   }
@@ -160,9 +157,7 @@ class Application(implicit inj: Injector)
       _ <- authInfoService.save(loginInfo, password)
       authenticator <- env.authenticatorService.create(user.loginInfo)
       value <- env.authenticatorService.init(authenticator)
-      result <- env.authenticatorService.embed(value, Future.successful {
-        Ok(Json.obj("email" -> email))
-      })
+      result <- env.authenticatorService.embed(value, Ok(Json.obj("email" -> email)))
     } yield result
 
     result.recover {

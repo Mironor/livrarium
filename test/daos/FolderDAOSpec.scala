@@ -3,9 +3,9 @@ package daos
 import fixtures.{FolderFixture, UserFixture}
 import helpers.LivrariumSpecification
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.AroundExample
+import org.specs2.specification.{AroundEach, AroundExample}
 
-class FolderDAOSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
+class FolderDAOSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
 
   protected def bootstrapFixtures(): Unit = {
     await(UserFixture.initFixture())

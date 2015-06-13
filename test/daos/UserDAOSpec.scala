@@ -4,9 +4,9 @@ import daos.DBTableDefinitions.DBUser
 import fixtures.UserFixture
 import helpers.LivrariumSpecification
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.AroundExample
+import org.specs2.specification.AroundEach
 
-class UserDAOSpec extends LivrariumSpecification with AroundExample with ThrownMessages {
+class UserDAOSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
 
   protected def bootstrapFixtures(): Unit = {
     await(UserFixture.initFixture())

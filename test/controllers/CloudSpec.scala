@@ -9,8 +9,8 @@ import fixtures.{FolderFixture, UserFixture}
 import helpers.{BookFormatHelper, LivrariumSpecification, PDFTestHelper, RandomIdGenerator}
 import models.{Folder, FolderContents}
 import org.apache.commons.io.FileUtils
-import org.specs2.matcher.{FileMatchers, ThrownMessages}
-import org.specs2.specification.AroundExample
+import org.specs2.matcher.ThrownMessages
+import org.specs2.specification.AroundEach
 import play.api.Play
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsNumber, JsString, Json}
@@ -19,7 +19,7 @@ import play.api.mvc.MultipartFormData.FilePart
 import play.api.test._
 import services.{BookService, FolderService}
 
-class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExample with ThrownMessages {
+class CloudSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
 
   protected def bootstrapFixtures(): Unit = {
     await(UserFixture.initFixture())
@@ -150,7 +150,7 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
 
       // Then
       val uploadedPdf = new File(s"$uploadPath/$userId/$generatedBookIdentifier.pdf")
-      uploadedPdf must exist
+      uploadedPdf.exists() must beTrue
     }
 
     def generateRequestWithUploadedPdfFile() = {
@@ -190,14 +190,14 @@ class CloudSpec extends LivrariumSpecification with FileMatchers with AroundExam
 
       // Then
       val generatedPdfImage = new File(s"$generatedImagePath/$userId/$generatedBookId.jpg")
-      generatedPdfImage must exist
+      generatedPdfImage.exists() must beTrue
 
       val bufferedGeneratedPdfImage = ImageIO.read(generatedPdfImage)
       bufferedGeneratedPdfImage.getWidth mustEqual inject[Int](identified by "books.thumbnailWidth")
       bufferedGeneratedPdfImage.getHeight mustEqual inject[Int](identified by "books.thumbnailHeight")
 
       val generatedPdfSmallImage = new File(s"$generatedImagePath/$userId/$generatedBookId-small.jpg")
-      generatedPdfSmallImage must exist
+      generatedPdfSmallImage.exists() must beTrue
 
       val bufferedGeneratedPdfSmallImage = ImageIO.read(generatedPdfSmallImage)
       bufferedGeneratedPdfSmallImage.getWidth mustEqual inject[Int](identified by "books.smallThumbnailWidth")
