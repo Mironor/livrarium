@@ -18,7 +18,7 @@ libraryDependencies ++= Seq(
   "org.postgresql" % "postgresql" % "9.3-1102-jdbc4",
   "com.mohiva" %% "play-silhouette" % "3.0.0-RC1",
   "com.mohiva" %% "play-silhouette-testkit" % "3.0.0-RC1" % "test",
-  "org.scaldi" %% "scaldi-play" % "0.5.7",
+  "org.scaldi" %% "scaldi-play" % "0.5.8",
   "com.sksamuel.scrimage" %% "scrimage-core" % "1.4.1",
   "com.sksamuel.scrimage" %% "scrimage-canvas" % "1.4.1",
   "org.bouncycastle" % "bcprov-jdk16" % "1.45",

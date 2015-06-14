@@ -1,8 +1,8 @@
 package daos
 
 import daos.DBTableDefinitions.{BookToFolder, Books, BooksToFolders, DBBook}
-import play.api.Play
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfig}
+import scaldi.{Injector, Injectable}
 import slick.driver.JdbcProfile
 import slick.lifted.TableQuery
 import slick.driver.PostgresDriver.api._
@@ -11,8 +11,8 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 
-class BookDAO extends HasDatabaseConfig[JdbcProfile] {
-  val dbConfig = DatabaseConfigProvider.get[JdbcProfile](Play.current)
+class BookDAO(implicit inj: Injector) extends HasDatabaseConfig[JdbcProfile] with Injectable {
+  val dbConfig = inject[DatabaseConfigProvider].get[JdbcProfile]
 
   val slickBooks = TableQuery[Books]
   val slickBooksToFolders = TableQuery[BooksToFolders]

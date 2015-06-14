@@ -10,26 +10,25 @@ import helpers.{BookFormatHelper, LivrariumSpecification, PDFTestHelper, RandomI
 import models.{Folder, FolderContents}
 import org.apache.commons.io.FileUtils
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.AroundEach
 import play.api.Play
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsNumber, JsString, Json}
 import play.api.mvc.MultipartFormData
 import play.api.mvc.MultipartFormData.FilePart
 import play.api.test._
+import scaldi.Injector
 import services.{BookService, FolderService}
 
-class CloudSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
+class CloudSpec extends LivrariumSpecification with ThrownMessages {
 
-  protected def bootstrapFixtures(): Unit = {
+  protected def bootstrapFixtures(implicit inj: Injector): Unit = {
     await(UserFixture.initFixture())
     await(FolderFixture.initFixture())
     cleanUploadDirectories()
   }
 
-  private def cleanUploadDirectories() = {
-
-    val applicationPath = Play.current.path
+  private def cleanUploadDirectories()(implicit inj: Injector) = {
+    val applicationPath = inject[play.api.Application].path
     val uploadFolderPath = applicationPath + inject[String](identified by "folders.uploadPath")
     val generatedImageFolderPath = applicationPath + inject[String](identified by "folders.generatedImagePath")
 
@@ -45,7 +44,7 @@ class CloudSpec extends LivrariumSpecification with AroundEach with ThrownMessag
 
   "Cloud controller" should {
 
-    "return folder tree" in {
+    "return folder tree" in { implicit inj: Injector =>
       // Given
       val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.testUserLoginInfo)
 
@@ -71,7 +70,7 @@ class CloudSpec extends LivrariumSpecification with AroundEach with ThrownMessag
       sub2.name must beEqualTo(FolderFixture.sub2Name)
     }
 
-    "return root's content" in {
+    "return root's content" in { implicit inj: Injector =>
       // Given
       val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.testUserLoginInfo)
 
@@ -89,7 +88,7 @@ class CloudSpec extends LivrariumSpecification with AroundEach with ThrownMessag
       folderContents.folders(1).name must beEqualTo(FolderFixture.sub2Name)
     }
 
-    "return some folder's (other than root) content" in {
+    "return some folder's (other than root) content" in { implicit inj: Injector =>
       // Given
       val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.testUserLoginInfo)
 
@@ -104,7 +103,7 @@ class CloudSpec extends LivrariumSpecification with AroundEach with ThrownMessag
       contentAsJson(result).as[FolderContents].folders must have size 2
     }
 
-    "create new folder" in {
+    "create new folder" in { implicit inj: Injector =>
       // Given
       val folderService = inject[FolderService]
 
@@ -131,14 +130,14 @@ class CloudSpec extends LivrariumSpecification with AroundEach with ThrownMessag
       createdFolder.name mustEqual newFolderName
     }
 
-    "upload a pdf" in {
+    "upload a pdf" in { implicit inj: Injector =>
       // Given
       val userId = UserFixture.testUserId
 
       val randomIdGenerator = inject[RandomIdGenerator]
       val generatedBookIdentifier = randomIdGenerator.generateBookId() // it generates the same id each time due to the injection
 
-      val applicationPath = Play.current.path
+      val applicationPath = inject[play.api.Application].path
       val uploadPath = applicationPath + inject[String](identified by "folders.uploadPath")
 
       val request = generateRequestWithUploadedPdfFile()
@@ -153,7 +152,7 @@ class CloudSpec extends LivrariumSpecification with AroundEach with ThrownMessag
       uploadedPdf.exists() must beTrue
     }
 
-    def generateRequestWithUploadedPdfFile() = {
+    def generateRequestWithUploadedPdfFile()(implicit inj: Injector) = {
       val file = generateTemporaryPdfFile()
 
       val tempFile = TemporaryFile(file)
@@ -171,14 +170,14 @@ class CloudSpec extends LivrariumSpecification with AroundEach with ThrownMessag
       new File(filePath)
     }
 
-    "generate image (with good width/height) from uploaded pdf" in {
+    "generate image (with good width/height) from uploaded pdf" in { implicit inj: Injector =>
       // Given
       val userId = UserFixture.testUserId
 
       val randomIdGenerator = inject[RandomIdGenerator]
       val generatedBookId = randomIdGenerator.generateBookId() // it generates the same id each time due to the injection
 
-      val applicationPath = Play.current.path
+      val applicationPath = inject[play.api.Application].path
       val generatedImagePath = applicationPath + inject[String](identified by "folders.generatedImagePath")
 
       val request = generateRequestWithUploadedPdfFile()
@@ -204,7 +203,7 @@ class CloudSpec extends LivrariumSpecification with AroundEach with ThrownMessag
       bufferedGeneratedPdfSmallImage.getHeight mustEqual inject[Int](identified by "books.smallThumbnailHeight")
     }
 
-    "generate corresponding model in the database from uploaded pdf" in {
+    "generate corresponding model in the database from uploaded pdf" in { implicit inj: Injector =>
       // Given
       val bookService = inject[BookService]
 

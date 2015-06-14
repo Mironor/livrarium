@@ -3,7 +3,7 @@ package daos
 import com.mohiva.play.silhouette.api.LoginInfo
 import daos.DBTableDefinitions.{DBUser, LoginInfos, Users}
 
-import play.api.Play
+import scaldi.{Injector, Injectable}
 import slick.driver.JdbcProfile
 import play.api.db.slick._
 import slick.driver.PostgresDriver.api._
@@ -14,8 +14,8 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 
 
-class UserDAO extends HasDatabaseConfig[JdbcProfile] {
-  val dbConfig = DatabaseConfigProvider.get[JdbcProfile](Play.current)
+class UserDAO(implicit inj: Injector) extends HasDatabaseConfig[JdbcProfile] with Injectable {
+  val dbConfig = inject[DatabaseConfigProvider].get[JdbcProfile]
 
 
   private val slickUsers = TableQuery[Users]

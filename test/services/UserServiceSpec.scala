@@ -5,16 +5,16 @@ import daos.silhouette.LoginInfoDAO
 import fixtures.UserFixture
 import helpers.LivrariumSpecification
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.AroundEach
+import scaldi.Injector
 
-class UserServiceSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
+class UserServiceSpec extends LivrariumSpecification with ThrownMessages {
 
-  protected def bootstrapFixtures(): Unit = {
+  protected def bootstrapFixtures(implicit inj: Injector): Unit = {
     await(UserFixture.initFixture())
   }
 
   "User service" should {
-    "retrieve user by login info" in {
+    "retrieve user by login info" in { implicit inj: Injector =>
       // Given
       val userService = new UserService
 
@@ -26,7 +26,7 @@ class UserServiceSpec extends LivrariumSpecification with AroundEach with Thrown
       user.avatarURL must beEqualTo(UserFixture.testUser.avatarURL)
     }
 
-    "save a new user" in {
+    "save a new user" in { implicit inj: Injector =>
       // Given
       val userService = new UserService
       val newEmail = "new email"
@@ -42,7 +42,7 @@ class UserServiceSpec extends LivrariumSpecification with AroundEach with Thrown
       user.avatarURL must beEqualTo(newAvatarUrl)
     }
 
-    "not create a new login info if it already exists" in {
+    "not create a new login info if it already exists" in { implicit inj: Injector =>
       // Given
       val userService = new UserService
       val loginInfoDAO = inject[LoginInfoDAO]
@@ -58,7 +58,7 @@ class UserServiceSpec extends LivrariumSpecification with AroundEach with Thrown
       loginInfoCountAfter must beEqualTo(loginInfoCountBefore)
     }
 
-    "create new login info attached to the user if the login info does not exist" in {
+    "create new login info attached to the user if the login info does not exist" in { implicit inj: Injector =>
       // Given
       val userService = new UserService
       val loginInfoDAO = inject[LoginInfoDAO]
@@ -74,7 +74,7 @@ class UserServiceSpec extends LivrariumSpecification with AroundEach with Thrown
       loginInfo must beSome
     }
 
-    "save an already created user" in {
+    "save an already created user" in { implicit inj: Injector =>
       // Given
       val userService = new UserService
 

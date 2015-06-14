@@ -3,19 +3,19 @@ package services
 import fixtures.{FolderFixture, UserFixture}
 import helpers.LivrariumSpecification
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.AroundEach
+import scaldi.Injector
 
 
-class FolderServiceSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
+class FolderServiceSpec extends LivrariumSpecification with ThrownMessages {
 
-  protected def bootstrapFixtures(): Unit = {
+  protected def bootstrapFixtures(implicit inj: Injector): Unit = {
     await(UserFixture.initFixture())
     await(FolderFixture.initFixture())
   }
 
   "Folder service" should {
 
-    "return user's folder tree" in {
+    "return user's folder tree" in { implicit inj: Injector =>
       // Given
       val folderService = new FolderService
 
@@ -42,7 +42,7 @@ class FolderServiceSpec extends LivrariumSpecification with AroundEach with Thro
       sub2.children must have size 0
     }
 
-    "append a folder to root" in {
+    "append a folder to root" in { implicit inj: Injector =>
       // Given
       val folderService = new FolderService
       val testFolderName = "testFolder"
@@ -58,7 +58,7 @@ class FolderServiceSpec extends LivrariumSpecification with AroundEach with Thro
       testFolder.name must beEqualTo(testFolderName)
     }
 
-    "retrieve folder's children" in {
+    "retrieve folder's children" in { implicit inj: Injector =>
       // Given
       val folderService = new FolderService
 
@@ -75,7 +75,7 @@ class FolderServiceSpec extends LivrariumSpecification with AroundEach with Thro
       subSub2.name must beEqualTo(FolderFixture.sub1sub2Name)
     }
 
-    "append a folder to another folder (not root)" in {
+    "append a folder to another folder (not root)" in { implicit inj: Injector =>
       // Given
       val folderService = new FolderService
       val testFolderName = "testFolder"
@@ -91,7 +91,7 @@ class FolderServiceSpec extends LivrariumSpecification with AroundEach with Thro
       testFolder.name must beEqualTo(testFolderName)
     }
 
-    "retrieve folder by id" in {
+    "retrieve folder by id" in { implicit inj: Injector =>
       // Given
       val folderService = new FolderService
 
@@ -103,7 +103,7 @@ class FolderServiceSpec extends LivrariumSpecification with AroundEach with Thro
       folder.get.name must beEqualTo(FolderFixture.sub1Name)
     }
 
-    "not retrieve another user's folder" in {
+    "not retrieve another user's folder" in { implicit inj: Injector =>
       // Given
       val folderService = new FolderService
 

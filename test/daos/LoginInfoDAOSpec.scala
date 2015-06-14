@@ -5,17 +5,16 @@ import daos.silhouette.LoginInfoDAO
 import fixtures.UserFixture
 import helpers.LivrariumSpecification
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.AroundEach
+import scaldi.Injector
 
-class LoginInfoDAOSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
+class LoginInfoDAOSpec extends LivrariumSpecification with ThrownMessages {
 
-  protected def bootstrapFixtures(): Unit = {
+  protected def bootstrapFixtures(implicit inj: Injector): Unit = {
     await(UserFixture.initFixture())
   }
 
   "LoginInfo DAO" should {
-    "find login info if it exists" in {
-      println("SPEC1")
+    "find login info if it exists" in { implicit inj: Injector =>
       // Given
       val loginInfoDAO = new LoginInfoDAO
 
@@ -26,8 +25,7 @@ class LoginInfoDAOSpec extends LivrariumSpecification with AroundEach with Throw
       foundLoginInfo must beSome
     }
 
-    "find None if login info does not exist" in {
-      println("SPEC2")
+    "find None if login info does not exist" in { implicit inj: Injector =>
       // Given
       val loginInfoDAO = new LoginInfoDAO
 
@@ -40,8 +38,7 @@ class LoginInfoDAOSpec extends LivrariumSpecification with AroundEach with Throw
       foundLoginInfo must beNone
     }
 
-    "insert new LoginInfo" in {
-      println("SPEC3")
+    "insert new LoginInfo" in { implicit inj: Injector =>
       // Given
       val loginInfoDAO = new LoginInfoDAO
 
