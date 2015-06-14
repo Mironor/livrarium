@@ -3,17 +3,17 @@ package daos
 import fixtures.{FolderFixture, UserFixture}
 import helpers.LivrariumSpecification
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.{AroundEach, AroundExample}
+import scaldi.Injector
 
-class FolderDAOSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
+class FolderDAOSpec extends LivrariumSpecification with ThrownMessages {
 
-  protected def bootstrapFixtures(): Unit = {
+  protected def bootstrapFixtures(implicit inj: Injector): Unit = {
     await(UserFixture.initFixture())
     await(FolderFixture.initFixture())
   }
 
   "Folder DAO" should {
-    "find folder's children" in {
+    "find folder's children" in { implicit inj: Injector =>
       // Given
       val folderDAO = new FolderDAO
 
@@ -26,7 +26,7 @@ class FolderDAOSpec extends LivrariumSpecification with AroundEach with ThrownMe
       rootFolderChildren(1).name must beEqualTo(FolderFixture.sub2Name)
     }
 
-    "find folder by id" in {
+    "find folder by id" in { implicit inj: Injector =>
       // Given
       val folderDAO = new FolderDAO
 
@@ -37,7 +37,7 @@ class FolderDAOSpec extends LivrariumSpecification with AroundEach with ThrownMe
       folder.name must beEqualTo(FolderFixture.sub1Name)
     }
 
-    "affect correct level to appended folder" in {
+    "affect correct level to appended folder" in { implicit inj: Injector =>
       // Given
       val folderDAO = new FolderDAO
 

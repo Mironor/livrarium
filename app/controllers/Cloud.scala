@@ -32,6 +32,7 @@ class Cloud(implicit inj: Injector)
   val folderService = inject[FolderService]
   val bookService = inject[BookService]
   val randomIdGenerator = inject[RandomIdGenerator]
+  val applicationPath = inject[play.api.Application].path
 
 
   /**
@@ -137,7 +138,6 @@ class Cloud(implicit inj: Injector)
         val extension = filename.drop(filename.lastIndexOf('.'))
         val uuid = randomIdGenerator.generateBookId()
 
-        val applicationPath = Play.current.path
         val userId = user.id
         val uploadFolder = applicationPath + inject[String](identified by "folders.uploadPath")
         val generatedImageFolder = applicationPath + inject[String](identified by "folders.generatedImagePath")

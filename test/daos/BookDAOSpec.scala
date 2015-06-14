@@ -4,18 +4,18 @@ import daos.DBTableDefinitions.DBBook
 import fixtures.{BookFixture, FolderFixture, UserFixture}
 import helpers.{BookFormatHelper, LivrariumSpecification, RandomIdGenerator}
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.AroundEach
+import scaldi.Injector
 
-class BookDAOSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
+class BookDAOSpec extends LivrariumSpecification with ThrownMessages {
 
-  protected def bootstrapFixtures(): Unit = {
+  protected def bootstrapFixtures(implicit inj: Injector): Unit = {
     await(UserFixture.initFixture())
     await(FolderFixture.initFixture())
     await(BookFixture.initFixture())
   }
 
   "Book DAO" should {
-    "insert a book" in {
+    "insert a book" in { implicit inj: Injector =>
       skipped("")
       // Given
       val bookDAO = new BookDAO
@@ -37,7 +37,7 @@ class BookDAOSpec extends LivrariumSpecification with AroundEach with ThrownMess
       testBook.format must beEqualTo(BookFormatHelper.PDF)
     }
 
-    def generateTestBook(): DBBook = {
+    def generateTestBook()(implicit inj: Injector): DBBook = {
       val randomIdGenerator = inject[RandomIdGenerator]
       val generatedBookId = randomIdGenerator.generateBookId() // it generates the same id each time due to the injection
 
@@ -50,7 +50,7 @@ class BookDAOSpec extends LivrariumSpecification with AroundEach with ThrownMess
       )
     }
 
-    "update book if it already exists" in {
+    "update book if it already exists" in { implicit inj: Injector =>
       skipped("")
       // Given
       val bookDAO = new BookDAO
@@ -70,7 +70,7 @@ class BookDAOSpec extends LivrariumSpecification with AroundEach with ThrownMess
       testBook.name must beEqualTo(updatedName)
     }
 
-    "relate book to a folder" in {
+    "relate book to a folder" in { implicit inj: Injector =>
       skipped("")
       // Given
       val bookDAO = new BookDAO

@@ -4,16 +4,16 @@ import daos.DBTableDefinitions.DBUser
 import fixtures.UserFixture
 import helpers.LivrariumSpecification
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.AroundEach
+import scaldi.Injector
 
-class UserDAOSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
+class UserDAOSpec extends LivrariumSpecification with ThrownMessages {
 
-  protected def bootstrapFixtures(): Unit = {
+  protected def bootstrapFixtures(implicit inj: Injector): Unit = {
     await(UserFixture.initFixture())
   }
 
   "User DAO" should {
-    "find user by its id" in {
+    "find user by its id" in { implicit inj: Injector =>
       // Given
       val userDAO = new UserDAO
 
@@ -26,7 +26,7 @@ class UserDAOSpec extends LivrariumSpecification with AroundEach with ThrownMess
       user.avatarURL must beEqualTo(UserFixture.testUser.avatarURL)
     }
 
-    "find user by its Login Info" in {
+    "find user by its Login Info" in { implicit inj: Injector =>
       // Given
       val userDAO = new UserDAO
 
@@ -39,7 +39,7 @@ class UserDAOSpec extends LivrariumSpecification with AroundEach with ThrownMess
       user.avatarURL must beEqualTo(UserFixture.testUser.avatarURL)
     }
 
-    "insert new user" in {
+    "insert new user" in { implicit inj: Injector =>
       // Given
       val userDAO = new UserDAO
 
@@ -57,7 +57,7 @@ class UserDAOSpec extends LivrariumSpecification with AroundEach with ThrownMess
       foundUser.avatarURL must beEqualTo(newAvatarUrl)
     }
 
-    "update a user" in {
+    "update a user" in { implicit inj: Injector =>
       // Given
       val userDAO = new UserDAO
 

@@ -2,8 +2,8 @@ package daos.silhouette
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import daos.DBTableDefinitions.{DBLoginInfo, LoginInfos}
-import play.api.Play
 import play.api.db.slick._
+import scaldi.{Injectable, Injector}
 import slick.driver.PostgresDriver.api._
 
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
@@ -12,8 +12,8 @@ import slick.driver.JdbcProfile
 import scala.concurrent.Future
 import slick.lifted.TableQuery
 
-class LoginInfoDAO extends HasDatabaseConfig[JdbcProfile] {
-  val dbConfig = DatabaseConfigProvider.get[JdbcProfile](Play.current)
+class LoginInfoDAO(implicit inj: Injector) extends HasDatabaseConfig[JdbcProfile] with Injectable {
+  val dbConfig = inject[DatabaseConfigProvider].get[JdbcProfile]
 
   private val slickLoginInfos = TableQuery[LoginInfos]
 

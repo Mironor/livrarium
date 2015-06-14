@@ -4,19 +4,19 @@ import fixtures.{BookFixture, FolderFixture, UserFixture}
 import helpers.{BookFormatHelper, LivrariumSpecification, RandomIdGenerator}
 import models.Book
 import org.specs2.matcher.ThrownMessages
-import org.specs2.specification.AroundEach
+import scaldi.Injector
 
-class BookServiceSpec extends LivrariumSpecification with AroundEach with ThrownMessages {
+class BookServiceSpec extends LivrariumSpecification with ThrownMessages {
 
 
-  protected def bootstrapFixtures(): Unit = {
+  protected def bootstrapFixtures(implicit inj: Injector): Unit = {
     await(UserFixture.initFixture())
     await(FolderFixture.initFixture())
     await(BookFixture.initFixture())
   }
 
   "Book Service" should {
-    "create new book" in {
+    "create new book" in { implicit inj: Injector =>
       // Given
       val bookService = new BookService
       def randomIdGenerator = inject[RandomIdGenerator]
@@ -31,7 +31,7 @@ class BookServiceSpec extends LivrariumSpecification with AroundEach with Thrown
       books must have size 3
     }
 
-    "update book if it already exists" in {
+    "update book if it already exists" in { implicit inj: Injector =>
       // Given
       val bookService = new BookService
 
@@ -47,7 +47,7 @@ class BookServiceSpec extends LivrariumSpecification with AroundEach with Thrown
       retrievedBook.name must equalTo(updatedName)
     }
 
-    "retrieve all books from a folder" in {
+    "retrieve all books from a folder" in { implicit inj: Injector =>
       // Given
       val bookService = new BookService
 
@@ -60,7 +60,7 @@ class BookServiceSpec extends LivrariumSpecification with AroundEach with Thrown
       noBooks must beEmpty
     }
 
-    "not retrieve books from other user's folder" in {
+    "not retrieve books from other user's folder" in { implicit inj: Injector =>
       // Given
       val bookService = new BookService
 
@@ -71,7 +71,7 @@ class BookServiceSpec extends LivrariumSpecification with AroundEach with Thrown
       books must beEmpty
     }
 
-    "retrieve None if trying to retrieve another user's book" in {
+    "retrieve None if trying to retrieve another user's book" in { implicit inj: Injector =>
       // Given
       val bookService = new BookService
 
@@ -82,21 +82,7 @@ class BookServiceSpec extends LivrariumSpecification with AroundEach with Thrown
       book must beNone
     }
 
-    "not save another user's book" in {
-      // Given
-      val bookService = new BookService
-
-      // When
-      val saveReturn = await(bookService.save(UserFixture.testUser, Book.fromDBBook(BookFixture.otherUserBook)))
-      val book = await(bookService.retrieve(UserFixture.testUser, BookFixture.otherUserBookId))
-
-      // Then
-      saveReturn must beNone
-      book must beNone
-
-    }
-
-    "not add another user's book to current user's folder" in {
+    "not save another user's book" in { implicit inj: Injector =>
       // Given
       val bookService = new BookService
 
@@ -110,7 +96,21 @@ class BookServiceSpec extends LivrariumSpecification with AroundEach with Thrown
 
     }
 
-    "not add current user's book to another user's folder" in {
+    "not add another user's book to current user's folder" in { implicit inj: Injector =>
+      // Given
+      val bookService = new BookService
+
+      // When
+      val saveReturn = await(bookService.save(UserFixture.testUser, Book.fromDBBook(BookFixture.otherUserBook)))
+      val book = await(bookService.retrieve(UserFixture.testUser, BookFixture.otherUserBookId))
+
+      // Then
+      saveReturn must beNone
+      book must beNone
+
+    }
+
+    "not add current user's book to another user's folder" in { implicit inj: Injector =>
       // Given
       val bookService = new BookService
 

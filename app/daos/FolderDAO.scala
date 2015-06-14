@@ -2,7 +2,7 @@ package daos
 
 import daos.DBTableDefinitions.{DBFolder, Folders}
 
-import play.api.Play
+import scaldi.{Injector, Injectable}
 import slick.driver.JdbcProfile
 import play.api.db.slick._
 import slick.driver.PostgresDriver.api._
@@ -12,8 +12,8 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import scala.concurrent.Future
 
-class FolderDAO extends HasDatabaseConfig[JdbcProfile] {
-  val dbConfig = DatabaseConfigProvider.get[JdbcProfile](Play.current)
+class FolderDAO(implicit inj: Injector) extends HasDatabaseConfig[JdbcProfile] with Injectable {
+  val dbConfig = inject[DatabaseConfigProvider].get[JdbcProfile]
 
 
   val rootFolderName = ""

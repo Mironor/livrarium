@@ -4,9 +4,9 @@ import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.util.PasswordInfo
 import com.mohiva.play.silhouette.impl.daos.DelegableAuthInfoDAO
 import daos.DBTableDefinitions.{DBPasswordInfo, LoginInfos, PasswordInfos}
-import play.api.Play
 import play.api.db.slick._
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import scaldi.{Injector, Injectable}
 import slick.driver.JdbcProfile
 import slick.driver.PostgresDriver.api._
 import slick.lifted.TableQuery
@@ -14,8 +14,8 @@ import slick.lifted.TableQuery
 import scala.concurrent.Future
 
 
-class PasswordInfoDAO extends DelegableAuthInfoDAO[PasswordInfo] with HasDatabaseConfig[JdbcProfile] {
-  val dbConfig = DatabaseConfigProvider.get[JdbcProfile](Play.current)
+class PasswordInfoDAO(implicit inj: Injector) extends DelegableAuthInfoDAO[PasswordInfo] with HasDatabaseConfig[JdbcProfile] with Injectable {
+  val dbConfig = inject[DatabaseConfigProvider].get[JdbcProfile]
 
 
   private val slickPasswordInfos = TableQuery[PasswordInfos]

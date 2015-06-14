@@ -6,19 +6,16 @@ import daos.DBTableDefinitions._
 import models.User
 import modules.SpecModule
 import org.specs2.execute.AsResult
+import org.specs2.specification.ForEach
+import play.api.db.DBApi
+import play.api.db.evolutions.Evolutions
 import play.api.test.PlaySpecification
-import scaldi.play.ScaldiApplicationBuilder
 import scaldi.play.ScaldiApplicationBuilder._
 import scaldi.{Injectable, Injector}
 import slick.driver.PostgresDriver.api._
 
-abstract class LivrariumSpecification extends PlaySpecification with Injectable {
-
-  private val application = new ScaldiApplicationBuilder().prependModule(new SpecModule)
-
-  implicit lazy val injector: Injector = application.buildInj()
-
-  implicit lazy val silhouetteEnv: Environment[User, SessionAuthenticator] = inject[Environment[User, SessionAuthenticator]]
+abstract class LivrariumSpecification extends PlaySpecification with Injectable with ForEach[Injector] {
+  implicit def silhouetteEnv(implicit inj: Injector) = inject [Environment[User, SessionAuthenticator]]
 
   lazy val database = Database.forConfig("slick.dbs.default.db")
 
@@ -30,38 +27,13 @@ abstract class LivrariumSpecification extends PlaySpecification with Injectable 
   val slickBooks = TableQuery[Books]
   val slickFolders = TableQuery[Folders]
 
-  /**
-   * This automatically handles up and down evolutions at the beginning and at the end of a spec respectively
-   */
-  def around[T: AsResult](t: => T) = {
-    withScaldiApp() {
-      bootstrapFixtures()
-      val out = AsResult(t)
-      /*
-      Await.result(database.run {
-        sqlu"""
-        alter table "passwordinfos" drop constraint "PASSWORDINFO_LOGININFO_FK";
-        alter table "oauth2infos" drop constraint "OAUTH2INFO_LOGININFO_FK";
-        alter table "oauth1infos" drop constraint "OAUTH1INFO_LOGININFO_FK";
-        alter table "logininfos" drop constraint "LOGININFO_USER_FK";
-        alter table "folders" drop constraint "FOLDER_USER_FK";
-        alter table "books_to_folders" drop constraint "BOOK_BOOKS_TO_FOLDERS_FK";
-        alter table "books_to_folders" drop constraint "FOLDER_BOOKS_TO_FOLDERS_FK";
-        alter table "books" drop constraint "BOOK_USER_FK";
-        drop table "users";
-        drop table "passwordinfos";
-        drop table "oauth2infos";
-        drop table "oauth1infos";
-        drop table "logininfos";
-        drop table "folders";
-        alter table "books_to_folders" drop constraint "pk_books_to_folders";
-        drop table "books_to_folders";
-        drop table "books";"""
-      }, 1 second)
-      */
-      out
-    }
-  }
+  override protected def foreach[R : AsResult](f: Injector => R) =
+    withScaldiInj(modules = Seq(new SpecModule)) { implicit injector =>
+      bootstrapFixtures(injector)
 
-  protected def bootstrapFixtures(): Unit
+      try AsResult(f(injector))
+      finally Evolutions.cleanupEvolutions(inject[DBApi].database("default"))
+    }
+
+  protected def bootstrapFixtures(implicit inj: Injector): Unit
 }
