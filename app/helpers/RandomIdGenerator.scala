@@ -3,9 +3,9 @@ package helpers
 import java.util.UUID
 
 trait RandomIdGenerator {
-  def generateBookId(): UUID
+  def generateBookId(): String
 }
 
 class UUIDGenerator extends RandomIdGenerator{
-  def generateBookId(): UUID = UUID.randomUUID()
+  def generateBookId(): String = UUID.randomUUID().toString
 }

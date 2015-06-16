@@ -1,10 +1,7 @@
 package daos
 
-import java.util.UUID
-
-import slick.lifted.Tag
 import slick.driver.PostgresDriver.api._
-import slick.lifted.TableQuery
+import slick.lifted.{TableQuery, Tag}
 import slick.model.ForeignKeyAction
 
 /**
@@ -108,7 +105,7 @@ object DBTableDefinitions {
 
   case class DBBook(id: Option[Long],
                     idUser: Long,
-                    uuid: UUID,
+                    uuid: String,
                     name: String,
                     format: String,
                     totalPages: Int = 0,
@@ -124,7 +121,7 @@ object DBTableDefinitions {
 
     def idUser = column[Long]("idUser")
 
-    def uuid = column[UUID]("uuid")
+    def uuid = column[String]("uuid")
 
     def name = column[String]("name")
 

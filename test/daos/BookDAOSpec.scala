@@ -16,7 +16,6 @@ class BookDAOSpec extends LivrariumSpecification with ThrownMessages {
 
   "Book DAO" should {
     "insert a book" in { implicit inj: Injector =>
-      skipped("")
       // Given
       val bookDAO = new BookDAO
 
@@ -30,7 +29,7 @@ class BookDAOSpec extends LivrariumSpecification with ThrownMessages {
       val testBook = await(bookDAO.findById(insertedBookId)).getOrElse(fail("Inserted book was not found"))
 
       // Then
-      books must have size 3
+      books must have size 4
 
       testBook.idUser must beEqualTo(UserFixture.testUserId)
       testBook.name must beEqualTo(book.name)
@@ -51,7 +50,6 @@ class BookDAOSpec extends LivrariumSpecification with ThrownMessages {
     }
 
     "update book if it already exists" in { implicit inj: Injector =>
-      skipped("")
       // Given
       val bookDAO = new BookDAO
 
@@ -71,7 +69,6 @@ class BookDAOSpec extends LivrariumSpecification with ThrownMessages {
     }
 
     "relate book to a folder" in { implicit inj: Injector =>
-      skipped("")
       // Given
       val bookDAO = new BookDAO
 

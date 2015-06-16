@@ -6,8 +6,7 @@ import models.User
 import slick.driver.PostgresDriver.api._
 import slick.lifted.TableQuery
 
-import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Future
 
 object UserFixture{
 
@@ -25,7 +24,6 @@ object UserFixture{
   val otherUser = User(otherUserId, otherUserLoginInfo, "test@test.test", None)
 
   def initFixture(): Future[_] = {
-    println(Await.result(database.run{slickLoginInfos.result}, 1 second))
     database.run {
       DBIO.seq(
         slickUsers ++= Seq(testUser.toDBUser, otherUser.toDBUser) ,

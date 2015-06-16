@@ -2,12 +2,11 @@ package daos
 
 import daos.DBTableDefinitions.{BookToFolder, Books, BooksToFolders, DBBook}
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfig}
-import scaldi.{Injector, Injectable}
-import slick.driver.JdbcProfile
-import slick.lifted.TableQuery
-import slick.driver.PostgresDriver.api._
-
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
+import scaldi.{Injectable, Injector}
+import slick.driver.JdbcProfile
+import slick.driver.PostgresDriver.api._
+import slick.lifted.TableQuery
 
 import scala.concurrent.Future
 

@@ -9,7 +9,6 @@ import com.sksamuel.scrimage.{Format => ImgFormat, Image}
 import helpers.{BookFormatHelper, PDFHelper, RandomIdGenerator}
 import models.{Folder, FolderContents, User}
 import org.apache.commons.io.FileUtils
-import play.api.Play
 import play.api.i18n.MessagesApi
 import play.api.libs.Files
 import play.api.libs.concurrent.Execution.Implicits._

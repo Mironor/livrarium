@@ -1,13 +1,11 @@
 package models
 
-import java.util.UUID
-
 import daos.DBTableDefinitions.DBBook
-import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import play.api.libs.json._
 
 case class Book(id: Long,
-                identifier: UUID,
+                identifier: String,
                 name: String,
                 format: String,
                 totalPages: Int = 0,
@@ -22,7 +20,7 @@ object Book {
   // Implicit conversions for Json Serialisation / Deserialisation
   implicit val bookWrites: Writes[Book] = (
     (__ \ "id").write[Long] and
-      (__ \ "identifier").write[UUID] and
+      (__ \ "identifier").write[String] and
       (__ \ "name").write[String] and
       (__ \ "format").write[String] and
       (__ \ "totalPates").write[Int] and

@@ -1,7 +1,5 @@
 package services
 
-import java.util.UUID
-
 import daos.BookDAO
 import daos.DBTableDefinitions.DBBook
 import models.{Book, Folder, User}
@@ -49,7 +47,7 @@ class BookService(implicit inj: Injector) extends Injectable {
    * @param format future book's format
    * @return a promise of a created book
    */
-  def create(user: User, identifier: UUID, name: String, format: String, totalPages: Int = 0): Future[Book] = {
+  def create(user: User, identifier: String, name: String, format: String, totalPages: Int = 0): Future[Book] = {
     val dbBook = DBBook(None, user.id, identifier, name, format, totalPages)
     bookDAO.insert(dbBook).map(Book.fromDBBook)
   }

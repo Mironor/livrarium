@@ -10,7 +10,6 @@ import helpers.{BookFormatHelper, LivrariumSpecification, PDFTestHelper, RandomI
 import models.{Folder, FolderContents}
 import org.apache.commons.io.FileUtils
 import org.specs2.matcher.ThrownMessages
-import play.api.Play
 import play.api.libs.Files.TemporaryFile
 import play.api.libs.json.{JsNumber, JsString, Json}
 import play.api.mvc.MultipartFormData

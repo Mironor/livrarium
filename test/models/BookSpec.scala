@@ -11,7 +11,7 @@ class BookSpec extends PlaySpecification{
   "Book model" should {
     "be creatable from dbBook" in {
       // Given
-      val uuid = UUID.fromString("00000000-0000-4000-A000-000000000000")
+      val uuid = UUID.fromString("00000000-0000-4000-A000-000000000000").toString
       val bookName = "book"
       val totalPages = 100
       val currentPage = 42
@@ -31,7 +31,7 @@ class BookSpec extends PlaySpecification{
 
     "throw an exception if created from dbBook that has no id" in {
       // Given
-      val uuid = UUID.fromString("00000000-0000-4000-A000-000000000000")
+      val uuid = UUID.fromString("00000000-0000-4000-A000-000000000000").toString
       val dbBook = DBBook(None, 1, uuid,"", BookFormatHelper.PDF)
 
       // When // Then
@@ -40,7 +40,7 @@ class BookSpec extends PlaySpecification{
 
     "be castable in dbBook" in {
       // Given
-      val uuid = UUID.fromString("00000000-0000-4000-A000-000000000000")
+      val uuid = UUID.fromString("00000000-0000-4000-A000-000000000000").toString
       val bookName = "book"
       val totalPages = 100
       val currentPage = 42

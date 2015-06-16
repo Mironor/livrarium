@@ -12,13 +12,13 @@ import scala.concurrent.Future
  * PLEASE KEEP UP TO DATE
  * Mocked tree:
  * root
- * Sub1
- * SubSub1
- * SubSub2
- * Sub2
+ * **Sub1
+ * ****SubSub1
+ * ****SubSub2
+ * **Sub2
  *
  */
-object FolderFixture{
+object FolderFixture {
   lazy val database = Database.forConfig("slick.dbs.default.db")
 
   val slickFolders = TableQuery[Folders]

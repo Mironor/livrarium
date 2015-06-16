@@ -6,7 +6,7 @@ import play.api.libs.functional.syntax._
 
 case class Folder(id: Long,
                   name: String,
-                  children: Seq[Folder] = Nil)
+                  children: Seq[Folder] = Vector.empty[Folder])
 
 object Folder {
   // Implicit conversions for Json Serialisation / Deserialisation
@@ -34,7 +34,7 @@ object Folder {
         | Or you are trying to cast a user's row that does not have id (this is strange)""".stripMargin
     ))
 
-    Folder(id, dbFolder.name, Nil)
+    Folder(id, dbFolder.name, Vector.empty[Folder])
   }
 
   /**
@@ -43,7 +43,7 @@ object Folder {
    * @param children folder's children
    * @return
    */
-  def fromDBFolderWithChildren(dbFolder: DBFolder, children: List[Folder]) = {
+  def fromDBFolderWithChildren(dbFolder: DBFolder, children: Vector[Folder]) = {
     val folder = fromDBFolder(dbFolder)
     folder.copy(children = children)
   }

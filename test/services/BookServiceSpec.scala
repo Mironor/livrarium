@@ -28,7 +28,7 @@ class BookServiceSpec extends LivrariumSpecification with ThrownMessages {
       val books = await(bookService.retrieveAll(UserFixture.testUser))
 
       // Then
-      books must have size 3
+      books must have size 4
     }
 
     "update book if it already exists" in { implicit inj: Injector =>

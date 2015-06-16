@@ -9,7 +9,6 @@ import scaldi.{Injectable, Injector}
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-
 /**
  * There should be no access to FolderDAO except through this class
  * Handles all transformations from DBFolder to Folder (including tree construction)
@@ -26,21 +25,21 @@ class FolderService(implicit inj: Injector) extends Injectable {
    */
   def retrieveFolderTree(user: User): Future[Folder] = {
     folderDAO.findAll(user.id).flatMap {
-      case rootFolder :: tail => Future.successful {
+      case rootFolder +: tail => Future.successful {
         Folder.fromDBFolderWithChildren(rootFolder, generateChildren(0, rootFolder.right, tail))
       }
-      case Nil => createRootForUser(user)
+      case _ => createRootForUser(user)
     }
   }
 
   // this is not tail-rec, so possible overflows on very large folder trees
-  private def generateChildren(currentLeft: Int, currentRight: Int, dbFolders: Seq[DBFolder]): List[Folder] = {
+  private def generateChildren(currentLeft: Int, currentRight: Int, dbFolders: Seq[DBFolder]): Vector[Folder] = {
     dbFolders match {
-      case dbFolder :: tail if dbFolder.left > currentRight => Nil
-      case dbFolder :: tail if dbFolder.left > currentLeft =>
-        Folder.fromDBFolderWithChildren(dbFolder, generateChildren(dbFolder.left, dbFolder.right, tail)) :: generateChildren(dbFolder.right, currentRight, tail)
-      case dbFolder :: tail => generateChildren(currentLeft, currentRight, tail)
-      case Nil => Nil
+      case dbFolder +: tail if dbFolder.left > currentRight => Vector.empty[Folder]
+      case dbFolder +: tail if dbFolder.left > currentLeft =>
+        Folder.fromDBFolderWithChildren(dbFolder, generateChildren(dbFolder.left, dbFolder.right, tail)) +: generateChildren(dbFolder.right, currentRight, tail)
+      case dbFolder +: tail => generateChildren(currentLeft, currentRight, tail)
+      case _ => Vector.empty[Folder]
     }
   }
 
