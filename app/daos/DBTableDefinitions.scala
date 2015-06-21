@@ -47,9 +47,7 @@ object DBTableDefinitions {
                           secret: String)
 
   class OAuth1Infos(tag: Tag) extends Table[DBOAuth1Info](tag, "oauth1infos") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-
-    def idLoginInfo = column[Long]("idLoginInfo")
+    def idLoginInfo = column[Long]("idLoginInfo", O.PrimaryKey)
 
     def token = column[String]("token")
 
@@ -67,9 +65,7 @@ object DBTableDefinitions {
                           refreshToken: Option[String])
 
   class OAuth2Infos(tag: Tag) extends Table[DBOAuth2Info](tag, "oauth2infos") {
-    def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
-
-    def idLoginInfo = column[Long]("idLoginInfo")
+    def idLoginInfo = column[Long]("idLoginInfo", O.PrimaryKey)
 
     def accessToken = column[String]("accesstoken")
 
@@ -90,7 +86,7 @@ object DBTableDefinitions {
                             salt: Option[String])
 
   class PasswordInfos(tag: Tag) extends Table[DBPasswordInfo](tag, "passwordinfos") {
-    def idLoginInfo = column[Long]("idLoginInfo")
+    def idLoginInfo = column[Long]("idLoginInfo", O.PrimaryKey)
 
     def hasher = column[String]("hasher")
 
