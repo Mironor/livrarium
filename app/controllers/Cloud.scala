@@ -28,9 +28,12 @@ class Cloud(implicit inj: Injector)
   implicit val env = inject[Environment[User, SessionAuthenticator]]
 
   val applicationController = inject[Application]
+
   val folderService = inject[FolderService]
   val bookService = inject[BookService]
+
   val randomIdGenerator = inject[RandomIdGenerator]
+
   val applicationPath = inject[play.api.Application].path
 
 
@@ -50,14 +53,11 @@ class Cloud(implicit inj: Injector)
     request.identity match {
       case Some(user) =>
         val rootFolder: Future[Folder] = folderService.retrieveFolderTree(user)
-        rootFolder.map{
+        rootFolder.map {
           folder => Ok(views.html.index(Json.obj(
-
             "rootFolder" -> Json.toJson(folder)
-
           ).toString()))
         }
-
 
       case None => Future.successful(Redirect(routes.Application.index())) //applicationController.authenticateUser(Credentials("meanor@gmail.com", "aaaaaa"))
     }
@@ -76,6 +76,7 @@ class Cloud(implicit inj: Injector)
   def getRootContent = UserAwareAction.async { implicit request =>
     request.identity match {
       case Some(user) => folderService.retrieveRoot(user).flatMap { rootFolderOption =>
+        // TODO: create root if not present
         val rootFolder = rootFolderOption.getOrElse(throw new Exception("Root folder not found"))
         val rootFolderContent = getFolderContents(user, rootFolder.id)
 

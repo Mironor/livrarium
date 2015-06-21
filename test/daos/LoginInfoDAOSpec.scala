@@ -1,7 +1,7 @@
 package daos
 
 import com.mohiva.play.silhouette.api.LoginInfo
-import daos.silhouette.LoginInfoDAO
+import daos.silhouette.{SilhouetteDAOException, LoginInfoDAO}
 import fixtures.UserFixture
 import helpers.LivrariumSpecification
 import org.specs2.matcher.ThrownMessages
@@ -50,6 +50,25 @@ class LoginInfoDAOSpec extends LivrariumSpecification with ThrownMessages {
 
       // Then
       loginInfo must beSome
+    }
+
+    "return LoginInfo's id" in { implicit inj: Injector =>
+      // Given
+      val loginInfoDAO = new LoginInfoDAO
+
+      // When
+      val foundLoginInfo = await(loginInfoDAO.getId(UserFixture.testUserLoginInfo))
+
+      // Then
+      foundLoginInfo must beEqualTo(1)
+    }
+
+    "throw exception when trying to get LoginInfo's id and it doesn't exist" in { implicit inj: Injector =>
+      // Given
+      val loginInfoDAO = new LoginInfoDAO
+
+      // When Then
+      await(loginInfoDAO.getId(LoginInfo("SomeProvider", "SomeKey"))) must throwA[SilhouetteDAOException]
     }
   }
 

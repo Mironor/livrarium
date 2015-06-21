@@ -2,18 +2,15 @@ package daos.silhouette
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import daos.DBTableDefinitions.{DBLoginInfo, LoginInfos}
-import play.api.db.slick._
-import scaldi.{Injectable, Injector}
-import slick.driver.PostgresDriver.api._
-
+import daos.LivrariumDAO
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
-
-import slick.driver.JdbcProfile
-import scala.concurrent.Future
+import scaldi.Injector
+import slick.driver.PostgresDriver.api._
 import slick.lifted.TableQuery
 
-class LoginInfoDAO(implicit inj: Injector) extends HasDatabaseConfig[JdbcProfile] with Injectable {
-  val dbConfig = inject[DatabaseConfigProvider].get[JdbcProfile]
+import scala.concurrent.Future
+
+class LoginInfoDAO(implicit inj: Injector) extends LivrariumDAO{
 
   private val slickLoginInfos = TableQuery[LoginInfos]
 
@@ -43,4 +40,14 @@ class LoginInfoDAO(implicit inj: Injector) extends HasDatabaseConfig[JdbcProfile
   def insert(loginInfo: LoginInfo, userId: Long): Future[DBLoginInfo] = db.run {
     slickLoginInfos.returning(slickLoginInfos.map(_.id)) += DBLoginInfo(None, userId, loginInfo.providerID, loginInfo.providerKey)
   }.map(id => DBLoginInfo(Option(id), userId, loginInfo.providerID, loginInfo.providerKey))
+
+  /**
+   * Finds login info's id (NOT wrapped in option, so it throws exception if login info is not found
+   * @param loginInfo the id of this login info will be fetched
+   * @return id (Long), throws exception if loginInfo is not found
+   */
+  def getId(loginInfo: LoginInfo): Future[Long] = db.run {
+    slickLoginInfos.filter(x => x.providerID === loginInfo.providerID && x.providerKey === loginInfo.providerKey).map(_.id)
+      .result.headOption
+  }.map(_.getOrElse(throw new SilhouetteDAOException("Associated LoginInfo not found")))
 }

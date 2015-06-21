@@ -31,8 +31,8 @@ class Application(implicit inj: Injector)
   val userService = inject[UserService]
   val folderService = inject[FolderService]
   val authInfoService = inject[AuthInfoRepository]
-  val credentialsProvider = inject[CredentialsProvider]
   val avatarService = inject[AvatarService]
+  val credentialsProvider = inject[CredentialsProvider]
   val passwordHasher = inject[PasswordHasher]
 
   implicit val CredentialsReads: Reads[Credentials] = (
@@ -85,24 +85,10 @@ class Application(implicit inj: Injector)
     }
   }
 
-  def authenticateUser(userCredentials: Credentials)(implicit request: Request[_]): Future[Result] = {
-    credentialsProvider.authenticate(userCredentials).flatMap { loginInfo =>
-      userService.retrieve(loginInfo).flatMap {
-        case Some(user) => env.authenticatorService.create(user.loginInfo).flatMap { authenticator =>
-          val result = Ok(Json.obj("email" -> user.email))
-
-          env.authenticatorService.init(authenticator).flatMap { value =>
-            env.authenticatorService.embed(value, result)
-          }
-        }
-        case None => Future.successful {
-          InternalServerError(Json.obj(
-            "code" -> inject[Int](identified by "errors.auth.userNotFound"),
-            "message" -> "User was not found"
-          ))
-        }
-      }
-    }.recover {
+  private def authenticateUser(userCredentials: Credentials)(implicit request: Request[_]): Future[Result] = {
+    credentialsProvider.authenticate(userCredentials)
+      .flatMap(authenticateUserByLoginInfo)
+      .recover {
       case e: NotAuthorizedException => InternalServerError(Json.obj(
         "code" -> inject[Int](identified by "errors.auth.accessDenied"),
         "message" -> "Access denied"
@@ -111,6 +97,24 @@ class Application(implicit inj: Injector)
         "code" -> inject[Int](identified by "errors.auth.notAuthenticated"),
         "message" -> "Not authenticated"
       ))
+    }
+  }
+
+  private def authenticateUserByLoginInfo(loginInfo: LoginInfo)(implicit request: Request[_]): Future[Result] = {
+    userService.retrieve(loginInfo).flatMap {
+      case Some(user) => env.authenticatorService.create(user.loginInfo).flatMap { authenticator =>
+        val result = Ok(Json.obj("email" -> user.email))
+
+        env.authenticatorService.init(authenticator).flatMap { value =>
+          env.authenticatorService.embed(value, result)
+        }
+      }
+      case None => Future.successful {
+        InternalServerError(Json.obj(
+          "code" -> inject[Int](identified by "errors.auth.userNotFound"),
+          "message" -> "User was not found"
+        ))
+      }
     }
   }
 
@@ -153,6 +157,7 @@ class Application(implicit inj: Injector)
     val result = for {
       avatarURL <- avatarService.retrieveURL(email)
       user <- userService.create(loginInfo, email, avatarURL)
+    //TODO: following 3 lines could execute in parallel
       _ <- folderService.createRootForUser(user)
       _ <- authInfoService.save(loginInfo, password)
       authenticator <- env.authenticatorService.create(user.loginInfo)
