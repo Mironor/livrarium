@@ -19,7 +19,7 @@ class LoginInfoDAO(implicit inj: Injector) extends LivrariumDAO{
    * @return a promise of found login info (None if not found)
    */
   def find(loginInfo: LoginInfo): Future[Option[DBLoginInfo]] = db.run {
-    slickLoginInfos.filter(x => x.providerID === loginInfo.providerID && x.providerKey === loginInfo.providerKey)
+    slickLoginInfos.filter(info => info.providerID === loginInfo.providerID && info.providerKey === loginInfo.providerKey)
       .result.headOption
   }
 
@@ -47,7 +47,7 @@ class LoginInfoDAO(implicit inj: Injector) extends LivrariumDAO{
    * @return id (Long), throws exception if loginInfo is not found
    */
   def getId(loginInfo: LoginInfo): Future[Long] = db.run {
-    slickLoginInfos.filter(x => x.providerID === loginInfo.providerID && x.providerKey === loginInfo.providerKey).map(_.id)
+    slickLoginInfos.filter(info => info.providerID === loginInfo.providerID && info.providerKey === loginInfo.providerKey).map(_.id)
       .result.headOption
   }.map(_.getOrElse(throw new SilhouetteDAOException("Associated LoginInfo not found")))
 }

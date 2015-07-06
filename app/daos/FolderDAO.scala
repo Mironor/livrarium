@@ -8,7 +8,7 @@ import slick.lifted.TableQuery
 
 import scala.concurrent.Future
 
-class FolderDAO(implicit inj: Injector) extends LivrariumDAO{
+class FolderDAO(implicit inj: Injector) extends LivrariumDAO {
 
   val rootFolderName = ""
   val slickFolders = TableQuery[Folders]
@@ -28,7 +28,7 @@ class FolderDAO(implicit inj: Injector) extends LivrariumDAO{
    * @return a promise of user's root folder (None if user does not have a root folder)
    */
   def findRoot(userId: Long): Future[Option[DBFolder]] = db.run {
-    slickFolders.filter(x => x.idUser === userId && x.left === 0).result.headOption
+    slickFolders.filter(folder => folder.idUser === userId && folder.left === 0).result.headOption
   }
 
   /**
@@ -46,17 +46,10 @@ class FolderDAO(implicit inj: Injector) extends LivrariumDAO{
    * @return a promise of a list of immediate children of a folder with supplied id
    */
   def findChildrenById(folderId: Long): Future[Seq[DBFolder]] = db.run {
-    slickFolders.filter(_.id === folderId).result.headOption
-  }.flatMap {
-    case Some(parentFolder) => db.run {
-      slickFolders.filter(x =>
-        x.left > parentFolder.left
-          && x.left > parentFolder.left
-          && x.right < parentFolder.right
-          && x.level === (parentFolder.level + 1)
-      ).result
-    }
-    case None => Future.successful(Nil)
+    (for {
+      parentFolder <- slickFolders if parentFolder.id === folderId
+      folder <- slickFolders if folder.left > parentFolder.left && folder.right < parentFolder.right && folder.level === (parentFolder.level + 1)
+    } yield folder).result
   }
 
 
@@ -90,7 +83,6 @@ class FolderDAO(implicit inj: Injector) extends LivrariumDAO{
       } catch {
         case e: Exception => throw new DAOException("Append folder: slick could not execute plain query")
       }
-
     case None => Future.successful(None)
   }
 }
