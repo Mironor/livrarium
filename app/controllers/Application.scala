@@ -8,6 +8,7 @@ import com.mohiva.play.silhouette.api.util.{Credentials, PasswordHasher, Passwor
 import com.mohiva.play.silhouette.api.{Silhouette, _}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
+import daos.silhouette.SilhouetteDAOException
 import models.User
 import play.api.i18n.MessagesApi
 import play.api.libs.concurrent.Execution.Implicits._
@@ -89,15 +90,19 @@ class Application(implicit inj: Injector)
     credentialsProvider.authenticate(userCredentials)
       .flatMap(authenticateUserByLoginInfo)
       .recover {
-      case e: NotAuthorizedException => InternalServerError(Json.obj(
-        "code" -> inject[Int](identified by "errors.auth.accessDenied"),
-        "message" -> "Access denied"
-      ))
-      case e: NotAuthenticatedException => InternalServerError(Json.obj(
-        "code" -> inject[Int](identified by "errors.auth.notAuthenticated"),
-        "message" -> "Not authenticated"
-      ))
-    }
+        case e: NotAuthorizedException => InternalServerError(Json.obj(
+          "code" -> inject[Int](identified by "errors.auth.accessDenied"),
+          "message" -> "Access denied"
+        ))
+        case e: NotAuthenticatedException => InternalServerError(Json.obj(
+          "code" -> inject[Int](identified by "errors.auth.notAuthenticated"),
+          "message" -> "Not authenticated"
+        ))
+        case e: SilhouetteDAOException => InternalServerError(Json.obj(
+          "code" -> inject[Int](identified by "errors.auth.userNotFound"),
+          "message" -> "User was not found"
+        ))
+      }
   }
 
   private def authenticateUserByLoginInfo(loginInfo: LoginInfo)(implicit request: Request[_]): Future[Result] = {
@@ -157,7 +162,7 @@ class Application(implicit inj: Injector)
     val result = for {
       avatarURL <- avatarService.retrieveURL(email)
       user <- userService.create(loginInfo, email, avatarURL)
-    //TODO: following 3 lines could execute in parallel
+      //TODO: following 3 lines could execute in parallel
       _ <- folderService.createRootForUser(user)
       _ <- authInfoService.save(loginInfo, password)
       authenticator <- env.authenticatorService.create(user.loginInfo)
