@@ -1,10 +1,8 @@
 describe("Content", function() {
     var $httpBackend, constants, i18n,
-        contentController, Folder,
-        scope, element;
+        Folder, scope, element;
 
-    var newFolderName = "New folder",
-        validTemplate = '<lvr-content></lvr-content>';
+    var validTemplate = '<lvr-content></lvr-content>';
 
     var rootFolderContents = function() {
         return {

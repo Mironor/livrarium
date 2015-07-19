@@ -6,7 +6,7 @@ angular.module('lvr.uploadButton', [
         templateUrl: constants.pathToApp + 'modules/upload-button/upload-button.html',
         controller: function ($scope, $upload, folders, books) {
             $scope.uploadFile = function (file) {
-                var currentFolderId = folders.getCurrentFolder().id;
+                var currentFolderId = folders.currentFolder.id;
 
                 $scope.upload = $upload.upload({
                     url: constants.api.upload(currentFolderId),
