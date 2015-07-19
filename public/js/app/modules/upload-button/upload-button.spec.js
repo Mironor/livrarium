@@ -37,7 +37,7 @@ describe('Upload Button', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('call upload method of the $upload for each element in the $files array', function () {
+    xit('call upload method of the $upload for each element in the $files array', function () {
         // Given
         var fileList = ["file1", "file2", "file3"];
 
@@ -48,7 +48,7 @@ describe('Upload Button', function () {
         expect($upload.upload.calls.count()).toEqual(fileList.length);
     });
 
-    it('supply expected parameters to the upload method', function () {
+    xit('supply expected parameters to the upload method', function () {
         // Given
         spyOn(folders, 'getCurrentFolder').and.returnValue(new Folder({
             id: 1,

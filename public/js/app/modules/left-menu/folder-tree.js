@@ -1,6 +1,8 @@
 angular.module('lvr.folderTree', ['RecursionHelper'])
     .controller('lvrFolderTreeCtrl', function ($scope, folders) {
-        $scope.rootFolder = folders.getRootFolder();
+        // this fetch will fill up root folder's children array as soon as ajax request is completed
+        folders.fetchFolderTree();
+        $scope.rootFolder = folders.rootFolder;
 
         $scope.expanded = false;
 

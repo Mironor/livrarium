@@ -1,21 +1,27 @@
 angular.module('lvr.content', [])
     .controller('lvrContentCtrl', function ($scope, Book, Folder, folders, books) {
+
+        this.test = "test";
+
         $scope.showDropdown = false;
         $scope.showAsMosaic = true;
 
-        $scope.currentFolder = folders.getCurrentFolder();
-        $scope.folders = [];
-        //$scope.getFolders = folders.getCurrentSubFolders();
+        $scope.currentFolder = folders.currentFolder;
 
-        $scope.getBooks =  books.currentBooks;
+        folders.fetchFolderContents($scope.currentFolder.id);
 
         $scope.createNewFolder = function () {
-            $scope.folders.unshift(new Folder({
-                label: folders.getNewFolderNameInCurrentFolder()
-            }));
+            var newFolder =  new Folder({
+                name: folders.getNewFolderNameInCurrentFolder()
+            });
 
-            folders.saveRootFolder();
-        }
+            $scope.currentFolder.contents.folders.unshift(newFolder);
+
+            folders.createFolder($scope.currentFolder.id, newFolder.name)
+                //.success(function(data) {
+                //    newFolder.id = data.id
+                //})
+        };
     })
     .directive('lvrContent', function (constants) {
         return {

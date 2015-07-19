@@ -8,16 +8,20 @@ angular.module('lvr')
         api: {
             signInWithCredentials: '/authenticate/credentials',
             signUp: '/sign-up',
+            foldersTree: '/folders/tree',
+            createFolder: '/folders/create',
+            folderContents: function(folderId) {
+                return '/folders/contents/' + folderId.toString()
+            },
             upload: function(folderId) {
-                return '/upload/' + folderId
+                return '/upload/' + folderId.toString()
             }
         },
 
         applicationUrls: {
             signIn: '/',
             signUp: '/sign-up',
-            cloud: '/cloud',
-            folderTree: '/folders/tree'
+            cloud: '/cloud'
         },
 
         errorCodes: {

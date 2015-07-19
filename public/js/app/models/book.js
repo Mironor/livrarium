@@ -3,9 +3,8 @@ angular.module('lvr')
 
         var bookModel = {
 
-            id: '',
-            name: '',
             identifier: '',
+            name: '',
             formats: [],
             pages: 0,
             currentPage: 0,

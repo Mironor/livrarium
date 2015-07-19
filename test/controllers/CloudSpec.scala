@@ -109,7 +109,7 @@ class CloudSpec extends LivrariumSpecification with ThrownMessages {
       val newFolderName = "testCreateFolder"
 
       val requestJson = Json.obj(
-        "idParent" -> JsNumber(FolderFixture.sub1Id),
+        "parentId" -> JsNumber(FolderFixture.sub1Id),
         "name" -> JsString(newFolderName)
       )
 

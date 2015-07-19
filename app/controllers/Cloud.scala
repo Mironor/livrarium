@@ -42,7 +42,7 @@ class Cloud(implicit inj: Injector)
    * https://www.playframework.com/documentation/2.1.0/ScalaJsonRequests
    */
   implicit val appendFolderReads = (
-    (__ \ 'idParent).read[Long] and
+    (__ \ 'parentId).read[Long] and
       (__ \ 'name).read[String]
     ) tupled
 

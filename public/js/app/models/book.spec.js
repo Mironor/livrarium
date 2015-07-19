@@ -8,7 +8,7 @@ describe('Book', function () {
         constants = _constants_;
 
         book = new Book({
-            id: 'book_one',
+            identifier: 'uuid-1',
             name: 'Book one',
             createDate: 1407608313000,
             formats: ['pdf', 'epub'],

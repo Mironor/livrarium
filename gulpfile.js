@@ -23,6 +23,8 @@ gulp.task('deps_dev', function () {
 
 gulp.task('deps_test', function () {
     gulp.src([
+        'bower_dependencies/jquery/dist/jquery.js',
+
         'bower_dependencies/angular/angular.js',
         'bower_dependencies/angular-mocks/angular-mocks.js',
         'bower_dependencies/angular-translate/angular-translate.js',
@@ -32,8 +34,8 @@ gulp.task('deps_test', function () {
         'bower_dependencies/lodash/dist/lodash.js',
         'bower_dependencies/underscore.string/lib/underscore.string.js',
 
-        'bower_dependencies/jquery/dist/jquery.js',
-        'bower_dependencies/jasmine-jquery/lib/jasmine-jquery.js'
+        'bower_dependencies/jasmine-jquery/lib/jasmine-jquery.js',
+        'node_modules/phantomjs-polyfill/bind-polyfill.js'
     ])
         .pipe(concat('lvr-vendor-test.js'))
         .pipe(gulp.dest('public/js/'))
