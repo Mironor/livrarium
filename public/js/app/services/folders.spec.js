@@ -2,22 +2,18 @@ describe('Folders', function() {
     var $httpBackend, constants, i18n,
         foldersService, Folder;
 
-    var rootFolderId = -1;
-
     // function instead of value to regenerate folder tree each time (as we are working with mutable objects)
-    var rootSubFolders = function() {
-    };
-
-    var rootFolderContents = function() {
+    var folderContentsFixture = function() {
         return {
+            id: 1,
             folders: [
                 {
-                    id: 1,
+                    id: 2,
                     name: 'javascript',
                     children: []
                 },
                 {
-                    id: 2,
+                    id: 3,
                     name: 'database',
                     children: []
                 }
@@ -49,7 +45,7 @@ describe('Folders', function() {
 
     var folderTreeFixture = function() {
         return {
-            id: rootFolderId,
+            id: 1,
             name: "",
             children: [
                 {
@@ -69,7 +65,7 @@ describe('Folders', function() {
                     name: 'database',
                     children: [
                         {
-                            label: 'Beginning with MongoDB',
+                            name: 'Beginning with MongoDB',
                             children: []
                         }
                     ]
@@ -93,13 +89,13 @@ describe('Folders', function() {
         $httpBackend.when('GET', constants.api.foldersTree)
             .respond(folderTreeFixture());
 
-        $httpBackend.when('GET', constants.api.folderContents(-1))
-            .respond(rootFolderContents());
+
     }));
 
     afterEach(function() {
         $httpBackend.verifyNoOutstandingExpectation();
         $httpBackend.verifyNoOutstandingRequest();
+        foldersService.currentFolder = undefined;
     });
 
 
@@ -118,9 +114,11 @@ describe('Folders', function() {
 
     it("should retrieve root's contents", function() {
         // Given
+        $httpBackend.expect('GET', constants.api.rootContent)
+            .respond(folderContentsFixture());
 
         // When
-        foldersService.fetchFolderContents(rootFolderId);
+        foldersService._fetchRootContents();
         $httpBackend.flush();
         var folder = foldersService.currentFolder;
 
@@ -128,17 +126,61 @@ describe('Folders', function() {
         expect(folder.name).toEqual("");
 
         expect(folder.contents.folders.length).toEqual(2);
-        expect(_.map(folder.contents.folders, 'id')).toEqual([1, 2]);
+        expect(_.map(folder.contents.folders, 'id')).toEqual([2, 3]);
 
         expect(folder.contents.books.length).toEqual(3);
         expect(_.map(folder.contents.books, 'identifier')).toEqual(['uuid-1', 'uuid-2', 'uuid-3']);
+    });
+
+    it("should retrieve some folder's contents", function() {
+        // Given
+        var folderId = 1;
+        $httpBackend.expect('GET', constants.api.folderContents(folderId))
+            .respond(folderContentsFixture());
+
+        // When
+        foldersService._fetchFolderContents(folderId);
+        $httpBackend.flush();
+        var folder = foldersService.currentFolder;
+
+        // Then
+        expect(folder.name).toEqual("");
+
+        expect(folder.contents.folders.length).toEqual(2);
+        expect(_.map(folder.contents.folders, 'id')).toEqual([2, 3]);
+
+        expect(folder.contents.books.length).toEqual(3);
+        expect(_.map(folder.contents.books, 'identifier')).toEqual(['uuid-1', 'uuid-2', 'uuid-3']);
+    });
+
+    it("should choose what contents to fetch depending on current folder (if it's root)", function() {
+        // Given
+        $httpBackend.expect('GET', constants.api.rootContent)
+            .respond(folderContentsFixture());
+
+        // When Then
+        foldersService.fetchCurrentFolderContents();
+        $httpBackend.flush();
+    });
+
+    it("should choose what contents to fetch depending on current folder (if it's NOT root)", function() {
+        // Given
+        foldersService.currentFolder = new Folder({id: 1});
+
+        var folderId = 1;
+        $httpBackend.expect('GET', constants.api.folderContents(folderId))
+            .respond(folderContentsFixture());
+
+        // When Then
+        foldersService.fetchCurrentFolderContents();
+        $httpBackend.flush();
     });
 
     it("should pick the the name for a new folder (if a folder with a default name already exists in current folder)", function() {
         // Given
         var currentFolder = foldersService.currentFolder,
             newFolder = new Folder({
-                label: i18n['content.folders.newFolderName']
+                name: i18n['content.folders.newFolderName']
             });
 
         currentFolder.contents.folders.push(newFolder);
@@ -152,28 +194,15 @@ describe('Folders', function() {
 
     it("should send request to create a new folder", function() {
         // Given
+        var folderId = 1;
         var newFolderName = "new folder";
 
         // When Then
         $httpBackend.expectPOST(constants.api.createFolder, {
-            parentId: -1,
+            parentId: folderId,
             name: newFolderName
         }).respond(200, {id: 3});
-        foldersService.createFolder(rootFolderId, newFolderName);
+        foldersService.createFolder(folderId, newFolderName);
         $httpBackend.flush();
     });
-
-    /*
-
-     it("should generate correct path to current folder", function () {
-     // Given
-     var expectedPath = "/database/Beginning with MongoDB";
-
-     // When
-
-     // Then
-     expect(foldersService.getCurrentPath()).toBe()
-
-     })
-     */
 });

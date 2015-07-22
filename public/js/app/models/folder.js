@@ -1,7 +1,7 @@
 angular.module('lvr')
     .factory('Folder', function () {
         var folderModel = {
-            id: -1,
+            id: undefined,
             name: "",
             children: [], // used in folder's tree
             contents: {

@@ -1,5 +1,5 @@
 angular.module('lvr')
-    .factory('folders', function($http, constants, i18nEn, Folder) {
+    .factory('folders', function($http, constants, i18nEn, Folder, Book) {
 
         var FoldersService = {
             // These public fields are only for angular binding, otherwise use helper functions instead
@@ -16,17 +16,34 @@ angular.module('lvr')
                     }.bind(this));
             },
 
-            fetchFolderContents: function(folderId) {
-                return $http.get(constants.api.folderContents(folderId))
+            fetchCurrentFolderContents: function() {
+                if (this.currentFolder.id === undefined) this._fetchRootContents();
+                else this._fetchFolderContents(this.currentFolder.id);
+            },
+
+            _fetchFolderContents: function(folderId) {
+                return this._fetchFolderContentsByUrl(constants.api.folderContents(folderId))
+            },
+
+            _fetchRootContents: function() {
+                return this._fetchFolderContentsByUrl(constants.api.rootContent)
+                    .success(function(data) {
+                        if (this.currentFolder.id === undefined) this.currentFolder.id = data.id;
+                    }.bind(this))
+            },
+
+            _fetchFolderContentsByUrl: function(apiUrl) {
+                return $http.get(apiUrl)
                     .success(function(data) {
                         _(data.folders).forEach(function(folder) {
                             this.currentFolder.contents.folders.push(new Folder(folder));
                         }.bind(this));
 
                         _(data.books).forEach(function(book) {
-                            this.currentFolder.contents.books.push(new Folder(book));
+                            this.currentFolder.contents.books.push(new Book(book));
                         }.bind(this));
                     }.bind(this));
+
             },
 
             getNewFolderNameInCurrentFolder: function() {
@@ -34,7 +51,7 @@ angular.module('lvr')
                     expectedNumber = 1;
 
                 subFolders.forEach(function(subFolder) {
-                    if (_.str.startsWith(subFolder.label, i18nEn['content.folders.newFolderName'])) {
+                    if (_.str.startsWith(subFolder.name, i18nEn['content.folders.newFolderName'])) {
                         expectedNumber++;
                     }
                 });

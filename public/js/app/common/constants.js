@@ -9,6 +9,7 @@ angular.module('lvr')
             signInWithCredentials: '/authenticate/credentials',
             signUp: '/sign-up',
             foldersTree: '/folders/tree',
+            rootContent: '/folders/root',
             createFolder: '/folders/create',
             folderContents: function(folderId) {
                 return '/folders/contents/' + folderId.toString()
@@ -35,6 +36,5 @@ angular.module('lvr')
             maxBarsCount: 10
         },
 
-        folders: {
-        }
+        folders: {}
     });

@@ -23,9 +23,18 @@ object Book {
       (__ \ "identifier").write[String] and
       (__ \ "name").write[String] and
       (__ \ "format").write[String] and
-      (__ \ "totalPates").write[Int] and
+      (__ \ "pages").write[Int] and
       (__ \ "currentPage").write[Int]
     )(unlift(Book.unapply))
+
+  implicit val bookReads: Reads[Book] = (
+    (__ \ "id").read[Long] and
+      (__ \ "identifier").read[String] and
+      (__ \ "name").read[String] and
+      (__ \ "format").read[String] and
+      (__ \ "pages").read[Int] and
+      (__ \ "currentPage").read[Int]
+    )(Book.apply _)
 
 
   def fromDBBook(dbBook: DBBook): Book = {

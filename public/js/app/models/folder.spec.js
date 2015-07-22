@@ -27,7 +27,7 @@ describe('Folder', function () {
                     name: 'database',
                     children: [
                         {
-                            label: 'Beginning with MongoDB',
+                            name: 'Beginning with MongoDB',
                             children: []
                         }
                     ]

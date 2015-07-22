@@ -1,19 +1,19 @@
 describe("Content", function() {
     var $httpBackend, constants, i18n,
-        Folder, scope, element;
+        foldersService, Folder, scope, element;
 
     var validTemplate = '<lvr-content></lvr-content>';
 
-    var rootFolderContents = function() {
+    var rootFolderContentsFixture = function() {
         return {
             folders: [
                 {
-                    id: 1,
+                    id: 2,
                     name: 'javascript',
                     children: []
                 },
                 {
-                    id: 2,
+                    id: 3,
                     name: 'database',
                     children: []
                 }
@@ -43,6 +43,37 @@ describe("Content", function() {
         }
     };
 
+    var folderTreeFixture = function() {
+        return {
+            id: 1,
+            name: "",
+            children: [
+                {
+                    name: 'javascript',
+                    children: [
+                        {
+                            name: 'BDD with Jasmine',
+                            children: []
+                        },
+                        {
+                            name: 'Algorithms in js',
+                            children: []
+                        }
+                    ]
+                },
+                {
+                    name: 'database',
+                    children: [
+                        {
+                            name: 'Beginning with MongoDB',
+                            children: []
+                        }
+                    ]
+                }
+            ]
+        };
+    };
+
     beforeEach(module('lvr', 'lvr.content'));
 
     beforeEach(module(
@@ -56,10 +87,10 @@ describe("Content", function() {
         $httpBackend = _$httpBackend_;
         constants = _constants_;
         i18n = i18nEn;
+        foldersService = folders;
         Folder = _Folder_;
 
-        $httpBackend.when('GET', constants.api.folderContents(-1))
-            .respond(rootFolderContents());
+        $httpBackend.when('GET', constants.api.rootContent).respond(rootFolderContentsFixture());
 
         scope = $rootScope.$new();
         element = jQuery(validTemplate);
@@ -94,5 +125,39 @@ describe("Content", function() {
 
         var afterBooks = element.find('.books .book');
         expect(afterBooks.length).toEqual(3);
-    })
+    });
+
+    it("should have new folders with incremented count ('New folder #2')", function() {
+        // Given
+        $httpBackend.whenPOST(constants.api.createFolder).respond(200, {id: 3});
+
+        // When
+        element.find('.buttons .button-new-folder').trigger('click');
+        element.find('.buttons .button-new-folder').trigger('click');
+        $httpBackend.flush();
+
+        // Then
+        var folderNames = element.find('.folders .folder span');
+        var lastFolderName = folderNames.last().text();
+
+        expect(lastFolderName).toBe(i18n['content.folders.newFolderName'] + i18n['content.numberSign'] + '2');
+    });
+
+    it("should append newly created folder to the folder's tree", function() {
+        // Given
+        $httpBackend.whenGET(constants.api.foldersTree).respond(folderTreeFixture());
+        $httpBackend.whenPOST(constants.api.createFolder).respond(200, {id: 3});
+
+        // When
+        foldersService.fetchFolderTree();
+        $httpBackend.flush();
+        element.find('.buttons .button-new-folder').trigger('click');
+        $httpBackend.flush();
+
+        // Then
+        var rootFolderChildren = foldersService.rootFolder.children;
+
+        expect(rootFolderChildren.length).toEqual(3);
+        expect(rootFolderChildren[2].name).toBe(i18n['content.folders.newFolderName'])
+    });
 });

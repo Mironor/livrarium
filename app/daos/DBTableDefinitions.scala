@@ -123,13 +123,13 @@ object DBTableDefinitions {
 
     def format = column[String]("format")
 
-    def totalPages = column[Int]("totalPages")
+    def pages = column[Int]("pages")
 
     def currentPage = column[Int]("currentPage")
 
     def userFK = foreignKey("BOOK_USER_FK", idUser, TableQuery[Users])(_.id, onUpdate = ForeignKeyAction.Restrict, onDelete = ForeignKeyAction.Cascade)
 
-    def * = (id.?, idUser, uuid, name, format, totalPages, currentPage) <>(DBBook.tupled, DBBook.unapply)
+    def * = (id.?, idUser, uuid, name, format, pages, currentPage) <>(DBBook.tupled, DBBook.unapply)
 
     def uniqueUUID = index("UNIQUE_UUID", uuid, unique = true)
   }

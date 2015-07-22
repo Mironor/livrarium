@@ -88,8 +88,13 @@ class Cloud(implicit inj: Injector)
   }
 
   private def getFolderContents(user: User, folderId: Long): Future[FolderContents] = {
-    val childrenPromise = folderService.retrieveChildren(user, folderId)
-    childrenPromise.map(children => FolderContents(folderId, children))
+    val subFolders = folderService.retrieveChildren(user, folderId)
+    val books = bookService.retrieveAllFromFolder(user, folderId)
+
+    for {
+      retrievedSubFolders <- subFolders
+      retrievedBooks <- books
+    } yield FolderContents(folderId, retrievedSubFolders, retrievedBooks)
   }
 
   def getContent(id: Long) = UserAwareAction.async { implicit request =>

@@ -3,7 +3,7 @@
 
 # --- !Ups
 
-create table "books" ("id" BIGSERIAL NOT NULL PRIMARY KEY,"idUser" BIGINT NOT NULL,"uuid" UUID NOT NULL,"name" VARCHAR(254) NOT NULL,"format" VARCHAR(254) NOT NULL,"totalPages" INTEGER NOT NULL,"currentPage" INTEGER NOT NULL);
+create table "books" ("id" BIGSERIAL NOT NULL PRIMARY KEY,"idUser" BIGINT NOT NULL,"uuid" VARCHAR(254) NOT NULL,"name" VARCHAR(254) NOT NULL,"format" VARCHAR(254) NOT NULL,"pages" INTEGER NOT NULL,"currentPage" INTEGER NOT NULL);
 create unique index "UNIQUE_UUID" on "books" ("uuid");
 create table "books_to_folders" ("idBook" BIGINT NOT NULL,"idFolder" BIGINT NOT NULL);
 alter table "books_to_folders" add constraint "pk_books_to_folders" primary key("idBook","idFolder");

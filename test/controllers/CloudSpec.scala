@@ -5,7 +5,7 @@ import javax.imageio.ImageIO
 
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.test._
-import fixtures.{FolderFixture, UserFixture}
+import fixtures.{BookFixture, FolderFixture, UserFixture}
 import helpers.{BookFormatHelper, LivrariumSpecification, PDFTestHelper, RandomIdGenerator}
 import models.{Folder, FolderContents}
 import org.apache.commons.io.FileUtils
@@ -23,6 +23,7 @@ class CloudSpec extends LivrariumSpecification with ThrownMessages {
   protected def bootstrapFixtures(implicit inj: Injector): Unit = {
     await(UserFixture.initFixture())
     await(FolderFixture.initFixture())
+    await(BookFixture.initFixture())
     cleanUploadDirectories()
   }
 
@@ -82,9 +83,13 @@ class CloudSpec extends LivrariumSpecification with ThrownMessages {
       status(result) mustEqual OK
       contentType(result) must beSome("application/json")
       val folderContents = contentAsJson(result).as[FolderContents]
+
       folderContents.folders must have size 2
       folderContents.folders(0).name must beEqualTo(FolderFixture.sub1Name)
       folderContents.folders(1).name must beEqualTo(FolderFixture.sub2Name)
+
+      folderContents.books must have size 1
+      folderContents.books(0).name must beEqualTo(BookFixture.rootBookName)
     }
 
     "return some folder's (other than root) content" in { implicit inj: Injector =>
@@ -218,12 +223,12 @@ class CloudSpec extends LivrariumSpecification with ThrownMessages {
       val books = await(bookService.retrieveAllFromFolder(UserFixture.testUser, FolderFixture.sub1Id))
 
       // Then
-      books must have size 1
+      books must have size 2
 
-      val book = books.head
-      book.identifier mustEqual generatedBookId
-      book.format mustEqual BookFormatHelper.PDF
-      book.name mustEqual "book"
+      val uploadedBook = books(1)
+      uploadedBook.identifier mustEqual generatedBookId
+      uploadedBook.format mustEqual BookFormatHelper.PDF
+      uploadedBook.name mustEqual "book"
     }
   }
 }

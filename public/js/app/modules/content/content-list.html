@@ -11,13 +11,13 @@
     <tr ng-repeat="folder in currentFolder.contents.folders">
         <td class="thumbnail"><i class="icon-button icon-folder"></i></td>
         <td>
-            {{folder.label}}
+            {{folder.name}}
         </td>
         <td></td>
         <td></td>
     </tr>
     <tr ng-repeat="book in currentFolder.contents.books">
-        <td class="thumbnail"><img ng-src="/assets/img/{{currentFolder.id}}/{{book.identifier}}-small.png" alt=""/></td>
+        <td class="thumbnail"><img ng-src="/assets/img/upload/{{currentFolder.id}}/{{book.identifier}}-small.jpg" alt=""/></td>
         <td>
             {{book.name}}
             <lvr-book-progressbar class="progressbar" bars="book.progressBars"></lvr-book-progressbar>

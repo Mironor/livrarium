@@ -40,12 +40,23 @@ describe('Upload Button', function () {
     it('call upload method of the $upload for each element in the $files array', function () {
         // Given
         var fileList = ["file1", "file2", "file3"];
+        folders.currentFolder.id = 1;
 
         // When
         scope.onFileSelect(fileList);
 
         // Then
         expect($upload.upload.calls.count()).toEqual(fileList.length);
+    });
+
+    it('should throw error if trying to upload to undefined folder', function () {
+        // Given
+        var fileList = ["file1", "file2", "file3"];
+
+        // When Then
+        expect(function(){
+            scope.onFileSelect(fileList)
+        }).toThrow();
     });
 
     it('supply expected parameters to the upload method', function () {
