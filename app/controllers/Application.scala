@@ -29,12 +29,12 @@ class Application(implicit inj: Injector)
   implicit val messagesApi = inject[MessagesApi]
   implicit val env = inject[Environment[User, SessionAuthenticator]]
 
-  val userService = inject[UserService]
-  val folderService = inject[FolderService]
-  val authInfoService = inject[AuthInfoRepository]
-  val avatarService = inject[AvatarService]
-  val credentialsProvider = inject[CredentialsProvider]
-  val passwordHasher = inject[PasswordHasher]
+  private val userService = inject[UserService]
+  private val folderService = inject[FolderService]
+  private val authInfoService = inject[AuthInfoRepository]
+  private val avatarService = inject[AvatarService]
+  private val credentialsProvider = inject[CredentialsProvider]
+  private val passwordHasher = inject[PasswordHasher]
 
   implicit val CredentialsReads: Reads[Credentials] = (
     (JsPath \ "email").read[String](email) and

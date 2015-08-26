@@ -15,7 +15,7 @@ angular.module('lvr')
                 var barsCount, currentProgress;
 
                 if (this.pages > 0) {
-                    barsCount = Math.ceil(this.pages / constants.books.minPagesPerBar);
+                    barsCount = Math.ceil(this.pages / constants.books.maxPagesPerBar);
                     barsCount = Math.min(barsCount, constants.books.maxBarsCount);
                     currentProgress = this.currentPage / this.pages;
                 } else {

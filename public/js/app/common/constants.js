@@ -1,10 +1,10 @@
-// Inject server variable
-var pathToApp = window.pathToApp || 'public/js/app/'; // path for karma tests if undefined
+var pathToApp = window.pathToApp || 'public/js/app/'; // this is most useful for karma tests
 
 angular.module('lvr')
     .constant('constants', {
         pathToApp: pathToApp,
 
+        // Urls that will be sent to the server via ajax requesting json data
         api: {
             signInWithCredentials: '/authenticate/credentials',
             signUp: '/sign-up',
@@ -19,12 +19,14 @@ angular.module('lvr')
             }
         },
 
+        // Internal (client-side) urls
         applicationUrls: {
             signIn: '/',
             signUp: '/sign-up',
             cloud: '/cloud'
         },
 
+        // Application errors (the ones returned by server must have the same id as here)
         errorCodes: {
             userNotFound: 4004,
             accessDenied: 4002,
@@ -32,7 +34,7 @@ angular.module('lvr')
         },
 
         books: {
-            minPagesPerBar: 50,
+            maxPagesPerBar: 50,
             maxBarsCount: 10
         },
 

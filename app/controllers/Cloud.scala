@@ -27,14 +27,13 @@ class Cloud(implicit inj: Injector)
   implicit val messagesApi = inject[MessagesApi]
   implicit val env = inject[Environment[User, SessionAuthenticator]]
 
-  val applicationController = inject[Application]
+  private val applicationController = inject[Application]
 
-  val folderService = inject[FolderService]
-  val bookService = inject[BookService]
+  private val folderService = inject[FolderService]
+  private val bookService = inject[BookService]
 
-  val randomIdGenerator = inject[RandomIdGenerator]
-
-  val applicationPath = inject[play.api.Application].path
+  private val randomIdGenerator = inject[RandomIdGenerator]
+  private val applicationPath = inject[play.api.Application].path
 
 
   /**
