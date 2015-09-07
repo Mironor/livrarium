@@ -5,7 +5,7 @@ import com.mohiva.play.silhouette.api.util.PasswordHasher
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.test.FakeEnvironment
 import fixtures.UserFixture
-import helpers.{RandomIdGenerator, PseudoUUIDGenerator, TestPasswordHasher}
+import helpers._
 import models.User
 import scaldi.Module
 
@@ -16,5 +16,6 @@ class SpecModule extends Module{
     UserFixture.testUserLoginInfo -> UserFixture.testUser)
   )
   bind[RandomIdGenerator] to new PseudoUUIDGenerator
-  bind[PasswordHasher] to new TestPasswordHasher
+  bind[FileHelper] to new FileTestHelper
+  bind[PasswordHasher] to new PasswordTestHasher
 }

@@ -1,6 +1,6 @@
 describe("Content", function() {
-    var $httpBackend, constants, i18n,
-        foldersService, Folder, scope, element;
+    var $httpBackend, $compile, $rootScope, constants, i18n,
+        folders, Folder, bookViewer, scope, element;
 
     var validTemplate = '<lvr-content></lvr-content>';
 
@@ -83,22 +83,39 @@ describe("Content", function() {
         'public/js/app/modules/content/book-progressbar.html'
     ));
 
-    beforeEach(inject(function(_$httpBackend_, $controller, $rootScope, $compile, _constants_, i18nEn, folders, _Folder_) {
+    beforeEach(inject(function(_$httpBackend_, $controller, _$rootScope_, _$compile_, _constants_, i18nEn, _bookViewer_, _folders_, _Folder_) {
         $httpBackend = _$httpBackend_;
+        $compile = _$compile_;
+        $rootScope = _$rootScope_;
         constants = _constants_;
         i18n = i18nEn;
-        foldersService = folders;
+        bookViewer = _bookViewer_;
+        folders = _folders_;
         Folder = _Folder_;
 
+        createMosaicView();
+    }));
+
+    function createMosaicView(){
+        scope = $rootScope.$new();
+        create(scope);
+    }
+
+    function createListView(){
+        scope = $rootScope.$new();
+        scope.showAsMosaic = false;
+        create(scope);
+    }
+
+    function create(scope){
         $httpBackend.when('GET', constants.api.rootContent).respond(rootFolderContentsFixture());
 
-        scope = $rootScope.$new();
         element = jQuery(validTemplate);
         $compile(element)(scope);
 
         $httpBackend.flush();
         scope.$apply();
-    }));
+    }
 
     afterEach(function () {
         $httpBackend.verifyNoOutstandingExpectation();
@@ -149,15 +166,44 @@ describe("Content", function() {
         $httpBackend.whenPOST(constants.api.createFolder).respond(200, {id: 3});
 
         // When
-        foldersService.fetchFolderTree();
+        folders.fetchFolderTree();
         $httpBackend.flush();
         element.find('.buttons .button-new-folder').trigger('click');
         $httpBackend.flush();
 
         // Then
-        var rootFolderChildren = foldersService.rootFolder.children;
+        var rootFolderChildren = folders.rootFolder.children;
 
         expect(rootFolderChildren.length).toEqual(3);
         expect(rootFolderChildren[2].name).toBe(i18n['content.folders.newFolderName'])
+    });
+
+    it("should open book viewer when clicked on book in mosaic view", function() {
+        // Given
+        expect(bookViewer.show).toBeFalsy();
+
+        // When
+        var bookOne = element.find('.content-mosaic .books .book:first');
+        bookOne.dblclick();
+
+        // Then
+        expect(bookViewer.show).toBeTruthy();
+        expect(bookViewer.openedBook.model.identifier).toEqual(rootFolderContentsFixture().books[0].identifier)
+    });
+
+    it("should open book viewer when clicked on book in list view", function() {
+        // Given
+
+        // When
+        createListView();
+
+        expect(bookViewer.show).toBeFalsy();
+
+        var bookOne = element.find('.content-list .book:first');
+        bookOne.dblclick();
+
+        // Then
+        expect(bookViewer.show).toBeTruthy();
+        expect(bookViewer.openedBook.model.identifier).toEqual(rootFolderContentsFixture().books[0].identifier)
     });
 });

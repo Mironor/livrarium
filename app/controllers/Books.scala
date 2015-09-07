@@ -1,23 +1,73 @@
 package controllers
 
-import play.api.mvc._
+import com.mohiva.play.silhouette.api.{Environment, Silhouette}
+import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
+import helpers.{BookFormatHelper, FileHelper}
+import models.{Book, Folder, User}
+import play.api.i18n.MessagesApi
+import play.api.libs.concurrent.Execution.Implicits._
+import play.api.libs.json.Json
+import scaldi.{Injectable, Injector}
+import services.{BookService, FolderService}
 
-object Books extends Controller{
+import scala.concurrent.Future
 
-  def index = TODO
+class Books(implicit inj: Injector)
+  extends Silhouette[User, SessionAuthenticator] with Injectable {
 
-  def info(id: String) = TODO
+  implicit val messagesApi = inject[MessagesApi]
+  implicit val env = inject[Environment[User, SessionAuthenticator]]
 
-  def read(id: String) = TODO
+  private val fileHelper = inject[FileHelper]
 
-  def move(id: String) = TODO
+  private val folderService = inject[FolderService]
+  private val bookService = inject[BookService]
 
-  def toRead(id: String) = TODO
+  /**
+   * Streams book to user
+   * @param folderId folder in which the book is situated
+   * @param identifier book's identifier
+   * @param extension book's extension
+   * @return
+   */
+  def stream(folderId: Long, identifier: String, extension: String) = UserAwareAction.async { implicit request =>
+    request.identity match {
+      case Some(user) =>
+        // Fetching is necessary to verify that user is the real owner of folder / book
+        fetchFolderBook(user, folderId, identifier).map {
+          case (Some(folder), Some(book)) =>
+            extension match {
+              case BookFormatHelper.PDF =>
+                val file = fileHelper.getUploadedFile(folder.id, book.identifier, extension)
+                Ok.sendFile(file)
 
-  def update(id: String) = TODO
+              case _ => BadRequest(Json.obj(
+                "code" -> inject[Int](identified by "errors.cloud.fileTypeNotSupported"),
+                "message" -> s"Book format $extension is currently unsupported"
+              ))
+            }
+          case _ => Unauthorized
+        }
 
-  def archive(id: String) = TODO
+      case None => Future.successful(Redirect(routes.Application.index()))
+    }
+  }
 
-  def delete(id: String) = TODO
+  private def fetchFolderBook(user: User, folderId: Long, identifier: String): Future[(Option[Folder], Option[Book])] = {
+    val folder = folderService.retrieve(user, folderId)
+    val book = bookService.retrieve(user, identifier)
+
+    folder zip book
+  }
+
+
+  //  def index = v2.TODO
+  //  def info(id: String) = v2.TODO
+  //  def read(id: String) = v2.TODO
+  //  def move(id: String) = v2.TODO
+  //  def toRead(id: String) = v2.TODO
+  //  def update(id: String) = v2.TODO
+  //  def archive(id: String) = TODO
+  //  def delete(id: String) = TODO
 
 }

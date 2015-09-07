@@ -16,6 +16,9 @@ angular.module('lvr')
             },
             upload: function(folderId) {
                 return '/upload/' + folderId.toString()
+            },
+            bookStream: function(folderId, identifier, extension) {
+                return '/books/stream/' + folderId.toString() + '/' + identifier + '/' + extension
             }
         },
 

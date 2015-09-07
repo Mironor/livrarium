@@ -1,5 +1,8 @@
-<header lvr-header></header>
-<div id="main">
-    <lvr-left-menu id="left-menu"></lvr-left-menu>
-    <lvr-content id="content"></lvr-content>
+<div ng-controller="CloudController">
+    <header lvr-header></header>
+    <div id="main">
+        <lvr-left-menu id="left-menu"></lvr-left-menu>
+        <lvr-content id="content"></lvr-content>
+        <lvr-book-viewer id="book-viewer" ng-if="bookViewer.show" scale="page-fit"></lvr-book-viewer>
+    </div>
 </div>

@@ -1,7 +1,7 @@
 package modules
 
 import daos.{BookDAO, FolderDAO}
-import helpers.{RandomIdGenerator, UUIDGenerator}
+import helpers.{FileHelper, RandomIdGenerator, UUIDGenerator}
 import scaldi.Module
 import services.{BookService, FolderService}
 
@@ -10,6 +10,7 @@ import services.{BookService, FolderService}
  */
 class WebModule extends Module {
   bind[RandomIdGenerator] to new UUIDGenerator
+  bind[FileHelper] to new FileHelper
 
   bind[FolderDAO] to new FolderDAO
   bind[FolderService] to new FolderService

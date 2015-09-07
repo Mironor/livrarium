@@ -33,6 +33,8 @@
         <script src="@routes.Assets.at("js/app/modules/sign-in/sign-in.js")"></script>
         <script src="@routes.Assets.at("js/app/modules/sign-up/sign-up.js")"></script>
 
+        <script src="@routes.Assets.at("js/app/modules/cloud/cloud.js")"></script>
+
         <script src="@routes.Assets.at("js/app/modules/header/header.js")"></script>
 
         <script src="@routes.Assets.at("js/app/modules/left-menu/left-menu.js")"></script>
@@ -40,6 +42,23 @@
         <script src="@routes.Assets.at("js/app/modules/upload-button/upload-button.js")"></script>
 
         <script src="@routes.Assets.at("js/app/modules/content/content.js")"></script>
+
+        <script src="@routes.Assets.at("js/app/modules/book-viewer/book-viewer.js")"></script>
+
+
+        @* PDF TMP FILES*@
+
+        <style>
+        * { box-sizing : border-box ; }
+        .wrapper { margin : 0 auto ; width : 960 px ; }
+        .pdf-controls { width : 100 % ; display : block ; background : #eee ; padding : 1 em ; }
+        .rotate0 { -webkit-transform : rotate ( 0 deg ) ; transform : rotate ( 0 deg ) ; }
+        .rotate90 { -webkit-transform : rotate ( 90 deg ) ; transform : rotate ( 90 deg ) ; }
+        .rotate180 { -webkit-transform : rotate ( 180 deg ) ; transform : rotate ( 180 deg ) ; }
+        .rotate270 { -webkit-transform : rotate ( 270 deg ) ; transform : rotate ( 270 deg ) ; }
+        .fixed { position : fixed ; top : 0 ; left : calc ( 50 % - 480 px ) ; z-index : 100 ; width : 100 % ; padding : 1 em ; background : rgba ( 238, 238, 238,.9 ) ; width : 960 px ; }
+        </style>
+
 
     </head>
     <body ng-app="lvr" ui-view>

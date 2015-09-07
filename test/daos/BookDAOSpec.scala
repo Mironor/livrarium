@@ -15,6 +15,17 @@ class BookDAOSpec extends LivrariumSpecification with ThrownMessages {
   }
 
   "Book DAO" should {
+    "find a book by uuid" in { implicit inj: Injector =>
+      // Given
+      val bookDAO = new BookDAO
+
+      // When
+      val foundBook = await(bookDAO.findByUUID(BookFixture.rootBookUUID))
+
+      // Then
+      foundBook must beSome(BookFixture.rootBook)
+    }
+
     "insert a book" in { implicit inj: Injector =>
       // Given
       val bookDAO = new BookDAO

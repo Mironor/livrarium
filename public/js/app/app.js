@@ -1,11 +1,10 @@
 angular.module('lvr', [
     'ui.router',
     'pascalprecht.translate',
+
     'lvr.signIn',
     'lvr.signUp',
-    'lvr.header',
-    'lvr.leftMenu',
-    'lvr.content'
+    'lvr.cloud'
 ])
     .config(function ($stateProvider, $urlRouterProvider, $locationProvider, constants) {
         $stateProvider

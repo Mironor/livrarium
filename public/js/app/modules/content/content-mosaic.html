@@ -1,10 +1,10 @@
 <div class="folders">
-    <div ng-repeat="folder in currentFolder.contents.folders" class="folder">
+    <div ng-repeat="folder in currentFolder.contents.folders" class="folder" ng-dblclick="openFolder(folder)">
         <i class="icon-button icon-folder"></i> <span>{{folder.name}}</span>
     </div>
 </div>
 <div class="books">
-    <div ng-repeat="book in currentFolder.contents.books" class="book">
+    <div ng-repeat="book in currentFolder.contents.books" class="book" ng-dblclick="openBook(book)">
         <div class="thumbnail">
             <img ng-src="/assets/img/upload/{{currentFolder.id}}/{{book.identifier}}.jpg" alt=""/>
         </div>

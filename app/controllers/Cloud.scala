@@ -7,7 +7,7 @@ import com.mohiva.play.silhouette.api.{Environment, Silhouette}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.sksamuel.scrimage.{Format => ImgFormat, Image}
 import helpers.{BookFormatHelper, PDFHelper, RandomIdGenerator}
-import models.{Folder, FolderContents, User}
+import models.{Book, Folder, FolderContents, User}
 import org.apache.commons.io.FileUtils
 import play.api.i18n.MessagesApi
 import play.api.libs.Files
@@ -127,66 +127,38 @@ class Cloud(implicit inj: Injector)
 
   def upload(uploadFolderId: Long) = UserAwareAction.async(parse.multipartFormData) { implicit request =>
     request.identity match {
-      case Some(user) => uploadBook(user, uploadFolderId)
+      case Some(user) => uploadForUser(user, uploadFolderId)
       case None => Future.successful(Redirect(routes.Application.index()))
     }
   }
 
-  private def uploadBook(user: User, uploadFolderId: Long)(implicit request: UserAwareRequest[MultipartFormData[Files.TemporaryFile]]): Future[Result] = {
+  private def uploadForUser(user: User, uploadFolderId: Long)(implicit request: UserAwareRequest[MultipartFormData[Files.TemporaryFile]]): Future[Result] = {
     val uploadInputName = inject[String](identified by "books.uploadInputName")
 
     request.body.file(uploadInputName).map {
       book =>
-        val filename = book.filename
-        val name = filename.dropRight(filename.length - filename.lastIndexOf('.'))
-        val extension = filename.drop(filename.lastIndexOf('.'))
+        // uuid is used for storing the book as well as the corresponding thumbnails
         val uuid = randomIdGenerator.generateBookId()
-
         val userId = user.id
-        val uploadFolder = applicationPath + inject[String](identified by "folders.uploadPath")
-        val generatedImageFolder = applicationPath + inject[String](identified by "folders.generatedImagePath")
 
-        val userUploadFolder = s"$uploadFolder/$userId"
-        val userGeneratedImageFolder = s"$generatedImageFolder/$userId"
+        val uploadedBookPath = storeUploadedFile(book, userId, uuid)
 
-        FileUtils.forceMkdir(new File(userUploadFolder))
+        generateThumbnails(uploadedBookPath, userId, uuid)
 
-        val uploadedBookPath = s"$userUploadFolder/$uuid$extension"
-        book.ref.moveTo(new File(uploadedBookPath))
-
-        FileUtils.forceMkdir(new File(userGeneratedImageFolder))
-
-        val generatedThumbnailPath = s"$userGeneratedImageFolder/$uuid.jpg"
-        PDFHelper.extractImageFromPdf(uploadedBookPath, generatedThumbnailPath)
-
-        val generatedThumbnail = new File(generatedThumbnailPath)
-
-        Image(generatedThumbnail).fit(
-          inject[Int](identified by "books.thumbnailWidth"),
-          inject[Int](identified by "books.thumbnailHeight")
-        ).write(new File(generatedThumbnailPath), ImgFormat.JPEG)
-
-        val generatedSmallThumbnailPath = s"$generatedImageFolder/$userId/$uuid-small.jpg"
-
-        Image(generatedThumbnail).fit(
-          inject[Int](identified by "books.smallThumbnailWidth"),
-          inject[Int](identified by "books.smallThumbnailHeight")
-        ).write(new File(generatedSmallThumbnailPath), ImgFormat.JPEG)
-
+        val fileName = book.filename
+        val name = fileName.dropRight(fileName.length - fileName.lastIndexOf('.'))
+        val totalPages = PDFHelper.getTotalPages(uploadedBookPath)
         val fileType = BookFormatHelper.normalize(
           book.contentType.getOrElse(BookFormatHelper.NONE)
         )
 
-        val totalPages = PDFHelper.getTotalPages(uploadedBookPath)
-
-        val uploadedBookModel = for {
+        val uploadedBookModel: Future[Option[Book]] = for {
           insertedBook <- bookService.create(user, uuid, name, fileType, totalPages)
-          addedBook <- bookService.addToFolder(user, insertedBook, uploadFolderId)
-        } yield addedBook
+          addedToFolderBook <- bookService.addToFolder(user, insertedBook, uploadFolderId)
+        } yield addedToFolderBook
 
         uploadedBookModel.map {
-          case Some(addedBook) =>
-            Ok(Json.toJson(addedBook))
+          case Some(addedBook) => Ok(Json.toJson(addedBook))
 
           case None => BadRequest(
             Json.obj("code" -> inject[Int](identified by "errors.upload.noFileFound"))
@@ -197,5 +169,44 @@ class Cloud(implicit inj: Injector)
         Json.obj("code" -> inject[Int](identified by "errors.upload.noFileFound"))
       ))
     }
+  }
+
+  private def storeUploadedFile(book: MultipartFormData.FilePart[Files.TemporaryFile], userId: Long, bookUUID: String): String = {
+    val fileName = book.filename
+    val extension = fileName.drop(fileName.lastIndexOf('.'))
+
+    val uploadFolder = applicationPath + inject[String](identified by "folders.uploadPath")
+    val userUploadFolder = s"$uploadFolder/$userId"
+
+    FileUtils.forceMkdir(new File(userUploadFolder))
+
+    val uploadedBookPath = s"$userUploadFolder/$bookUUID$extension"
+    book.ref.moveTo(new File(uploadedBookPath))
+
+    uploadedBookPath
+  }
+
+  private def generateThumbnails(pathToBook: String, userId: Long, bookUUID: String): Unit = {
+    val generatedImageFolder = applicationPath + inject[String](identified by "folders.generatedImagePath")
+    val userGeneratedImageFolder = s"$generatedImageFolder/$userId"
+
+    FileUtils.forceMkdir(new File(userGeneratedImageFolder))
+
+    val generatedThumbnailPath = s"$userGeneratedImageFolder/$bookUUID.jpg"
+    PDFHelper.extractImageFromPdf(pathToBook, generatedThumbnailPath)
+
+    val generatedThumbnail = new File(generatedThumbnailPath)
+
+    Image(generatedThumbnail).fit(
+      inject[Int](identified by "books.thumbnailWidth"),
+      inject[Int](identified by "books.thumbnailHeight")
+    ).write(new File(generatedThumbnailPath), ImgFormat.JPEG)
+
+    val generatedSmallThumbnailPath = s"$generatedImageFolder/$userId/$bookUUID-small.jpg"
+
+    Image(generatedThumbnail).fit(
+      inject[Int](identified by "books.smallThumbnailWidth"),
+      inject[Int](identified by "books.smallThumbnailHeight")
+    ).write(new File(generatedSmallThumbnailPath), ImgFormat.JPEG)
   }
 }

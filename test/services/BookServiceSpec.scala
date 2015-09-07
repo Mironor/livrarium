@@ -31,6 +31,17 @@ class BookServiceSpec extends LivrariumSpecification with ThrownMessages {
       books must have size 4
     }
 
+    "retrieve book by uuid" in { implicit inj: Injector =>
+      // Given
+      val bookService = new BookService
+
+      // When
+      val retrievedBook = await(bookService.retrieve(UserFixture.testUser, BookFixture.rootBookUUID))
+
+      // Then
+      retrievedBook must beSome(Book.fromDBBook(BookFixture.rootBook))
+    }
+
     "update book if it already exists" in { implicit inj: Injector =>
       // Given
       val bookService = new BookService

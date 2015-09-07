@@ -193,6 +193,7 @@ header {
 }
 
 #main {
+  position: relative;
   .display(flex);
   margin: 35px 20px 0 20px;
 
@@ -200,7 +201,7 @@ header {
     .flex(0 0 285px);
 
     .buttons {
-      @height: 29px;
+      @height: 45px;
       height: @height;
 
       i {
@@ -301,7 +302,7 @@ header {
 
     .content-header {
       width: 100%;
-      height: 33px;
+      height: 51px;
       padding-top: 15px;
       border-top: @grey_light 1px solid;
       border-bottom: @grey_light 1px solid;
@@ -551,6 +552,15 @@ header {
         }
       }
     }
+  }
+
+  #book-viewer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: #FFF;
   }
 }
 

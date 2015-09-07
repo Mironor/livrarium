@@ -40,6 +40,18 @@ class BookService(implicit inj: Injector) extends Injectable {
   }
 
   /**
+   * Retrieves book by uuid (with user checking)
+   * @param user current user, book's owner
+   * @param identifier the uuid of the book to retrieve
+   * @return a promise of a book (None if no book was found)
+   */
+  def retrieve(user: User, identifier: String): Future[Option[Book]] = {
+    bookDAO.findByUUID(identifier).map {
+      _.filter(user.owns).map(Book.fromDBBook)
+    }
+  }
+
+  /**
    * Creates new book from supplied info
    * @param user user to which the book will belong
    * @param identifier future's book identifier

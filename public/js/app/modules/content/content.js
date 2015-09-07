@@ -1,8 +1,8 @@
 angular.module('lvr.content', [])
-    .controller('lvrContentCtrl', function($scope, Book, Folder, folders, books) {
+    .controller('lvrContentCtrl', function($scope, Book, Folder, folders, bookViewer) {
 
         $scope.showDropdown = false;
-        $scope.showAsMosaic = true;
+        $scope.showAsMosaic = ($scope.showAsMosaic === undefined) ? true : $scope.showAsMosaic;
 
         $scope.currentFolder = folders.currentFolder;
 
@@ -16,16 +16,23 @@ angular.module('lvr.content', [])
             $scope.currentFolder.contents.folders.push(newFolder);
             folders.rootFolder.children.push(newFolder);
 
-            folders.createFolder($scope.currentFolder.id, newFolder.name)
-            //.success(function(data) {
-            //    newFolder.id = data.id
-            //})
+            folders.createFolder($scope.currentFolder.id, newFolder.name);
+        };
+
+        $scope.openFolder = function(folder) {
+
+        };
+
+        $scope.openBook = function(book) {
+            bookViewer.openedBook.model = book;
+            bookViewer.show = true;
         };
     })
     .directive('lvrContent', function(constants) {
         return {
             restrict: 'E',
-            templateUrl: constants.pathToApp + 'modules/content/content.html'
+            templateUrl: constants.pathToApp + 'modules/content/content.html',
+            controller: 'lvrContentCtrl'
         };
     })
     .directive('lvrContentMosaic', function(constants) {

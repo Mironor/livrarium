@@ -3,25 +3,27 @@
 # ~~~~
 
 # Home page
-GET         /                                @controllers.Application.index
-GET         /sign-out                        @controllers.Application.signOut
-GET         /sign-up                         @controllers.Application.signUp
+GET         /                                                     @controllers.Application.index
+GET         /sign-out                                             @controllers.Application.signOut
+GET         /sign-up                                              @controllers.Application.signUp
 #GET           /authenticate/:provider          @controllers.Application.socialAuthenticationHandler(provider)
-POST        /authenticate/credentials        @controllers.Application.credentialsAuthenticationHandler
-POST        /sign-up                         @controllers.Application.signUpHandler
+POST        /authenticate/credentials                             @controllers.Application.credentialsAuthenticationHandler
+POST        /sign-up                                              @controllers.Application.signUpHandler
 
 # Map static resources from the /public folder to the /assets URL path
-GET         /assets/*file                    controllers.Assets.at(path="/public", file)
+GET         /assets/*file                                         controllers.Assets.at(path="/public", file)
 
 # Actual service
-GET         /cloud                           @controllers.Cloud.index
+GET         /cloud                                                @controllers.Cloud.index
 
-GET         /folders/tree                    @controllers.Cloud.getFolderTree
-GET         /folders/root                    @controllers.Cloud.getRootContent
-GET         /folders/content/:id             @controllers.Cloud.getContent(id:Long)
-POST        /folders/create                  @controllers.Cloud.createFolder
+GET         /folders/tree                                         @controllers.Cloud.getFolderTree
+GET         /folders/root                                         @controllers.Cloud.getRootContent
+GET         /folders/content/:id                                  @controllers.Cloud.getContent(id:Long)
+POST        /folders/create                                       @controllers.Cloud.createFolder
 
-POST        /upload/:folderId                @controllers.Cloud.upload(folderId:Long)
+POST        /upload/:folderId                                     @controllers.Cloud.upload(folderId:Long)
+
+GET         /books/stream/:folderId/:identifier/:extension        controllers.Books.stream(folderId: Long, identifier: String, extension: String)
 
 #GET           /books                           controllers.Books.index
 #GET           /books/:id                       controllers.Books.info(id)

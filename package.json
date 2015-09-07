@@ -20,5 +20,8 @@
     "karma-ng-html2js-preprocessor": "^0.1.0",
     "karma-phantomjs-launcher": "^0.1.4",
     "phantomjs-polyfill": "0.0.1"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^1.1.403"
   }
 }

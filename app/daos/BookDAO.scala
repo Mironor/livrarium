@@ -32,6 +32,15 @@ class BookDAO(implicit inj: Injector) extends LivrariumDAO{
   }
 
   /**
+   * Finds book by its uuid
+   * @param uuid book's uuid
+   * @return a promise with a found book (None if no book was found)
+   */
+  def findByUUID(uuid: String): Future[Option[DBBook]] = db.run {
+    slickBooks.filter(_.uuid === uuid).result.headOption
+  }
+
+  /**
    * Finds all books for a specified folderId
    * @param folderId parent folder's id
    * @return a promise of a list of books contained in the folder

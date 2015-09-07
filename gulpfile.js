@@ -9,6 +9,7 @@ var paths = {
 
 gulp.task('deps_dev', function () {
     gulp.src([
+        'node_modules/pdfjs-dist/build/pdf.combined.js',
         'bower_dependencies/angular/angular.js',
         'bower_dependencies/angular-ui-router/release/angular-ui-router.js',
         'bower_dependencies/angular-translate/angular-translate.js',

@@ -8,7 +8,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr ng-repeat="folder in currentFolder.contents.folders">
+    <tr ng-repeat="folder in currentFolder.contents.folders" class="folder" ng-dblclick="openFolder(folder)">
         <td class="thumbnail"><i class="icon-button icon-folder"></i></td>
         <td>
             {{folder.name}}
@@ -16,7 +16,7 @@
         <td></td>
         <td></td>
     </tr>
-    <tr ng-repeat="book in currentFolder.contents.books">
+    <tr ng-repeat="book in currentFolder.contents.books" class="book" ng-dblclick="openBook(book)">
         <td class="thumbnail"><img ng-src="/assets/img/upload/{{currentFolder.id}}/{{book.identifier}}-small.jpg" alt=""/></td>
         <td>
             {{book.name}}
