@@ -39,13 +39,13 @@ angular.module('lvr.bookViewer', [])
 
                 $scope.onProgress = function(progress) {
                     $scope.loading = 'loading ' + Math.round(progress.loaded * 100 / progress.total) + '%';
+                    console.log($scope.loading);
                     $scope.$apply();
                 };
             },
 
             link: function(scope, element, attrs) {
                 var url, pdf,
-                //currentPage = bookViewer.openedBook.model.currentPage,
                     currentPage = 1,
                     totalPages = bookViewer.openedBook.model.pages,
 
