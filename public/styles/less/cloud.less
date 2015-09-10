@@ -193,7 +193,6 @@ header {
 }
 
 #main {
-  position: relative;
   .display(flex);
   margin: 35px 20px 0 20px;
 
@@ -561,6 +560,36 @@ header {
     left: 0;
     top: 0;
     background-color: #FFF;
+
+    nav{
+      position: fixed;
+      width: 100%;
+      height: 45px;
+      background: @white;
+      border-bottom: 1px solid @grey_light;
+
+      .name{
+        position: absolute;
+        left: 20px;
+        top: 15px;
+      }
+
+      .close{
+        position: absolute;
+        right: 20px;
+        top: 6px;
+      }
+    }
+
+    #pdf-viewer{
+      padding-top: 45px;
+
+      canvas{
+        display: block;
+        margin: 30px auto;
+        border: 1px solid @grey_light;
+      }
+    }
   }
 }
 

@@ -1,21 +1,8 @@
-<div >
-    <nav ng-class="getNavStyle(scroll)">
-        <button ng-click="goPrevious()"><</button>
-        <button ng-click="goNext()">></button>
+    <nav>
+        <div class="name">{{name}}</div>
 
-        <span>Page: </span>
-        <input type="number" min=1 ng-model="pageNum">
-        <span> / {{pageCount}}</span>
-
-        &nbsp;&nbsp;
-        <span>Document URL: </span>
-        <input type="url" ng-model="pdfUrl">
-
-        <span ng-click="close()">Close</span>
+        <div ng-click="close()" class="close pure-button">Close</div>
     </nav>
 
-    <hr>
-
     {{loading}}
-    <canvas id="pdf-viewer"></canvas>
-</div>
+    <div id="pdf-viewer"></div>
