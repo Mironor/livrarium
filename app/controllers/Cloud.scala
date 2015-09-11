@@ -3,7 +3,7 @@ package controllers
 
 import java.io.File
 
-import com.mohiva.play.silhouette.api.{Environment, Silhouette}
+import com.mohiva.play.silhouette.api.Environment
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.sksamuel.scrimage.{Format => ImgFormat, Image}
 import helpers.{BookFormatHelper, PDFHelper, RandomIdGenerator}
@@ -22,12 +22,10 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 
 class Cloud(implicit inj: Injector)
-  extends Silhouette[User, SessionAuthenticator] with Injectable {
+  extends Controller with Injectable {
 
   implicit val messagesApi = inject[MessagesApi]
   implicit val env = inject[Environment[User, SessionAuthenticator]]
-
-  private val applicationController = inject[Application]
 
   private val folderService = inject[FolderService]
   private val bookService = inject[BookService]
@@ -48,41 +46,27 @@ class Cloud(implicit inj: Injector)
   implicit val uploadBookReads = (__ \ 'idFolder).read[Long]
 
 
-  def index = UserAwareAction.async { implicit request =>
-    request.identity match {
-      case Some(user) =>
-        val rootFolder: Future[Folder] = folderService.retrieveFolderTree(user)
-        rootFolder.map {
-          folder => Ok(views.html.index(Json.obj(
-            "rootFolder" -> Json.toJson(folder)
-          ).toString()))
-        }
-
-      case None => Future.successful(Redirect(routes.Application.index())) //applicationController.authenticateUser(Credentials("meanor@gmail.com", "aaaaaa"))
+  def index = authenticatedActionAsync { user =>
+    val rootFolder: Future[Folder] = folderService.retrieveFolderTree(user)
+    rootFolder.map {
+      folder => Ok(views.html.index(Json.obj(
+        "rootFolder" -> Json.toJson(folder)
+      ).toString()))
     }
   }
 
-  def getFolderTree = UserAwareAction.async { implicit request =>
-    request.identity match {
-      case Some(user) =>
-        val rootFolder: Future[Folder] = folderService.retrieveFolderTree(user)
-        rootFolder.map(folder => Ok(Json.toJson(folder)))
-
-      case None => Future.successful(Redirect(routes.Application.index()))
-    }
+  def getFolderTree = authenticatedActionAsync { user =>
+    val rootFolder: Future[Folder] = folderService.retrieveFolderTree(user)
+    rootFolder.map(folder => Ok(Json.toJson(folder)))
   }
 
-  def getRootContent = UserAwareAction.async { implicit request =>
-    request.identity match {
-      case Some(user) => folderService.retrieveRoot(user).flatMap { rootFolderOption =>
-        // TODO: create root if not present
-        val rootFolder = rootFolderOption.getOrElse(throw new Exception("Root folder not found"))
-        val rootFolderContent = getFolderContents(user, rootFolder.id)
+  def getRootContent = authenticatedActionAsync { user =>
+    folderService.retrieveRoot(user).flatMap { rootFolderOption =>
+      // TODO: create root if not present
+      val rootFolder = rootFolderOption.getOrElse(throw new Exception("Root folder not found"))
+      val rootFolderContent = getFolderContents(user, rootFolder.id)
 
-        rootFolderContent.map(x => Ok(Json.toJson(x)))
-      }
-
-      case None => Future.successful(Redirect(routes.Application.index()))
+      rootFolderContent.map(x => Ok(Json.toJson(x)))
     }
   }
 
@@ -96,43 +80,31 @@ class Cloud(implicit inj: Injector)
     } yield FolderContents(folderId, retrievedSubFolders, retrievedBooks)
   }
 
-  def getContent(id: Long) = UserAwareAction.async { implicit request =>
-    request.identity match {
-      case Some(user) =>
-        val folderContent: Future[FolderContents] = getFolderContents(user, id)
-        folderContent.map(rootContent => Ok(Json.toJson(rootContent)))
+  def getContent(id: Long) = authenticatedActionAsync { user =>
+    val folderContent: Future[FolderContents] = getFolderContents(user, id)
+    folderContent.map(rootContent => Ok(Json.toJson(rootContent)))
 
-      case None => Future.successful(Redirect(routes.Application.index()))
-    }
   }
 
-  def createFolder() = UserAwareAction.async(BodyParsers.parse.json) { implicit request =>
-    request.identity match {
-      case Some(user) =>
-        request.body.validate[(Long, String)].map {
-          case (parentFolderId: Long, name: String) =>
-            folderService.appendTo(user, parentFolderId, name).map {
-              folder => Ok(Json.toJson(folder))
-            }
-        }.recoverTotal {
-          error => Future.successful(BadRequest(Json.obj(
-            "code" -> inject[Int](identified by "errors.request.badRequest"),
-            "fields" -> JsError.toJson(error)
-          )))
+  def createFolder() = authenticatedActionParseAsync(BodyParsers.parse.json) { (request, user) =>
+    request.body.validate[(Long, String)].map {
+      case (parentFolderId: Long, name: String) =>
+        folderService.appendTo(user, parentFolderId, name).map {
+          folder => Ok(Json.toJson(folder))
         }
-
-      case None => Future.successful(Redirect(routes.Application.index()))
+    }.recoverTotal {
+      error => Future.successful(BadRequest(Json.obj(
+        "code" -> inject[Int](identified by "errors.request.badRequest"),
+        "fields" -> JsError.toJson(error)
+      )))
     }
   }
 
-  def upload(uploadFolderId: Long) = UserAwareAction.async(parse.multipartFormData) { implicit request =>
-    request.identity match {
-      case Some(user) => uploadForUser(user, uploadFolderId)
-      case None => Future.successful(Redirect(routes.Application.index()))
-    }
+  def upload(uploadFolderId: Long) = authenticatedActionParseAsync(BodyParsers.parse.multipartFormData) { (request, user) =>
+    uploadForUser(user, uploadFolderId)(request)
   }
 
-  private def uploadForUser(user: User, uploadFolderId: Long)(implicit request: UserAwareRequest[MultipartFormData[Files.TemporaryFile]]): Future[Result] = {
+  private def uploadForUser(user: User, uploadFolderId: Long)(request: UserAwareRequest[MultipartFormData[Files.TemporaryFile]]): Future[Result] = {
     val uploadInputName = inject[String](identified by "books.uploadInputName")
 
     request.body.file(uploadInputName).map {

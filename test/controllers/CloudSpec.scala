@@ -44,6 +44,24 @@ class CloudSpec extends LivrariumSpecification with ThrownMessages {
 
   "Cloud controller" should {
 
+    "show login page if user is not authenticated" in { implicit inj: Injector =>
+      // Given
+      // Authenticated with other user than the one which is stored in current environment
+      val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.otherUserLoginInfo)
+
+      val applicationController = new Cloud
+
+      val expectedLocation = routes.Application.index().toString
+
+      // When
+      val result = applicationController.index()(request)
+
+      // Then
+      status(result) mustEqual SEE_OTHER
+      redirectLocation(result) must beSome(expectedLocation)
+    }
+
+
     "return folder tree" in { implicit inj: Injector =>
       // Given
       val request = FakeRequest().withAuthenticator[SessionAuthenticator](UserFixture.testUserLoginInfo)

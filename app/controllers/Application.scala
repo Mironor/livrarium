@@ -1,11 +1,11 @@
 package controllers
 
 import _root_.services.{FolderService, UserService}
+import com.mohiva.play.silhouette.api._
 import com.mohiva.play.silhouette.api.exceptions.{NotAuthenticatedException, NotAuthorizedException}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.{Credentials, PasswordHasher, PasswordInfo}
-import com.mohiva.play.silhouette.api.{Silhouette, _}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import daos.silhouette.SilhouetteDAOException
@@ -24,7 +24,7 @@ import scala.concurrent.Future
  * Controller handles mostly sign up / sign in routines
  */
 class Application(implicit inj: Injector)
-  extends Silhouette[User, SessionAuthenticator] with Injectable {
+  extends Controller with Injectable {
 
   implicit val messagesApi = inject[MessagesApi]
   implicit val env = inject[Environment[User, SessionAuthenticator]]
@@ -52,14 +52,6 @@ class Application(implicit inj: Injector)
       case None => Ok(views.html.index(""))
     }
   }
-
-  /**
-   * Handles the signUp action.
-   * Same as index, the client-side router will handle the sing up form rendering
-   *
-   * @return index page or cloud index page if user is authenticated
-   */
-  def signUp = index
 
   /**
    * Handles the Sign Out action.
