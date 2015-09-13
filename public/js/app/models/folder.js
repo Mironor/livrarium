@@ -16,7 +16,7 @@ angular.module('lvr')
             angular.extend(this, folderData);
 
             // Children should be also passed as data, not as an array of Folder objects
-            this.children = _.map(this.children, function(childData){
+            this.children = this.children.map(function(childData){
                 return new Folder(childData);
             });
         };

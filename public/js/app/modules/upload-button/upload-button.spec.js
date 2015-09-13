@@ -1,9 +1,9 @@
 describe('Upload Button', function () {
-    var $httpBackend, $upload, constants, scope, element, folders, Folder,
+    var $httpBackend, Upload, constants, scope, element, folders, Folder,
         validTemplate = '<lvr-upload-button class="upload pure-button" ng-file-select="onFileSelect($files)"></lvr-upload-button>';
 
     // all this initialisation is here to test chain calls to the $upload service
-    var uploadMock = {}, progressMock = {}, successMock = {};
+    var uploadMock = {}, progressMock = {}, successMock = {}, errorMock = {};
 
     beforeEach(module('lvr', function($provide) {
         $provide.value('bootstrapData', {})
@@ -14,9 +14,9 @@ describe('Upload Button', function () {
 
     beforeEach(module('public/js/app/modules/upload-button/upload-button.html'));
 
-    beforeEach(inject(function (_$httpBackend_, _$upload_, $rootScope, $compile, _constants_, _folders_, _Folder_) {
+    beforeEach(inject(function (_$httpBackend_, _Upload_, $rootScope, $compile, _constants_, _folders_, _Folder_) {
         $httpBackend = _$httpBackend_;
-        $upload = _$upload_;
+        Upload = _Upload_;
         constants = _constants_;
         folders = _folders_;
         Folder = _Folder_;
@@ -25,9 +25,10 @@ describe('Upload Button', function () {
         element = jQuery(validTemplate);
         $compile(element)(scope);
 
-        $upload.upload  = jasmine.createSpy('uploadFn').and.returnValue(uploadMock);
+        Upload.upload  = jasmine.createSpy('uploadFn').and.returnValue(uploadMock);
         uploadMock.progress  = jasmine.createSpy('progressFn').and.returnValue(progressMock);
         progressMock.success = jasmine.createSpy('successFn').and.returnValue(successMock);
+        successMock.error = jasmine.createSpy('successFn').and.returnValue(errorMock);
 
         scope.$apply();
     }));
@@ -46,7 +47,7 @@ describe('Upload Button', function () {
         scope.onFileSelect(fileList);
 
         // Then
-        expect($upload.upload.calls.count()).toEqual(fileList.length);
+        expect(Upload.upload.calls.count()).toEqual(fileList.length);
     });
 
     it('should throw error if trying to upload to undefined folder', function () {
@@ -85,6 +86,6 @@ describe('Upload Button', function () {
         scope.onFileSelect(fileList);
 
         // Then
-        expect($upload.upload).toHaveBeenCalledWith(expectedArgument);
+        expect(Upload.upload).toHaveBeenCalledWith(expectedArgument);
     })
 });

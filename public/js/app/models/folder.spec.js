@@ -39,7 +39,7 @@ describe('Folder', function () {
     it("should recursively contain only Folders as children", function() {
         // Given
         function flattenRecursiveFolders(stack, children) {
-            _(children).forEach(function(child) {
+            children.forEach(function(child) {
                 stack.push(child);
                 flattenRecursiveFolders(stack, child.children);
             });
@@ -53,7 +53,7 @@ describe('Folder', function () {
         // Then
         expect(foldersArray.length).toEqual(5);
 
-        _(foldersArray).forEach(function(folder) {
+        foldersArray.forEach(function(folder) {
             expect(folder instanceof Folder).toBeTruthy();
         });
     });

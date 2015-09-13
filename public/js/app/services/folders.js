@@ -10,7 +10,7 @@ angular.module('lvr')
             fetchFolderTree: function() {
                 return $http.get(constants.api.foldersTree)
                     .success(function(data) {
-                        _(data.children).forEach(function(folderData) {
+                        data.children.forEach(function(folderData) {
                             this.rootFolder.children.push(new Folder(folderData));
                         }.bind(this));
                     }.bind(this));
@@ -35,11 +35,11 @@ angular.module('lvr')
             _fetchFolderContentsByUrl: function(apiUrl) {
                 return $http.get(apiUrl)
                     .success(function(data) {
-                        _(data.folders).forEach(function(folder) {
+                        data.folders.forEach(function(folder) {
                             this.currentFolder.contents.folders.push(new Folder(folder));
                         }.bind(this));
 
-                        _(data.books).forEach(function(book) {
+                        data.books.forEach(function(book) {
                             this.currentFolder.contents.books.push(new Book(book));
                         }.bind(this));
                     }.bind(this));
@@ -51,7 +51,7 @@ angular.module('lvr')
                     expectedNumber = 1;
 
                 subFolders.forEach(function(subFolder) {
-                    if (_.str.startsWith(subFolder.name, i18nEn['content.folders.newFolderName'])) {
+                    if (s.startsWith(subFolder.name, i18nEn['content.folders.newFolderName'])) {
                         expectedNumber++;
                     }
                 });
