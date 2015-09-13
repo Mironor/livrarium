@@ -9,7 +9,7 @@ case class Book(id: Long,
                 name: String,
                 format: String,
                 totalPages: Int = 0,
-                currentPage: Int = 0) {
+                currentPage: Int = 1) {
 
   def toDBBook(userId: Long): DBBook = DBBook(Option(id), userId, identifier, name, format, totalPages, currentPage)
 

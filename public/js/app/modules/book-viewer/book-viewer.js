@@ -45,22 +45,24 @@ angular.module('lvr.bookViewer', [])
             },
 
             link: function(scope, element, attrs) {
-                var url, pdf,
-                    currentPage = 1,
+                var url, pdf, pageScale, pageWidth, pageHeight,
+                    currentPage = bookViewer.openedBook.model.currentPage,
                     totalPages = bookViewer.openedBook.model.pages,
+                    alreadyRenderedPages = [],
 
-                    container = document.getElementById('pdf-viewer');
+                    container = document.getElementById('pdf-viewer'),
+                    pageIdBase = "pdf-viewer-page-",
+                    pageWidthPercentageOfWindow = 0.7,
+                    pageRangeRender = 2; // n future/previous pages (in relation to the current page) will be rendered
 
 
                 function renderPDF() {
                     if (url) {
-                        PDFJS.getDocument(url, null, null, scope.onProgress).then(
-                            function(_pdf) {
+                        PDFJS.getDocument(url, null, null, scope.onProgress).then(function(_pdf) {
                                 pdf = _pdf;
                                 scope.onLoad();
 
                                 pdf.getPage(currentPage).then(handlePages)
-
                             }, function(error) {
                                 scope.onError(error);
                             }
@@ -69,37 +71,77 @@ angular.module('lvr.bookViewer', [])
                 }
 
                 function handlePages(page) {
+                    initPageParams(page);
+
+                    insertPageContainers();
+
+                    renderPage(currentPage)(page);
+
+                    renderNeighbourPages(currentPage);
+                }
+
+                function initPageParams(page) {
                     var initialViewport = page.getViewport(1);
 
-                    var widthScale = $window.innerWidth * 0.7 / initialViewport.width;
-                    var viewport = page.getViewport(widthScale);
+                    pageScale = $window.innerWidth * pageWidthPercentageOfWindow / initialViewport.width;
 
+                    var viewport = page.getViewport(pageScale);
+                    pageWidth = viewport.width;
+                    pageHeight = viewport.height;
+                }
+
+                function insertPageContainers() {
+                    _.range(1, totalPages + 1).forEach(insertPageContainer)
+                }
+
+                function insertPageContainer(pageNum) {
                     var canvas = document.createElement('canvas');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-
-                    var context = canvas.getContext('2d');
-
-                    page.render({
-                        canvasContext: context,
-                        viewport: viewport
-                    });
+                    canvas.id = pageIdBase + pageNum;
+                    canvas.width = pageWidth;
+                    canvas.height = pageHeight;
 
                     container.appendChild(canvas);
+                }
 
-                    currentPage++;
-                    if (currentPage <= totalPages) {
-                        pdf.getPage(currentPage).then(handlePages)
+                function renderPage(pageNum) {
+                    return function(pageObj) {
+                        //_.inRange(pageNum, 1, totalPages)
+                        if (pageNum >= 1 && pageNum <= totalPages && !_.include(alreadyRenderedPages, pageNum)) {
+                            var viewport = pageObj.getViewport(pageScale);
+
+                            var canvas = document.getElementById(pageIdBase + pageNum);
+
+                            var context = canvas.getContext('2d');
+
+                            pageObj.render({
+                                canvasContext: context,
+                                viewport: viewport
+                            });
+
+                            console.log("Rendering", pageNum);
+
+                            alreadyRenderedPages.push(pageNum);
+                        }
                     }
                 }
 
+                function renderNeighbourPages(pageNum) {
+                    var minPreviousPageNum = Math.max(1, pageNum - pageRangeRender);
+                    var maxNextPageNum = Math.min(totalPages, pageNum + pageRangeRender);
+                    for (var i = minPreviousPageNum; i <= maxNextPageNum; i++) {
+                        pdf.getPage(i).then(renderPage(i));
+                    }
+                }
+
+                angular.element($window).bind('scroll', _.debounce(function() {
+                    var currentlyViewedPage = Math.round((this.pageYOffset + this.innerHeight) / pageHeight);
+                    renderNeighbourPages(currentlyViewedPage);
+                }, 50));
+
                 // This should be at the end of the directive
                 scope.$watch('url', function(newUrl) {
-                    if (newUrl !== '') {
-                        console.log('pdfUrl value change detected: ', newUrl);
-                        url = newUrl;
-                        renderPDF();
-                    }
+                    url = newUrl;
+                    renderPDF();
                 });
 
             }

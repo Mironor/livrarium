@@ -105,7 +105,7 @@ object DBTableDefinitions {
                     name: String,
                     format: String,
                     totalPages: Int = 0,
-                    currentPage: Int = 0)
+                    currentPage: Int = 1)
 
   /**
    * Many-to-one with user
