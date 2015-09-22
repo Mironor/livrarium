@@ -1,4 +1,5 @@
 angular.module('lvr', [
+    'ngMaterial',
     'ui.router',
     'pascalprecht.translate',
 
@@ -6,16 +7,13 @@ angular.module('lvr', [
     'lvr.signUp',
     'lvr.cloud'
 ])
-    .config(function ($stateProvider, $urlRouterProvider, $locationProvider, constants) {
+    .config(function($stateProvider, $urlRouterProvider, $locationProvider, constants) {
         $stateProvider
             .state('index', {
-                templateUrl: constants.pathToApp + 'modules/index/index.html'
-            })
-            .state('index.signIn', {
                 url: constants.applicationUrls.signIn,
                 templateUrl: constants.pathToApp + 'modules/sign-in/sign-in.html'
             })
-            .state('index.signUp', {
+            .state('signUp', {
                 url: constants.applicationUrls.signUp,
                 templateUrl: constants.pathToApp + 'modules/sign-up/sign-up.html'
             })
@@ -28,8 +26,17 @@ angular.module('lvr', [
 
         $locationProvider.html5Mode(true);
     })
-    .config(function ($translateProvider, i18nEn) {
+    .config(function($translateProvider, i18nEn) {
         $translateProvider.translations('en', i18nEn);
         $translateProvider.preferredLanguage('en');
+    })
+    .config(function($mdThemingProvider) {
+        $mdThemingProvider.theme('default')
+            .primaryPalette('orange')
+            .accentPalette('blue')
+            .warnPalette('deep-orange')
+            .backgroundPalette('grey', {
+                'default': '50'
+            })
     });
 

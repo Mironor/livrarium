@@ -1,3 +1,39 @@
-<span class="form_label">{{'login.login' | translate}} {{'login.or' | translate}} <a ui-sref="index.signUp">{{'login.signUp' | translate}}</a></span>
-<lvr-credentials-sign-in-form></lvr-credentials-sign-in-form>
-<lvr-social-sign-in class="social"></lvr-social-sign-in>
+<div class="login_form_container" flex layout="column" layout-align="start center">
+
+    <md-content flex layout-fill layout="column" layout-align="center center"
+                ng-controller="lvrCredentialsSignInController"
+                class="login_form md-whiteframe-z4">
+
+        <!--<img src="/assets/img/logo.png" alt="Livrarium"/>-->
+        <md-content class="whiteframe-title md-headline">
+            Login
+        </md-content>
+
+        <form flayout="column" layout-fill layout-padding layout-align="center center"
+              name="credentials_sign_in_form" ng-submit="submit()" novalidate>
+
+            <span class="error email-password-not-valid" ng-show="emailPasswordNotValid">{{'login.error.invalidEmailOrPassword' | translate}}</span>
+
+            <md-input-container layout-fill>
+                <label>{{'login.emailPlaceholder' | translate}}</label>
+                <input type="email" name="email" ng-model="model.email" ng-minlength=5 required/>
+            </md-input-container>
+
+            <md-input-container layout-fill>
+                <label>{{'login.passwordPlaceholder' | translate}}</label>
+                <input type="password" name="password" ng-model="model.password" ng-minlength=6 required/>
+            </md-input-container>
+
+        </form>
+
+    </md-content>
+
+    <md-button type="submit" class="md-fab" aria-label="Login">
+        <md-icon md-svg-src="/assets/img/svg/arrow_forward.svg"></md-icon>
+    </md-button>
+
+    <md-button type="submit" class="md-raised md-primary">
+        Sign up
+    </md-button>
+
+</div>
