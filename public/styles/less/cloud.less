@@ -66,11 +66,25 @@ a:active {
 
 .whiteframe-title {
   margin-top: 20px;
+  margin-bottom: 5px;
   color: @orange;
 }
 
-.md-button.md-raised.md-primary {
+a.md-button.md-raised.md-primary {
   color: @white;
+}
+
+.md-fab-progress {
+  position: relative;
+  .md-fab {
+
+  }
+
+  .md-progress-circular {
+    position: absolute;
+    top: -16px;
+    left: -14px;
+  }
 }
 
 .login_form_container {
@@ -83,21 +97,24 @@ a:active {
   padding-bottom: 20px;
 
   .login_form {
+    position: relative;
+    margin-bottom: 50px;
     .border-radius(@border-radius);
-    .display(flex);
+    background: @white;
+    padding-bottom: 0;
 
     .layout-fill {
       padding: 8px 20px;
+      &.no-bottom-padding{
+        padding-bottom: 0;
+      }
     }
 
-    form {
-      margin-bottom: 45px;
+    .md-fab-progress {
+      top: 32px;
     }
   }
 
-  .md-fab {
-    top: -36px;
-  }
 
   /*
 

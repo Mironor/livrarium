@@ -3,6 +3,7 @@ angular.module('lvr', [
     'ui.router',
     'pascalprecht.translate',
 
+    'lvr.components',
     'lvr.signIn',
     'lvr.signUp',
     'lvr.cloud'
