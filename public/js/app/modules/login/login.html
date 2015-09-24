@@ -1,8 +1,8 @@
 <div class="login_form_container" layout="column" layout-align="start center"
-     ng-controller="lvrCredentialsSignInController">
+     ng-controller="lvrCredentialsLoginController">
 
     <form layout="column" layout-fill layout-padding layout-align="center center"
-          class="login_form md-whiteframe-z4 no-bottom-padding" name="signInForm"
+          class="login_form md-whiteframe-z4 no-bottom-padding" name="loginForm"
           ng-submit="submit()" novalidate>
 
         <div class="whiteframe-title md-headline">
@@ -11,9 +11,9 @@
 
         <md-input-container layout-fill>
             <label>{{'login.emailPlaceholder' | translate}}</label>
-            <input type="email" name="email" ng-model="model.email" ng-minlength=5 required/>
+            <input type="email" name="email" ng-model="model.email" required/>
 
-            <div ng-messages="signInForm.email.$error" ng-if="signInForm.email.$touched">
+            <div ng-messages="loginForm.email.$error" ng-if="loginForm.email.$touched">
                 <div ng-message="required">{{'login.error.requiredField' | translate}}</div>
                 <div ng-message="email">{{'login.error.invalidEmail' | translate}}</div>
                 <div ng-message="emailOrPasswordInvalid">{{'login.error.emailOrPasswordInvalid' | translate}}</div>
@@ -24,9 +24,8 @@
             <label>{{'login.passwordPlaceholder' | translate}}</label>
             <input type="password" name="password" ng-model="model.password" ng-minlength=6 required/>
 
-            <div ng-messages="signInForm.password.$error" ng-if="signInForm.password.$touched">
+            <div ng-messages="loginForm.password.$error" ng-if="loginForm.password.$touched">
                 <div ng-message="required">{{'login.error.requiredField' | translate}}</div>
-                <div ng-message="minlength">{{'login.error.invalidPassword' | translate}}</div>
             </div>
         </md-input-container>
 
@@ -37,7 +36,7 @@
         </md-fab-progress>
 
     </form>
-    <a class="md-button md-raised md-primary">
+    <a ui-sref="signUp" class="md-button md-raised md-primary">
         {{'login.signUp' | translate}}
     </a>
 

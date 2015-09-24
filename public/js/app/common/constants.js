@@ -24,7 +24,7 @@ angular.module('lvr')
 
         // Internal (client-side) urls
         applicationUrls: {
-            signIn: '/',
+            login: '/',
             signUp: '/sign-up',
             cloud: '/cloud'
         },

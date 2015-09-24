@@ -1,19 +1,20 @@
 angular.module('lvr', [
     'ngMaterial',
+    'ngAnimate',
     'ngMessages',
     'ui.router',
     'pascalprecht.translate',
 
     'lvr.components',
-    'lvr.signIn',
+    'lvr.login',
     'lvr.signUp',
     'lvr.cloud'
 ])
     .config(function($stateProvider, $urlRouterProvider, $locationProvider, constants) {
         $stateProvider
             .state('index', {
-                url: constants.applicationUrls.signIn,
-                templateUrl: constants.pathToApp + 'modules/sign-in/sign-in.html'
+                url: constants.applicationUrls.login,
+                templateUrl: constants.pathToApp + 'modules/login/login.html'
             })
             .state('signUp', {
                 url: constants.applicationUrls.signUp,

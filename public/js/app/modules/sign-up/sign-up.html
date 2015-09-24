@@ -1,3 +1,54 @@
-<span class="form_label">{{'login.signUp' | translate}} {{'login.or' | translate}} <a ui-sref="index.signIn">{{'login.login' | translate}}</a></span>
-<lvr-credentials-sign-up-form></lvr-credentials-sign-up-form>
-<lvr-social-sign-up class="social"></lvr-social-sign-up>
+<div class="login_form_container" layout="column" layout-align="start center"
+     ng-controller="lvrCredentialsSignUpController">
+
+    <form layout="column" layout-fill layout-padding layout-align="center center"
+          class="login_form md-whiteframe-z4 no-bottom-padding" name="signUpForm"
+          ng-submit="submit()" novalidate>
+
+        <div class="whiteframe-title md-headline">
+            {{'login.signUp' | translate}}
+        </div>
+
+        <md-input-container layout-fill>
+            <label>{{'login.emailPlaceholder' | translate}}</label>
+            <input type="email" name="email" ng-model="model.email" ng-minlength=5 required/>
+
+            <div ng-messages="signUpForm.email.$error" ng-if="signUpForm.email.$touched">
+                <div ng-message="required">{{'login.error.requiredField' | translate}}</div>
+                <div ng-message="email">{{'login.error.invalidEmail' | translate}}</div>
+                <div ng-message="userAlreadyExists">{{'login.error.userAlreadyExists' | translate}}</div>
+            </div>
+        </md-input-container>
+
+        <md-input-container layout-fill class="no-bottom-padding">
+            <label>{{'login.passwordPlaceholder' | translate}}</label>
+            <input type="password" name="password" ng-model="model.password" ng-minlength=6 required/>
+
+            <div ng-messages="signUpForm.password.$error" ng-if="signUpForm.password.$touched">
+                <div ng-message="required">{{'login.error.requiredField' | translate}}</div>
+                <div ng-message="minlength">{{'login.error.invalidPassword' | translate}}</div>
+            </div>
+        </md-input-container>
+
+        <md-input-container layout-fill class="no-bottom-padding">
+            <label>{{'login.rePasswordPlaceholder' | translate}}</label>
+            <input type="password" name="repassword" ng-model="model.rePassword" ng-minlength=6 required/>
+
+            <div ng-messages="signUpForm.repassword.$error" ng-if="signUpForm.repassword.$touched">
+                <div ng-message="required">{{'login.error.requiredField' | translate}}</div>
+                <div ng-message="notEqualPasswords">{{'login.error.notEqualPasswords' | translate}}</div>
+            </div>
+        </md-input-container>
+
+        <md-fab-progress class="md-fab-progress" loading="isProgress" click="submit()" fab-class="md-hue-1"
+                         fab-area-label="Sign up"
+                         progress-class="md-hue-1">
+            <md-icon md-svg-src="/assets/img/svg/arrow_forward.svg"></md-icon>
+        </md-fab-progress>
+
+    </form>
+    <a ui-sref="index" class="md-button md-raised md-primary">
+        {{'login.login' | translate}}
+    </a>
+
+</div>

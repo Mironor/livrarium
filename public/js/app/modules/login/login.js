@@ -1,5 +1,5 @@
-angular.module('lvr.signIn', [])
-    .controller('lvrCredentialsSignInController', function($scope, $http, $location, constants, identity) {
+angular.module('lvr.login', [])
+    .controller('lvrCredentialsLoginController', function($scope, $http, $location, constants, identity) {
         $scope.requestSent = false;
 
         $scope.model = {
@@ -7,14 +7,10 @@ angular.module('lvr.signIn', [])
             "password": ""
         };
 
-        // The submit button is outside of the form, so we need to pass the form into the scope
-        $scope.forms = {};
-
         $scope.submit = function() {
-            $scope.emailPasswordNotValid = $scope.signInForm.$invalid;
-            $scope.accessDenied = false;
+            var form = $scope.loginForm;
 
-            if ($scope.signInForm.$valid && !$scope.requestSent) {
+            if (form.$valid && !$scope.requestSent) {
 
                 $scope.requestSent = true;
 
@@ -25,7 +21,7 @@ angular.module('lvr.signIn', [])
                     })
                     .error(function(data) {
                         if (data.code === constants.errorCodes.userNotFound) {
-                            $scope.signInForm.email.$error.emailOrPasswordInvalid = true;
+                            form.email.$error.emailOrPasswordInvalid = true;
                         }
                         $scope.requestSent = false;
                     });

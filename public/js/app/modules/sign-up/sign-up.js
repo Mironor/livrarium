@@ -1,47 +1,38 @@
 angular.module('lvr.signUp', [])
-    .directive('lvrCredentialsSignUpForm', function (constants) {
-        return {
-            restrict: 'E',
-            templateUrl: constants.pathToApp + 'modules/sign-up/credentials-sign-up-form.html',
-            controller: function ($scope, $http, $location, constants, identity) {
-                $scope.translationData = {
-                    existingEmail: $scope.existingEmail
-                };
+    .controller('lvrCredentialsSignUpController', function($scope, $http, $location, constants, identity) {
+        $scope.requestSent = false;
 
-                $scope.model = {
-                    email: "",
-                    password: "",
-                    rePassword: ""
-                };
+        $scope.translationData = {
+            existingEmail: $scope.existingEmail
+        };
 
-                $scope.passwordsAreEqual = true;
+        $scope.model = {
+            email: "",
+            password: "",
+            rePassword: ""
+        };
 
-                $scope.submit = function () {
-                    var form = $scope.credentials_sign_up_form;
-                    $scope.emailNotValid = form.email.$invalid;
-                    $scope.passwordNotValid = form.password.$invalid || form.repassword.$invalid;
-                    $scope.passwordsAreEqual = $scope.model.password === $scope.model.rePassword;
+        $scope.submit = function() {
+            var form = $scope.signUpForm;
+            form.repassword.$error.notEqualPasswords = $scope.model.password !== $scope.model.rePassword;
 
-                    if (form.$valid && $scope.passwordsAreEqual) {
-                        $http.post('/sign-up', {
-                            "email": $scope.model.email,
-                            "password": $scope.model.password
-                        }).success(function (data) {
-                            identity.email = data.email;
-                            $location.path(constants.applicationUrls.cloud);
-                        }).error(function (data) {
-                            $scope.userAlreadyExists = data.code === constants.errorCodes.userAlreadyExists;
-                            $scope.existingEmail = $scope.model.email;
-                        });
-                    }
-                };
+            if (form.$valid && !form.repassword.$error.notEqualPasswords ) {
+
+                $scope.requestSent = true;
+
+                $http.post('/sign-up', {
+                    "email": $scope.model.email,
+                    "password": $scope.model.password
+                }).success(function(data) {
+                    identity.email = data.email;
+                    $location.path(constants.applicationUrls.cloud);
+                }).error(function(data) {
+                    form.email.$error.userAlreadyExists = data.code === constants.errorCodes.userAlreadyExists;
+                    $scope.existingEmail = $scope.model.email;
+
+                    $scope.requestSent = false;
+                });
             }
-        }
-    })
-    .directive('lvrSocialSignUp', function (constants) {
-        return {
-            restrict: 'E',
-            templateUrl: constants.pathToApp + 'modules/sign-up/social-sign-up.html'
-        }
+        };
     });
 
