@@ -11,10 +11,10 @@ angular.module('lvr.signIn', [])
         $scope.forms = {};
 
         $scope.submit = function() {
-            $scope.emailPasswordNotValid = $scope.forms.signInForm.$invalid;
+            $scope.emailPasswordNotValid = $scope.signInForm.$invalid;
             $scope.accessDenied = false;
 
-            if ($scope.forms.signInForm.$valid && !$scope.requestSent) {
+            if ($scope.signInForm.$valid && !$scope.requestSent) {
 
                 $scope.requestSent = true;
 
@@ -25,7 +25,7 @@ angular.module('lvr.signIn', [])
                     })
                     .error(function(data) {
                         if (data.code === constants.errorCodes.userNotFound) {
-                            $scope.emailPasswordNotValid = true;
+                            $scope.signInForm.email.$error.emailOrPasswordInvalid = true;
                         }
                         $scope.requestSent = false;
                     });

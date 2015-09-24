@@ -1,5 +1,6 @@
 angular.module('lvr', [
     'ngMaterial',
+    'ngMessages',
     'ui.router',
     'pascalprecht.translate',
 

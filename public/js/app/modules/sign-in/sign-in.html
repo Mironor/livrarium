@@ -6,29 +6,39 @@
           ng-submit="submit()" novalidate>
 
         <div class="whiteframe-title md-headline">
-            Login
+            {{'login.login' | translate}}
         </div>
-
-        <span class="error email-password-not-valid" ng-show="emailPasswordNotValid">{{'login.error.invalidEmailOrPassword' | translate}}</span>
 
         <md-input-container layout-fill>
             <label>{{'login.emailPlaceholder' | translate}}</label>
             <input type="email" name="email" ng-model="model.email" ng-minlength=5 required/>
+
+            <div ng-messages="signInForm.email.$error" ng-if="signInForm.email.$touched">
+                <div ng-message="required">{{'login.error.requiredField' | translate}}</div>
+                <div ng-message="email">{{'login.error.invalidEmail' | translate}}</div>
+                <div ng-message="emailOrPasswordInvalid">{{'login.error.emailOrPasswordInvalid' | translate}}</div>
+            </div>
         </md-input-container>
 
         <md-input-container layout-fill class="no-bottom-padding">
             <label>{{'login.passwordPlaceholder' | translate}}</label>
             <input type="password" name="password" ng-model="model.password" ng-minlength=6 required/>
+
+            <div ng-messages="signInForm.password.$error" ng-if="signInForm.password.$touched">
+                <div ng-message="required">{{'login.error.requiredField' | translate}}</div>
+                <div ng-message="minlength">{{'login.error.invalidPassword' | translate}}</div>
+            </div>
         </md-input-container>
 
-        <md-fab-progress class="md-fab-progress" loading="isProgress" click="submit()" fab-class="md-hue-1" fab-area-label="Login"
+        <md-fab-progress class="md-fab-progress" loading="isProgress" click="submit()" fab-class="md-hue-1"
+                         fab-area-label="Login"
                          progress-class="md-hue-1">
             <md-icon md-svg-src="/assets/img/svg/arrow_forward.svg"></md-icon>
         </md-fab-progress>
 
     </form>
     <a class="md-button md-raised md-primary">
-        Sign up
+        {{'login.signUp' | translate}}
     </a>
 
 </div>

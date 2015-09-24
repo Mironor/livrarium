@@ -13,6 +13,7 @@ gulp.task('deps_dev', function () {
         'bower_dependencies/angular/angular.js',
         'bower_dependencies/angular-aria/angular-aria.js',
         'bower_dependencies/angular-animate/angular-animate.js',
+        'bower_dependencies/angular-messages/angular-messages.js',
         'bower_dependencies/angular-material/angular-material.js',
         'bower_dependencies/angular-ui-router/release/angular-ui-router.js',
         'bower_dependencies/angular-translate/angular-translate.js',
@@ -30,8 +31,9 @@ gulp.task('deps_test', function () {
         'bower_dependencies/jquery/dist/jquery.js',
 
         'bower_dependencies/angular/angular.js',
-        'bower_dependencies/angular-animate/angular-animate.js',
         'bower_dependencies/angular-aria/angular-aria.js',
+        'bower_dependencies/angular-animate/angular-animate.js',
+        'bower_dependencies/angular-messages/angular-messages.js',
         'bower_dependencies/angular-material/angular-material.js',
         'bower_dependencies/angular-mocks/angular-mocks.js',
         'bower_dependencies/angular-translate/angular-translate.js',
