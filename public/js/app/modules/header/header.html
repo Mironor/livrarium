@@ -1,7 +1,15 @@
-<div>
-    <img src="/assets/img/logo.png" alt="Livrarium"/>
+<div class="md-toolbar-tools" layout-fill layout-align="center center">
+    <md-button hide-gt-md ng-click="toggleLeftNav()" class="md-icon-button" aria-label="Settings">
+        <md-icon md-svg-icon="/assets/img/svg/menu.svg"></md-icon>
+    </md-button>
 
-    <div id="search"><input type="search"/><a class="icon-search" href="/search"></a></div>
-
-    <img id="user" src="/assets/img/av.png" alt="current user"/>
+    <div id="search" class="md-hue-1" flex="60" layout="row">
+            <md-icon md-svg-icon="/assets/img/svg/search.svg"></md-icon>
+            <input layout-fill type="search" placeholder="Search book"/>
+    </div>
 </div>
+
+<!--<img src="/assets/img/logo.png" alt="Livrarium"/>-->
+
+
+<!--<img id="user" src="/assets/img/av.png" alt="current user"/>-->

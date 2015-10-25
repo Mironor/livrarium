@@ -4,6 +4,7 @@ angular.module('lvr', [
     'ngMessages',
     'ui.router',
     'pascalprecht.translate',
+    'ngMdIcons',
 
     'lvr.components',
     'lvr.login',
@@ -12,20 +13,24 @@ angular.module('lvr', [
 ])
     .config(function($stateProvider, $urlRouterProvider, $locationProvider, constants) {
         $stateProvider
-            .state('index', {
+            .state(constants.stateNames.index, {
                 url: constants.applicationUrls.login,
                 templateUrl: constants.pathToApp + 'modules/login/login.html'
             })
-            .state('signUp', {
+            .state(constants.stateNames.signUp, {
                 url: constants.applicationUrls.signUp,
                 templateUrl: constants.pathToApp + 'modules/sign-up/sign-up.html'
             })
-            .state('cloud', {
+            .state(constants.stateNames.cloud, {
                 url: constants.applicationUrls.cloud,
                 templateUrl: constants.pathToApp + 'modules/cloud/cloud.html'
+            })
+            .state(constants.stateNames.cloudAll, {
+                url: constants.applicationUrls.cloudAll,
+                templateUrl: constants.pathToApp + 'modules/content/all/all.html'
             });
 
-        $urlRouterProvider.otherwise('/');
+        $urlRouterProvider.otherwise('/cloud');
 
         $locationProvider.html5Mode(true);
     })

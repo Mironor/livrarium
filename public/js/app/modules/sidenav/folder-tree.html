@@ -1,0 +1,9 @@
+<md-list-item ng-repeat="node in children" class="menu-item">
+
+    <!--current level folder-->
+    <span>{{node.name}} </span>
+
+    <!--subfolders-->
+    <md-list lvr-folder-tree children="node.children" ng-show="node.children.length && node.expanded"></md-list>
+
+</md-list-item>

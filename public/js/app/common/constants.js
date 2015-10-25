@@ -8,6 +8,7 @@ angular.module('lvr')
         api: {
             signInWithCredentials: '/authenticate/credentials',
             signUp: '/sign-up',
+            allBooks: '/books',
             foldersTree: '/folders/tree',
             rootContent: '/folders/root',
             createFolder: '/folders/create',
@@ -26,7 +27,15 @@ angular.module('lvr')
         applicationUrls: {
             login: '/',
             signUp: '/sign-up',
-            cloud: '/cloud'
+            cloud: '/cloud',
+            cloudAll: '/all'
+        },
+
+        stateNames: {
+            index: 'index',
+            signUp: 'signUp',
+            cloud: 'cloud',
+            cloudAll: 'cloud.all'
         },
 
         // Application errors (the ones returned by server must have the same id as here)

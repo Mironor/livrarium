@@ -5,8 +5,8 @@
         <title>Livrarium</title>
         <meta charset="utf-8">
         <base href="/">
-        <link href="https://fontastic.s3.amazonaws.com/xDpa9byoYm8jR7PTJscRkT/icons.css" rel="stylesheet">
         <link rel="stylesheet" href="@routes.Assets.at("styles/lvr-cloud.css")">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,400italic">
 
         <script>
         // path to js may vary, this way we will inject it in the application
@@ -17,6 +17,7 @@
 
         <script src="@routes.Assets.at("js/app/app.js")"></script>
 
+        <script src="//cdnjs.cloudflare.com/ajax/libs/angular-material-icons/0.6.0/angular-material-icons.min.js"></script>
 
         <script src="@routes.Assets.at("js/app/i18n/en.js")"></script>
 
@@ -39,11 +40,12 @@
 
         <script src="@routes.Assets.at("js/app/modules/header/header.js")"></script>
 
-        <script src="@routes.Assets.at("js/app/modules/left-menu/left-menu.js")"></script>
-        <script src="@routes.Assets.at("js/app/modules/left-menu/folder-tree.js")"></script>
+        <script src="@routes.Assets.at("js/app/modules/sidenav/sidenav.js")"></script>
+        <script src="@routes.Assets.at("js/app/modules/sidenav/folder-tree.js")"></script>
         <script src="@routes.Assets.at("js/app/modules/upload-button/upload-button.js")"></script>
 
         <script src="@routes.Assets.at("js/app/modules/content/content.js")"></script>
+        <script src="@routes.Assets.at("js/app/modules/content/all/all.js")"></script>
 
         <script src="@routes.Assets.at("js/app/modules/book-viewer/book-viewer.js")"></script>
 
@@ -63,8 +65,7 @@
 
 
     </head>
-    <body ng-app="lvr" ui-view>
-
-
+    <body ng-app="lvr">
+        <div ui-view layout-fill></div>
     </body>
 </html>

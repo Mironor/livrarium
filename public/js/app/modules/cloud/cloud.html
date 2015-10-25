@@ -1,8 +1,15 @@
-<div ng-controller="CloudController">
-    <header lvr-header></header>
-    <div id="main">
-        <lvr-left-menu id="left-menu"></lvr-left-menu>
-        <lvr-content id="content"></lvr-content>
-        <lvr-book-viewer id="book-viewer" ng-if="bookViewer.show" scale="page-fit"></lvr-book-viewer>
-    </div>
+<div class="md-content" layout="row" layout-fill ng-controller="CloudController">
+
+    <md-sidenav lvr-sidenav id="sidenav"
+                class="md-sidenav-left md-whiteframe-z2"
+                md-component-id="sidenav-left"
+                md-is-locked-open="$mdMedia('gt-md')">
+    </md-sidenav>
+    <md-content layout-fill layout="column">
+        <md-toolbar lvr-header id="header"></md-toolbar>
+        <md-content id="content" flex layout-padding ui-view></md-content>
+    </md-content>
+
+    <lvr-book-viewer id="book-viewer" ng-if="bookViewer.show" scale="page-fit"></lvr-book-viewer>
+
 </div>

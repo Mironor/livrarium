@@ -1,4 +1,6 @@
-angular.module('lvr.content', [])
+angular.module('lvr.content', [
+    'lvr.content.all'
+])
     .controller('lvrContentCtrl', function($scope, Book, Folder, folders, bookViewer) {
 
         $scope.showDropdown = false;
@@ -30,7 +32,7 @@ angular.module('lvr.content', [])
     })
     .directive('lvrContent', function(constants) {
         return {
-            restrict: 'E',
+            restrict: 'A',
             templateUrl: constants.pathToApp + 'modules/content/content.html',
             controller: 'lvrContentCtrl'
         };

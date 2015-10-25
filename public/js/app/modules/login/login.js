@@ -1,5 +1,5 @@
 angular.module('lvr.login', [])
-    .controller('lvrCredentialsLoginController', function($scope, $http, $location, constants, identity) {
+    .controller('lvrCredentialsLoginController', function($scope, $http, $state, constants, identity) {
         $scope.requestSent = false;
 
         $scope.model = {
@@ -17,12 +17,10 @@ angular.module('lvr.login', [])
                 $http.post(constants.api.signInWithCredentials, $scope.model)
                     .success(function(data) {
                         identity.email = data.email;
-                        $location.path(constants.applicationUrls.cloud);
+                        $state.go(constants.stateNames.cloudAll);
                     })
                     .error(function(data) {
-                        if (data.code === constants.errorCodes.userNotFound) {
-                            form.email.$error.emailOrPasswordInvalid = true;
-                        }
+                        form.email.$error.emailOrPasswordInvalid = data.code === constants.errorCodes.userNotFound;
                         $scope.requestSent = false;
                     });
             }
