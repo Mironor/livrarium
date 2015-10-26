@@ -44,7 +44,7 @@ object BookFixture extends PlaySpecification {
 
   val sub1BookToFolderLink = BookToFolder(sub1BookId, FolderFixture.sub1Id)
 
-  val otherUserBookName = "sub 1 book"
+  val otherUserBookName = "other user book"
   val otherUserBookId = 3
   val otherUserBookUUID = UUID.fromString("08badfdc-12d2-11e5-b60b-1697f925ec7b").toString
   val otherUserBook = DBBook(

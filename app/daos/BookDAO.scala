@@ -16,10 +16,10 @@ class BookDAO(implicit inj: Injector) extends LivrariumDAO{
   /**
    * Finds all books for a specified userId
    * @param userId user's id
-   * @return a promise with a list of user's folders
+   * @return a promise with a list of user's books
    */
   def findAll(userId: Long): Future[Seq[DBBook]] = db.run {
-    slickBooks.result
+    slickBooks.filter(_.idUser === userId).result
   }
 
   /**

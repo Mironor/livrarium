@@ -16,6 +16,18 @@ class BookServiceSpec extends LivrariumSpecification with ThrownMessages {
   }
 
   "Book Service" should {
+
+    "retrieve all user's books" in { implicit inj: Injector =>
+      // Given
+      val bookService = new BookService
+
+      // When
+      val books = await(bookService.retrieveAll(UserFixture.testUser))
+
+      // Then
+      books must have size 2
+    }
+
     "create new book" in { implicit inj: Injector =>
       // Given
       val bookService = new BookService
@@ -28,7 +40,7 @@ class BookServiceSpec extends LivrariumSpecification with ThrownMessages {
       val books = await(bookService.retrieveAll(UserFixture.testUser))
 
       // Then
-      books must have size 4
+      books must have size 3
     }
 
     "retrieve book by uuid" in { implicit inj: Injector =>

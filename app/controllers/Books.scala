@@ -55,14 +55,9 @@ class Books(implicit inj: Injector)
     folder zip book
   }
 
+  def all() = authenticatedActionAsync { user =>
+    bookService.retrieveAll(user).map(books => Ok(Json.toJson(books)))
+  }
 
-  //  def index = v2.TODO
-  //  def info(id: String) = v2.TODO
-  //  def read(id: String) = v2.TODO
-  //  def move(id: String) = v2.TODO
-  //  def toRead(id: String) = v2.TODO
-  //  def update(id: String) = v2.TODO
-  //  def archive(id: String) = TODO
-  //  def delete(id: String) = TODO
 
 }
