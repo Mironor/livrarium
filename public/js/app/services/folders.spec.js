@@ -99,7 +99,7 @@ describe('Folders', function() {
     });
 
 
-    it("should retrieve root folder", function() {
+    it("should retrieve folder tree", function() {
         // Given
 
         // When
@@ -110,6 +110,8 @@ describe('Folders', function() {
         // Then
         expect(rootFolder.name).toEqual("");
         expect(rootFolder.children.length).toEqual(2);
+        expect(rootFolder.children[0].children.length).toEqual(2);
+        expect(rootFolder.children[1].children.length).toEqual(1);
     });
 
     it("should retrieve root's contents", function() {

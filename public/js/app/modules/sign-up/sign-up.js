@@ -1,5 +1,5 @@
 angular.module('lvr.signUp', [])
-    .controller('lvrCredentialsSignUpController', function($scope, $http, $location, constants, identity) {
+    .controller('lvrCredentialsSignUpController', function($scope, $http, $state, constants, identity) {
         $scope.requestSent = false;
 
         $scope.translationData = {
@@ -16,7 +16,7 @@ angular.module('lvr.signUp', [])
             var form = $scope.signUpForm;
             form.repassword.$error.notEqualPasswords = $scope.model.password !== $scope.model.rePassword;
 
-            if (form.$valid && !form.repassword.$error.notEqualPasswords ) {
+            if (form.$valid && !form.repassword.$error.notEqualPasswords && !$scope.requestSent) {
 
                 $scope.requestSent = true;
 
@@ -25,9 +25,9 @@ angular.module('lvr.signUp', [])
                     "password": $scope.model.password
                 }).success(function(data) {
                     identity.email = data.email;
-                    $location.path(constants.applicationUrls.cloud);
+                    $state.go(constants.stateNames.cloudAll);
                 }).error(function(data) {
-                    form.email.$error.userAlreadyExists = data.code === constants.errorCodes.userAlreadyExists;
+                    form.email.$error.useralreadyexists = data.code === constants.errorCodes.userAlreadyExists;
                     $scope.existingEmail = $scope.model.email;
 
                     $scope.requestSent = false;

@@ -35,16 +35,18 @@ gulp.task('deps_test', function () {
         'bower_dependencies/angular-animate/angular-animate.js',
         'bower_dependencies/angular-messages/angular-messages.js',
         'bower_dependencies/angular-material/angular-material.js',
-        'bower_dependencies/angular-mocks/angular-mocks.js',
-        'bower_dependencies/angular-translate/angular-translate.js',
         'bower_dependencies/angular-ui-router/release/angular-ui-router.js',
+        'bower_dependencies/angular-translate/angular-translate.js',
         'bower_dependencies/angular-recursion/angular-recursion.js',
         'bower_dependencies/ng-file-upload/ng-file-upload.js',
         'bower_dependencies/lodash/lodash.js',
         'bower_dependencies/underscore.string/dist/underscore.string.js',
+        'bower_dependencies/angular-mocks/angular-mocks.js',
 
         'bower_dependencies/jasmine-jquery/lib/jasmine-jquery.js',
-        'node_modules/phantomjs-polyfill/bind-polyfill.js'
+        'node_modules/phantomjs-polyfill/bind-polyfill.js',
+
+        'public/js/app/test-utils/ui-router-stat-mock.js'
     ])
         .pipe(concat('lvr-vendor-test.js'))
         .pipe(gulp.dest('public/js/'))

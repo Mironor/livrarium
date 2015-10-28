@@ -1,74 +1,64 @@
-describe('Sign in', function () {
-    var $httpBackend, $location, scope,
-        element, form, constants, identity,
-        validTemplate = '<lvr-credentials-sign-in-form></lvr-credentials-sign-in-form>';
+describe('Login', function() {
+    var $httpBackend, $state, scope, controller, constants, identity;
 
-    beforeEach(module('lvr', 'lvr.signIn'));
+    beforeEach(module('lvr', 'lvr.login'));
 
-    beforeEach(module('public/js/app/modules/sign-in/credentials-sign-in-form.html', 'public/js/app/modules/sign-in/social-sign-in.html'));
+    beforeEach(module('stateMock'));
 
-    beforeEach(inject(function (_$httpBackend_, _$location_, $rootScope, $compile, _constants_, _identity_) {
+    beforeEach(inject(function($controller, _$state_, _$httpBackend_,  $rootScope, _constants_, _identity_) {
+
         $httpBackend = _$httpBackend_;
-        $location = _$location_;
+        $state = _$state_;
         constants = _constants_;
         identity = _identity_;
 
         scope = $rootScope.$new();
-        element = jQuery(validTemplate);
-        $compile(element)(scope);
-
-        scope.$apply();
-
-        form = scope.credentials_sign_in_form;
+        scope.loginForm = {
+            email: {
+                $error: {}
+            }
+        };
+        controller = $controller('lvrCredentialsLoginController', {$scope: scope});
     }));
 
-    afterEach(function () {
+    afterEach(function() {
         $httpBackend.verifyNoOutstandingExpectation();
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('doesn\'t show any error by default', function () {
+    it('should not submit request if form is not valid', function() {
         // Given
-        var $shownErrorDivs = element.find('.error').not('.ng-hide');
-
-        // When
-
-        // Then
-        expect($shownErrorDivs).not.toExist();
-    });
-
-    it('should show error if email is invalid', function () {
-        // Given
-        form.email.$setViewValue("invalid@}@email.com");
-        form.password.$setViewValue("valid_password");
+        scope.loginForm.$valid = false;
 
         // When
         scope.submit();
         scope.$digest();
 
         // Then
-        expect(element.find('.email-password-not-valid')).toExist();
-        expect(element.find('.email-password-not-valid')).not.toHaveClass('ng-hide');
+        expect(scope.requestSent).toBeFalsy();
+        $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should show error if password is too short', function () {
+    it('should not submit request there is already a sent request', function() {
         // Given
-        form.email.$setViewValue("valid@email.com");
-        form.password.$setViewValue("pass");
+        scope.loginForm.$valid = true;
+        scope.requestSent = true;
 
         // When
         scope.submit();
         scope.$digest();
 
         // Then
-        expect(element.find('.email-password-not-valid')).toExist();
-        expect(element.find('.email-password-not-valid')).not.toHaveClass('ng-hide');
+        $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should show error if user does not exist', function () {
+    it('should show error if user does not exist', function() {
         // Given
-        form.email.$setViewValue("valid@email.com");
-        form.password.$setViewValue("valid_password");
+        expect(scope.loginForm.email.$error.emailOrPasswordInvalid).toBeFalsy();
+
+        scope.loginForm.$valid = true;
+        scope.model.email = "valid@email.com";
+        scope.model.password = "valid_password";
 
         $httpBackend.expectPOST(constants.api.signInWithCredentials).respond(500, {
             "code": constants.errorCodes.userNotFound
@@ -80,19 +70,40 @@ describe('Sign in', function () {
         scope.$digest();
 
         // Then
-        expect(element.find('.email-password-not-valid')).toExist();
-        expect(element.find('.email-password-not-valid')).not.toHaveClass('ng-hide');
+        expect(scope.loginForm.email.$error.emailOrPasswordInvalid).toBeTruthy();
     });
 
-    it('should modify identity value on successful log in', function () {
+    it('should do transition to cloud after successful login', function() {
         // Given
+        scope.loginForm.$valid = true;
         var email = "valid@email.com";
-        form.email.$setViewValue(email);
-        form.password.$setViewValue("valid_password");
+        scope.model.email = email;
+        scope.model.password = "valid_password";
 
         $httpBackend.expectPOST(constants.api.signInWithCredentials).respond({
             "email": email
         });
+        $state.expectTransitionTo(constants.stateNames.cloudAll);
+
+        // When
+        scope.submit();
+        $httpBackend.flush();
+        scope.$digest();
+
+        // Then
+    });
+
+    it('should modify identity value on successful log in', function() {
+        // Given
+        scope.loginForm.$valid = true;
+        var email = "valid@email.com";
+        scope.model.email = email;
+        scope.model.password = "valid_password";
+
+        $httpBackend.expectPOST(constants.api.signInWithCredentials).respond({
+            "email": email
+        });
+        $state.expectTransitionTo(constants.stateNames.cloudAll);
 
         // When
         scope.submit();
@@ -101,24 +112,5 @@ describe('Sign in', function () {
 
         // Then
         expect(identity.email).toBe(email);
-    });
-
-    it('should redirect user after a successful authentication', function () {
-        // Given
-        var email = "valid@email.com";
-        form.email.$setViewValue(email);
-        form.password.$setViewValue("valid_password");
-
-        $httpBackend.expectPOST(constants.api.signInWithCredentials).respond({
-            "email": email
-        });
-
-        // When
-        scope.submit();
-        $httpBackend.flush();
-        scope.$digest();
-
-        // Then
-        expect($location.path()).toBe(constants.applicationUrls.cloud);
     });
 });

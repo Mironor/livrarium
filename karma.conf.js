@@ -30,7 +30,6 @@ module.exports = function (config) {
             'public/js/app/**/*.html': 'ng-html2js'
         },
 
-
         // test results reporter to use
         // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
         reporters: ['progress'],

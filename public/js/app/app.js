@@ -4,7 +4,6 @@ angular.module('lvr', [
     'ngMessages',
     'ui.router',
     'pascalprecht.translate',
-    'ngMdIcons',
 
     'lvr.components',
     'lvr.login',
@@ -15,7 +14,7 @@ angular.module('lvr', [
         $stateProvider
             .state(constants.stateNames.index, {
                 url: constants.applicationUrls.login,
-                templateUrl: constants.pathToApp + 'modules/login/login.html'
+                templateUrl: constants.pathToApp + 'modules/login/login2.html'
             })
             .state(constants.stateNames.signUp, {
                 url: constants.applicationUrls.signUp,

@@ -1,25 +1,27 @@
-describe('Sign up', function () {
-    var $httpBackend, $location, scope,
-        element, form, constants, identity,
-        validTemplate = '<lvr-credentials-sign-up-form></lvr-credentials-sign-up-form>';
+fdescribe('Sign up', function () {
+    var $httpBackend, $state, scope, controller, constants, identity;
 
     beforeEach(module('lvr', 'lvr.signUp'));
 
-    beforeEach(module('public/js/app/modules/sign-up/credentials-sign-up-form.html', 'public/js/app/modules/sign-up/social-sign-up.html'));
+    beforeEach(module('stateMock'));
 
-    beforeEach(inject(function (_$httpBackend_, _$location_, $rootScope, $compile, _constants_, _identity_) {
+    beforeEach(inject(function($controller, _$state_, _$httpBackend_,  $rootScope, _constants_, _identity_) {
+
         $httpBackend = _$httpBackend_;
-        $location = _$location_;
+        $state = _$state_;
         constants = _constants_;
         identity = _identity_;
 
         scope = $rootScope.$new();
-        element = jQuery(validTemplate);
-        $compile(element)(scope);
-
-        scope.$apply();
-
-        form = scope.credentials_sign_up_form;
+        scope.signUpForm = {
+            email: {
+                $error: {}
+            },
+            repassword:{
+                $error: {}
+            }
+        };
+        controller = $controller('lvrCredentialsSignUpController', {$scope: scope});
     }));
 
     afterEach(function () {
@@ -27,66 +29,51 @@ describe('Sign up', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('doesn\'t show any error by default', function () {
+    it('should not submit request if form is not valid', function() {
         // Given
-        var $shownErrorDivs = element.find('.error').not('.ng-hide');
-
-        // When
-
-        // Then
-        expect($shownErrorDivs).not.toExist();
-    });
-
-    it('should show error if email is invalid', function () {
-        // Given
-        form.email.$setViewValue("invalid@}@email.com");
-        form.password.$setViewValue("valid_password");
-        form.repassword.$setViewValue("valid_password");
+        scope.signUpForm.$valid = false;
 
         // When
         scope.submit();
         scope.$digest();
 
         // Then
-        expect(element.find('.email-not-valid')).toExist();
-        expect(element.find('.email-not-valid')).not.toHaveClass('ng-hide')
+        expect(scope.requestSent).toBeFalsy();
+        $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should show error if password is too short', function () {
+    it('should not submit request if there is already a sent request', function() {
         // Given
-        form.email.$setViewValue("valid@email.com");
-        form.password.$setViewValue("pass");
-        form.repassword.$setViewValue("pass");
+        scope.signUpForm.$valid = true;
+        scope.requestSent = true;
 
         // When
         scope.submit();
         scope.$digest();
 
         // Then
-        expect(element.find('.password-not-valid')).toExist();
-        expect(element.find('.password-not-valid')).not.toHaveClass('ng-hide');
+        $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should show error if passwords are not the same', function () {
+    it('should not submit request if passwords are not the same', function () {
         // Given
-        form.email.$setViewValue("valid@email.com");
-        form.password.$setViewValue("valid_password");
-        form.repassword.$setViewValue("second_valid_password");
+        scope.signUpForm.$valid = true;
+        scope.model.password = "valid_password";
+        scope.model.rePassword = "second_valid_password";
 
         // When
         scope.submit();
         scope.$digest();
 
         // Then
-        expect(element.find('.passwords-not-equal')).toExist();
-        expect(element.find('.passwords-not-equal')).not.toHaveClass('ng-hide')
+        $httpBackend.verifyNoOutstandingRequest();
     });
 
     it('should show error if user already exists', function () {
         // Given
-        form.email.$setViewValue("valid@email.com");
-        form.password.$setViewValue("valid_password");
-        form.repassword.$setViewValue("valid_password");
+        expect(scope.signUpForm.email.$error.useralreadyexists).toBeFalsy();
+
+        scope.signUpForm.$valid = true;
 
         $httpBackend.expectPOST(constants.api.signUp).respond(500, {
             "code": constants.errorCodes.userAlreadyExists
@@ -98,20 +85,40 @@ describe('Sign up', function () {
         scope.$digest();
 
         // Then
-        expect(element.find('.user-already-exists')).toExist();
-        expect(element.find('.user-already-exists')).not.toHaveClass('ng-hide');
+        expect(scope.signUpForm.email.$error.useralreadyexists).toBeTruthy();
     });
 
-    it('should modify identity value on successful sign up', function () {
+    it('should do transition to cloud after successful sign up', function () {
         // Given
+        scope.signUpForm.$valid = true;
+        scope.requestSent = false;
         var email = "valid@email.com";
-        form.email.$setViewValue(email);
-        form.password.$setViewValue("valid_password");
-        form.repassword.$setViewValue("valid_password");
+        scope.model.email = email;
 
         $httpBackend.expectPOST(constants.api.signUp).respond({
             "email": email
         });
+        $state.expectTransitionTo(constants.stateNames.cloudAll);
+
+        // When
+        scope.submit();
+        $httpBackend.flush();
+        scope.$digest();
+
+        // Then
+    });
+
+    it('should modify identity value on successful sign up', function () {
+        // Given
+        scope.signUpForm.$valid = true;
+        scope.requestSent = false;
+        var email = "valid@email.com";
+        scope.model.email = email;
+
+        $httpBackend.expectPOST(constants.api.signUp).respond({
+            "email": email
+        });
+        $state.expectTransitionTo(constants.stateNames.cloudAll);
 
         // When
         scope.submit();
@@ -122,23 +129,4 @@ describe('Sign up', function () {
         expect(identity.email).toBe(email);
     });
 
-    it('should redirect user after a successful authentication', function () {
-        // Given
-        var email = "valid@email.com";
-        form.email.$setViewValue(email);
-        form.password.$setViewValue("valid_password");
-        form.repassword.$setViewValue("valid_password");
-
-        $httpBackend.expectPOST(constants.api.signUp).respond({
-            "email": email
-        });
-
-        // When
-        scope.submit();
-        $httpBackend.flush();
-        scope.$digest();
-
-        // Then
-        expect($location.path()).toBe(constants.applicationUrls.cloud);
-    });
 });
