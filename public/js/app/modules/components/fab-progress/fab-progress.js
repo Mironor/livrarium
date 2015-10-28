@@ -10,8 +10,6 @@ angular.module('lvr.fabProgress', [])
                 fabAreaLabel: '@',
                 progressClass: '@'
             },
-            templateUrl: constants.pathToApp + 'modules/components/fab-progress/fab-progress.html',
-            link: function(scope, element, attrs) {
-            }
+            templateUrl: constants.pathToApp + 'modules/components/fab-progress/fab-progress.html'
         }
     });

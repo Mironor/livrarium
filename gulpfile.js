@@ -46,7 +46,7 @@ gulp.task('deps_test', function () {
         'bower_dependencies/jasmine-jquery/lib/jasmine-jquery.js',
         'node_modules/phantomjs-polyfill/bind-polyfill.js',
 
-        'public/js/app/test-utils/ui-router-stat-mock.js'
+        'public/js/app/test-utils/ui-router-state-mock.js'
     ])
         .pipe(concat('lvr-vendor-test.js'))
         .pipe(gulp.dest('public/js/'))

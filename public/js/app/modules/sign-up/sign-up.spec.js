@@ -1,4 +1,4 @@
-fdescribe('Sign up', function () {
+describe('Sign up', function () {
     var $httpBackend, $state, scope, controller, constants, identity;
 
     beforeEach(module('lvr', 'lvr.signUp'));

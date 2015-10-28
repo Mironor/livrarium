@@ -11,7 +11,7 @@ describe('Book', function () {
             identifier: 'uuid-1',
             name: 'Book one',
             createDate: 1407608313000,
-            formats: ['pdf', 'epub'],
+            format: 'pdf',
             pages: 160,
             currentPage: 100
         });
@@ -24,50 +24,4 @@ describe('Book', function () {
             pages: 1000
         })
     }));
-
-    it('should generate valid progress bars', function () {
-        // Given
-        var expected = [
-            {
-                completeness: 100
-            },
-            {
-                completeness: 100
-            },
-            {
-                completeness: 50
-            },
-            {
-                completeness: 0
-            }
-        ];
-
-        // When
-        book.initProgressBars();
-
-        // Then
-        expect(book.progressBars).toEqual(expected);
-    });
-
-    it('should show one full bar if the number of total pages is 0', function () {
-        // Given
-
-        // When
-        zeroPagesBook.initProgressBars();
-
-        // Then
-        expect(zeroPagesBook.progressBars).toEqual([{
-            completeness: 100
-        }]);
-    });
-
-    it('should have no more than constants.books.maxBarsCount bars', function () {
-        // Given
-
-        // When
-        manyPagesBook.initProgressBars();
-
-        // Then
-        expect(manyPagesBook.progressBars.length).toEqual(constants.books.maxBarsCount);
-    });
 });
