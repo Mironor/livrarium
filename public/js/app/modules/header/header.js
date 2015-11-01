@@ -8,7 +8,6 @@ angular.module('lvr.header', [])
                 $scope.toggleLeftNav = function() {
                     $mdSidenav("sidenav-left").toggle()
                 }
-
             }
         };
     });

@@ -27,6 +27,7 @@ describe('Sign up', function () {
     afterEach(function () {
         $httpBackend.verifyNoOutstandingExpectation();
         $httpBackend.verifyNoOutstandingRequest();
+        $state.ensureAllTransitionsHappened();
     });
 
     it('should not submit request if form is not valid', function() {

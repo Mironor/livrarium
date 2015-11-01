@@ -13,7 +13,7 @@ angular.module('lvr')
             "login.error.invalidPassword": "Password should be minimum 6 characters long",
             "login.error.notEqualPasswords": "Passwords are not the same",
             "login.error.accessDenied": "Password is invalid",
-            "login.error.userAlreadyExists": "User {{existingEmail}} already exists",
+            "login.error.userAlreadyExists": "User {{existingEmail}} already exists"
         }, {
             "content.folders.newFolderName": "New folder",
             "content.numberSign": " #"

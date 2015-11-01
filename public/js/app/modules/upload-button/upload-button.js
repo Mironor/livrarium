@@ -6,18 +6,6 @@ angular.module('lvr.uploadButton', [
         templateUrl: constants.pathToApp + 'modules/upload-button/upload-button.html',
         controller: function($scope, Upload, folders, books) {
 
-            var _onProgress = function(evt) {
-                    var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-                    console.log(progressPercentage);
-                },
-
-                _onSuccess = function(data, status, headers, config) {
-                    books.addToContent(data);
-                },
-                _onError = function(data, status, headers, config) {
-                    console.log('Upload error: ', status)
-                };
-
             $scope.uploadFile = function(file) {
                 var currentFolderId = folders.currentFolder.id;
 
@@ -34,6 +22,20 @@ angular.module('lvr.uploadButton', [
                     .error(_onError);
 
             };
+
+
+            function _onProgress(evt) {
+                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+                console.log(progressPercentage);
+            }
+
+            function _onSuccess(data, status, headers, config) {
+                books.addToContent(data);
+            }
+
+            function _onError(data, status, headers, config) {
+                console.log('Upload error: ', data, status)
+            }
 
             $scope.onFileSelect = function($files) {
                 $files.forEach($scope.uploadFile);

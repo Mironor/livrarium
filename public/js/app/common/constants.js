@@ -43,12 +43,5 @@ angular.module('lvr')
             userNotFound: 4004,
             accessDenied: 4002,
             userAlreadyExists: 4005
-        },
-
-        books: {
-            maxPagesPerBar: 50,
-            maxBarsCount: 10
-        },
-
-        folders: {}
+        }
     });

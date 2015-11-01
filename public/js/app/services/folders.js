@@ -7,6 +7,10 @@ angular.module('lvr')
 
             currentFolder: undefined,
 
+            /**
+             * Fetchs user's folders in a form of a tree structure
+             * @returns root folder (that has children that have children and so on)
+             */
             fetchFolderTree: function() {
                 return $http.get(constants.api.foldersTree)
                     .success(function(data) {
@@ -16,6 +20,9 @@ angular.module('lvr')
                     }.bind(this));
             },
 
+            /**
+             * Fetchs and fills the content of currently opened folder
+             */
             fetchCurrentFolderContents: function() {
                 if (this.currentFolder.id === undefined) this._fetchRootContents();
                 else this._fetchFolderContents(this.currentFolder.id);
@@ -46,6 +53,11 @@ angular.module('lvr')
 
             },
 
+            /**
+             * Generates a semantically correct new name for a folder (if a folder with that name already
+             * exists, appends a unique prefix to the name)
+             * @returns {*}
+             */
             getNewFolderNameInCurrentFolder: function() {
                 var subFolders = this.currentFolder.contents.folders,
                     expectedNumber = 1;

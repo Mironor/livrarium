@@ -1,13 +1,11 @@
 angular.module('lvr')
-    .factory('Book', function (constants) {
+    .factory('Book', function () {
 
         var bookModel = {
-
             identifier: undefined,
             name: "",
             pages: 0,
             currentPage: 0
-
         };
 
         var Book = function (data) {

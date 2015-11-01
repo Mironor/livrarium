@@ -14,7 +14,7 @@ angular.module('lvr', [
         $stateProvider
             .state(constants.stateNames.index, {
                 url: constants.applicationUrls.login,
-                templateUrl: constants.pathToApp + 'modules/login/login2.html'
+                templateUrl: constants.pathToApp + 'modules/login/login.html'
             })
             .state(constants.stateNames.signUp, {
                 url: constants.applicationUrls.signUp,
