@@ -1,4 +1,4 @@
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.7"
 
 name := """Livrarium"""
 
@@ -13,12 +13,12 @@ resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
 
 libraryDependencies ++= Seq(
-  "com.typesafe.play" %% "play-slick" % "1.0.0",
-  "com.typesafe.play" %% "play-slick-evolutions" % "1.0.0",
+  "com.typesafe.play" %% "play-slick" % "1.1.0",
+  "com.typesafe.play" %% "play-slick-evolutions" % "1.1.0",
   "org.postgresql" % "postgresql" % "9.3-1102-jdbc4",
-  "com.mohiva" %% "play-silhouette" % "3.0.0-RC1",
-  "com.mohiva" %% "play-silhouette-testkit" % "3.0.0-RC1" % "test",
-  "org.scaldi" %% "scaldi-play" % "0.5.8",
+  "com.mohiva" %% "play-silhouette" % "3.0.4",
+  "com.mohiva" %% "play-silhouette-testkit" % "3.0.4" % "test",
+  "org.scaldi" %% "scaldi-play" % "0.5.10",
   "com.sksamuel.scrimage" %% "scrimage-core" % "1.4.1",
   "com.sksamuel.scrimage" %% "scrimage-canvas" % "1.4.1",
   "org.bouncycastle" % "bcprov-jdk16" % "1.45",
