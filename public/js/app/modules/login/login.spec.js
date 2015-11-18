@@ -12,6 +12,7 @@ describe('Login', function() {
         constants = _constants_;
         identity = _identity_;
 
+
         scope = $rootScope.$new();
         scope.loginForm = {
             email: {

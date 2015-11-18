@@ -6,13 +6,17 @@ describe('Upload Button', function () {
     var uploadMock = {}, progressMock = {}, successMock = {}, errorMock = {};
 
     beforeEach(module('lvr', function($provide) {
-        $provide.value('bootstrapData', {})
+        $provide.value('bootstrapData', {});
+
+        // Without this, the test says "Unexpected GET request `path_to_icon`", so we will shut it down
+        $provide.factory('mdIconDirective', function () {
+            return angular.noop;
+        });
     }));
 
-    beforeEach(module( 'lvr.uploadButton'));
+    beforeEach(module( 'lvr.uploadButton', 'lvr.components'));
 
-
-    beforeEach(module('public/js/app/modules/upload-button/upload-button.html'));
+    beforeEach(module('public/js/app/modules/upload-button/upload-button.html', 'public/js/app/modules/components/fab-progress/fab-progress.html'));
 
     beforeEach(inject(function (_$httpBackend_, _Upload_, $rootScope, $compile, _constants_, _folders_, _Folder_) {
         $httpBackend = _$httpBackend_;
@@ -20,6 +24,7 @@ describe('Upload Button', function () {
         constants = _constants_;
         folders = _folders_;
         Folder = _Folder_;
+
 
         scope = $rootScope.$new();
         element = jQuery(validTemplate);
@@ -78,7 +83,7 @@ describe('Upload Button', function () {
                 file: {
                     name: "file1"
                 },
-                fileFormDataName: 'books'
+                fileFormDataName: 'file'
             };
 
 
