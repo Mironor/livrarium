@@ -35,7 +35,10 @@ class UserService(implicit inj: Injector) extends IdentityService[User] with Inj
    * @return a promise of a created user
    */
   def create(loginInfo: LoginInfo, email: String, avatarURL: Option[String]): Future[User] = {
-    val dbUser = DBUser(None, email, avatarURL)
+    // We cannot create root before creating user, this value should be updated after root folder's creation
+    val idRootSpecialValue = 0
+
+    val dbUser = DBUser(None, idRootSpecialValue, email, avatarURL)
 
     for {
       dbUser <- userDAO.insert(dbUser)

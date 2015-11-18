@@ -5,7 +5,7 @@ describe('Login', function() {
 
     beforeEach(module('stateMock'));
 
-    beforeEach(inject(function($controller, _$state_, _$httpBackend_,  $rootScope, _constants_, _identity_) {
+    beforeEach(inject(function($controller, _$state_, _$httpBackend_, $rootScope, _constants_, _identity_) {
 
         $httpBackend = _$httpBackend_;
         $state = _$state_;
@@ -78,11 +78,13 @@ describe('Login', function() {
         // Given
         scope.loginForm.$valid = true;
         var email = "valid@email.com";
+        var idRoot = 1;
         scope.model.email = email;
         scope.model.password = "valid_password";
 
         $httpBackend.expectPOST(constants.api.signInWithCredentials).respond({
-            "email": email
+            "email": email,
+            "idRoot": idRoot
         });
         $state.expectTransitionTo(constants.stateNames.cloudAll);
 
@@ -98,11 +100,13 @@ describe('Login', function() {
         // Given
         scope.loginForm.$valid = true;
         var email = "valid@email.com";
+        var idRoot = 1;
         scope.model.email = email;
         scope.model.password = "valid_password";
 
         $httpBackend.expectPOST(constants.api.signInWithCredentials).respond({
-            "email": email
+            "email": email,
+            "idRoot": idRoot
         });
         $state.expectTransitionTo(constants.stateNames.cloudAll);
 
@@ -113,5 +117,6 @@ describe('Login', function() {
 
         // Then
         expect(identity.email).toBe(email);
+        expect(identity.idRoot).toBe(idRoot);
     });
 });

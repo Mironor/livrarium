@@ -16,14 +16,16 @@ object UserFixture{
   val slickLoginInfos = TableQuery[LoginInfos]
 
   val testUserId = 1
+  val testUserRootId = 1
   val testUserLoginInfoId = 1
   val testUserLoginInfo = LoginInfo("key", "value")
-  val testUser = User(testUserId, testUserLoginInfo, "test@test.test", Option("someUrl"))
+  val testUser = User(testUserId, testUserLoginInfo, testUserRootId, "test@test.test", Option("someUrl"))
 
   val otherUserId = 2
+  val otherUserRootId = 2
   val otherUserLoginInfoId = 2
   val otherUserLoginInfo = LoginInfo("key_other", "value_other")
-  val otherUser = User(otherUserId, otherUserLoginInfo, "test@test.test", None)
+  val otherUser = User(otherUserId, otherUserLoginInfo, testUserRootId, "test@test.test", None)
 
   def initFixture(): Future[_] = {
     database.run {

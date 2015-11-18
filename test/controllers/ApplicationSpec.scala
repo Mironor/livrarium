@@ -45,7 +45,7 @@ class ApplicationSpec extends LivrariumSpecification with ThrownMessages {
 
       // Then
       status(result) mustEqual SEE_OTHER
-      redirectLocation(result) must beSome(routes.Cloud.index().toString())
+      redirectLocation(result) must beSome(routes.Cloud.index().toString)
     }
   }
 }

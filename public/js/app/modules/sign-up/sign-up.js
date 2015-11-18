@@ -1,5 +1,5 @@
 angular.module('lvr.signUp', [])
-    .controller('lvrCredentialsSignUpController', function($scope, $http, $state, constants, identity) {
+    .controller('lvrCredentialsSignUpController', function($scope, $http, $state, constants, identity, folders) {
         $scope.requestSent = false;
 
         $scope.translationData = {
@@ -24,7 +24,10 @@ angular.module('lvr.signUp', [])
                     "email": $scope.model.email,
                     "password": $scope.model.password
                 }).success(function(data) {
+                    identity.id = data.id;
                     identity.email = data.email;
+                    identity.idRoot = data.idRoot;
+                    folders.rootFolder.id = identity.idRoot;
                     $state.go(constants.stateNames.cloudAll);
                 }).error(function(data) {
                     form.email.$error.useralreadyexists = data.code === constants.errorCodes.userAlreadyExists;

@@ -45,14 +45,10 @@ class Cloud(implicit inj: Injector)
 
   implicit val uploadBookReads = (__ \ 'idFolder).read[Long]
 
-
-  def index = authenticatedActionAsync { user =>
-    val rootFolder: Future[Folder] = folderService.retrieveFolderTree(user)
-    rootFolder.map {
-      folder => Ok(views.html.index(Json.obj(
-        "rootFolder" -> Json.toJson(folder)
-      ).toString()))
-    }
+  def index = authenticatedAction { user =>
+       Ok(views.html.index(Json.obj(
+         "user" -> Json.toJson(user)
+       ).toString()))
   }
 
   def getFolderTree = authenticatedActionAsync { user =>
@@ -174,7 +170,7 @@ class Cloud(implicit inj: Injector)
       inject[Int](identified by "books.thumbnailHeight")
     ).write(new File(generatedThumbnailPath), ImgFormat.JPEG)
 
-    val generatedSmallThumbnailPath = s"$generatedImageFolder/$userId/$bookUUID-small.jpg"
+    val generatedSmallThumbnailPath = s"$userGeneratedImageFolder/$bookUUID-small.jpg"
 
     Image(generatedThumbnail).fit(
       inject[Int](identified by "books.smallThumbnailWidth"),

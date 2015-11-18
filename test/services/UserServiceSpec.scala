@@ -23,10 +23,11 @@ class UserServiceSpec extends LivrariumSpecification with ThrownMessages {
 
       // Then
       user.email must beEqualTo(UserFixture.testUser.email)
+      user.idRoot must beEqualTo(UserFixture.testUserRootId)
       user.avatarURL must beEqualTo(UserFixture.testUser.avatarURL)
     }
 
-    "save a new user" in { implicit inj: Injector =>
+    "create a new user" in { implicit inj: Injector =>
       // Given
       val userService = new UserService
       val newEmail = "new email"
@@ -88,7 +89,6 @@ class UserServiceSpec extends LivrariumSpecification with ThrownMessages {
       // Then
       user.email must beEqualTo(updatedEmail)
       user.avatarURL must beEqualTo(updatedAvatarUrl)
-
     }
 
   }

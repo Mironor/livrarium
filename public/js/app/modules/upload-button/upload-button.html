@@ -1,1 +1,16 @@
-<i class="icon-upload"></i><span>upload books</span>
+<md-fab-progress id="upload-fab"
+                 class="md-fab-progress md-fab-bottom-right"
+                 loading="true"
+                 fab-class=""
+                 fab-area-label="Add document"
+                 progress-type="determinate"
+                 progress-class=""
+                 progress-value="progress"
+                 ngf-select="onFileSelect($files)"
+                 ngf-pattern="'.docx,.odt,.pdf,.rtf,.txt,.wpd,.wps,.xls,.xlsx,.bmp,.gif,.jpeg,.jpg,.png,.tiff,.psd,.pmd,.pub,.doc'"
+                 ngf-max-size="'20MB'">
+
+    <span ng-show="progress > 0 && progress < 100">{{progress}}%</span>
+    <md-icon ng-hide="progress > 0 && progress < 100" md-svg-src="/assets/img/svg/add.svg"></md-icon>
+
+</md-fab-progress>

@@ -1,6 +1,8 @@
 <md-button class="md-fab {{fabClass}}" aria-label="{{fabAreaLabel}}" ng-click="click()">
     <ng-transclude></ng-transclude>
 </md-button>
-<md-progress-circular class="md-progress-circular {{progressClass}}" ng-show="loading" md-diameter="63"
-                      md-mode="indeterminate">
+<md-progress-circular ng-show="progressType === 'indeterminate' || progressValue > 0"
+                      class="md-progress-circular {{progressClass}}" ng-show="loading" md-diameter="63"
+                      md-mode="{{progressType}}" value="{{progressValue}}">
 </md-progress-circular>
+

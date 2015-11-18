@@ -2,7 +2,7 @@
   "name": "livrarium",
   "dependencies": {
     "angular": "1.4.7",
-    "angular-material": "0.11.1",
+    "angular-material": "0.11.4",
     "angular-messages": "1.4.7",
     "angular-recursion": "1.0.5",
     "angular-translate": "2.7.2",

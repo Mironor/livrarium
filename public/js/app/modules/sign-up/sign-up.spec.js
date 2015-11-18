@@ -94,10 +94,12 @@ describe('Sign up', function () {
         scope.signUpForm.$valid = true;
         scope.requestSent = false;
         var email = "valid@email.com";
+        var idRoot = 1;
         scope.model.email = email;
 
         $httpBackend.expectPOST(constants.api.signUp).respond({
-            "email": email
+            "email": email,
+            "idRoot": idRoot
         });
         $state.expectTransitionTo(constants.stateNames.cloudAll);
 
@@ -114,10 +116,12 @@ describe('Sign up', function () {
         scope.signUpForm.$valid = true;
         scope.requestSent = false;
         var email = "valid@email.com";
+        var idRoot = 1;
         scope.model.email = email;
 
         $httpBackend.expectPOST(constants.api.signUp).respond({
-            "email": email
+            "email": email,
+            "idRoot": idRoot
         });
         $state.expectTransitionTo(constants.stateNames.cloudAll);
 
@@ -128,6 +132,7 @@ describe('Sign up', function () {
 
         // Then
         expect(identity.email).toBe(email);
+        expect(identity.idRoot).toBe(idRoot);
     });
 
 });

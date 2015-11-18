@@ -12,7 +12,7 @@ create table "logininfos" ("id" BIGSERIAL NOT NULL PRIMARY KEY,"idUser" BIGINT N
 create table "oauth1infos" ("idLoginInfo" BIGINT NOT NULL,"token" VARCHAR(254) NOT NULL,"secret" VARCHAR(254) NOT NULL);
 create table "oauth2infos" ("idLoginInfo" BIGINT NOT NULL,"accesstoken" VARCHAR(254) NOT NULL,"tokentype" VARCHAR(254),"expiresin" INTEGER,"refreshtoken" VARCHAR(254));
 create table "passwordinfos" ("idLoginInfo" BIGINT NOT NULL,"hasher" VARCHAR(254) NOT NULL,"password" VARCHAR(254) NOT NULL,"salt" VARCHAR(254));
-create table "users" ("id" BIGSERIAL NOT NULL PRIMARY KEY,"email" VARCHAR(254) NOT NULL,"avatarURL" VARCHAR(254));
+create table "users" ("id" BIGSERIAL NOT NULL PRIMARY KEY,"idRoot" BIGSERIAL NOT NULL, "email" VARCHAR(254) NOT NULL,"avatarURL" VARCHAR(254));
 alter table "books" add constraint "BOOK_USER_FK" foreign key("idUser") references "users"("id") on update RESTRICT on delete CASCADE;
 alter table "books_to_folders" add constraint "BOOK_BOOKS_TO_FOLDERS_FK" foreign key("idBook") references "books"("id") on update RESTRICT on delete CASCADE;
 alter table "books_to_folders" add constraint "FOLDER_BOOKS_TO_FOLDERS_FK" foreign key("idFolder") references "folders"("id") on update RESTRICT on delete CASCADE;

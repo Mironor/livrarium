@@ -44,8 +44,9 @@ class UserDAOSpec extends LivrariumSpecification with ThrownMessages {
       val userDAO = new UserDAO
 
       val newEmail = "new email"
+      val newIdRoot = 1
       val newAvatarUrl = Option("new url")
-      val newUser = DBUser(None, newEmail, newAvatarUrl)
+      val newUser = DBUser(None, newIdRoot, newEmail, newAvatarUrl)
 
       // When
       val insertedUser = await(userDAO.insert(newUser))
@@ -54,6 +55,7 @@ class UserDAOSpec extends LivrariumSpecification with ThrownMessages {
 
       // Then
       foundUser.email must beEqualTo(newEmail)
+      foundUser.idRoot must beEqualTo(newIdRoot)
       foundUser.avatarURL must beEqualTo(newAvatarUrl)
     }
 

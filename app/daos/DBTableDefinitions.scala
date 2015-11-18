@@ -10,17 +10,20 @@ import slick.model.ForeignKeyAction
 object DBTableDefinitions {
 
   case class DBUser(id: Option[Long],
+                    idRoot: Long,
                     email: String,
                     avatarURL: Option[String])
 
   class Users(tag: Tag) extends Table[DBUser](tag, "users") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
+    
+    def idRoot = column[Long]("idRoot")
 
     def email = column[String]("email")
 
     def avatarURL = column[Option[String]]("avatarURL")
 
-    def * = (id.?, email, avatarURL) <>(DBUser.tupled, DBUser.unapply)
+    def * = (id.?, idRoot, email, avatarURL) <>(DBUser.tupled, DBUser.unapply)
   }
 
   case class DBLoginInfo(id: Option[Long],

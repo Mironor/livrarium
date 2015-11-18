@@ -1,10 +1,5 @@
 <div ng-controller="ContentAllController">
-    <div class="books" layout="row">
-        <div ng-repeat="book in books" layout-margin class="book" ng-dblclick="openBook(book)">
-            <div class="thumbnail">
-                <img ng-src="/assets/img/upload/{{currentFolder.id}}/{{book.identifier}}.jpg" alt=""/>
-            </div>
-        </div>
-    </div>
+    <lvr-content></lvr-content>
+    <lvr-upload-button></lvr-upload-button>
 </div>
 

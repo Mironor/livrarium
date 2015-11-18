@@ -7,7 +7,7 @@ import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
 import com.mohiva.play.silhouette.api.services.AvatarService
 import com.mohiva.play.silhouette.api.util.{Credentials, PasswordHasher, PasswordInfo}
 import com.mohiva.play.silhouette.impl.authenticators.SessionAuthenticator
-import com.mohiva.play.silhouette.impl.exceptions.InvalidPasswordException
+import com.mohiva.play.silhouette.impl.exceptions.{IdentityNotFoundException, InvalidPasswordException}
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
 import daos.silhouette.SilhouetteDAOException
 import models.User
@@ -44,7 +44,6 @@ class Application(implicit inj: Injector)
 
   /**
    * Handles the index action.
-   *
    * @return index page or cloud index page if user is authenticated
    */
   def index = UserAwareAction { implicit request =>
@@ -56,7 +55,6 @@ class Application(implicit inj: Injector)
 
   /**
    * Handles the Sign Out action.
-   *
    * @return The result to display.
    */
   def signOut = SecuredAction.async { implicit request =>
@@ -99,13 +97,21 @@ class Application(implicit inj: Injector)
           "code" -> inject[Int](identified by "errors.auth.userNotFound"),
           "message" -> "User was not found"
         ))
+        case e: IdentityNotFoundException => InternalServerError(Json.obj(
+          "code" -> inject[Int](identified by "errors.auth.userNotFound"),
+          "message" -> "User was not found"
+        ))
       }
   }
 
   private def authenticateUserByLoginInfo(loginInfo: LoginInfo)(implicit request: Request[_]): Future[Result] = {
     userService.retrieve(loginInfo).flatMap {
       case Some(user) => env.authenticatorService.create(user.loginInfo).flatMap { authenticator =>
-        val result = Ok(Json.obj("email" -> user.email))
+        val result = Ok(Json.obj(
+          "id" -> user.id,
+          "email" -> user.email,
+          "idRoot" -> user.idRoot
+        ))
 
         env.authenticatorService.init(authenticator).flatMap { value =>
           env.authenticatorService.embed(value, result)
@@ -123,7 +129,6 @@ class Application(implicit inj: Injector)
 
   /**
    * Registers a new user.
-   *
    * @return The result to display.
    */
   def signUpHandler = Action.async(BodyParsers.parse.json) { implicit request =>
@@ -158,13 +163,18 @@ class Application(implicit inj: Injector)
 
     val result = for {
       avatarURL <- avatarService.retrieveURL(email)
-      user <- userService.create(loginInfo, email, avatarURL)
-      //TODO: following 3 lines could execute in parallel
-      _ <- folderService.createRootForUser(user)
+      // new user cannot have root folder's id
+      userWithoutIdRoot <- userService.create(loginInfo, email, avatarURL)
+      rootFolder <- folderService.createRootForUser(userWithoutIdRoot)
+      user <- userService.save(userWithoutIdRoot.copy(idRoot = rootFolder.id))
       _ <- authInfoService.save(loginInfo, password)
       authenticator <- env.authenticatorService.create(user.loginInfo)
       value <- env.authenticatorService.init(authenticator)
-      result <- env.authenticatorService.embed(value, Ok(Json.obj("email" -> email)))
+      result <- env.authenticatorService.embed(value, Ok(Json.obj(
+        "id" -> user.id,
+        "email" -> email,
+        "idRoot" -> user.idRoot
+      )))
     } yield result
 
     result.recover {
