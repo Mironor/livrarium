@@ -9,16 +9,18 @@ case class FolderContents(id: Long,
 
 object FolderContents {
   // Implicit conversions for Json Serialisation / Deserialisation
-  implicit val folderContentsWrites: Writes[FolderContents] = (
-    (__ \ "id").write[Long] and
-      (__ \ "folders").write[Seq[Folder]] and
-      (__ \ "books").write[Seq[Book]]
-    )(unlift(FolderContents.unapply))
+  implicit val folderContentsWrites: Writes[FolderContents] = new Writes[FolderContents]{
+    def writes(folderContents: FolderContents) = Json.obj(
+      "id" -> folderContents.id,
+      "folders" -> folderContents.folders,
+      "books" -> folderContents.books
+    )
+  }
 
   implicit val folderContentsReads: Reads[FolderContents] = (
-    (__ \ "id").read[Long] and
-      (__ \ "folders").read[Seq[Folder]] and
-      (__ \ "books").read[Seq[Book]]
+    (JsPath \ "id").read[Long] and
+      (JsPath \ "folders").read[Seq[Folder]] and
+      (JsPath \ "books").read[Seq[Book]]
     )(FolderContents.apply _)
 }
 

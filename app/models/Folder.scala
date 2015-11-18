@@ -6,20 +6,22 @@ import play.api.libs.functional.syntax._
 
 case class Folder(id: Long,
                   name: String,
-                  children: Seq[Folder] = Vector.empty[Folder])
+                  children: Seq[Folder] = List.empty[Folder])
 
 object Folder {
   // Implicit conversions for Json Serialisation / Deserialisation
-  implicit val folderWrites: Writes[Folder] = (
-    (__ \ "id").write[Long] and
-      (__ \ "name").write[String] and
-      (__ \ "children").lazyWrite(Writes.seq(folderWrites))
-    )(unlift(Folder.unapply))
+  implicit lazy val folderWrites: Writes[Folder] = new Writes[Folder]{
+    def writes(folder: Folder) = Json.obj(
+      "id" -> folder.id,
+      "name" -> folder.name,
+      "children" -> folder.children
+    )
+  }
 
   implicit val folderReads: Reads[Folder] = (
-    (__ \ "id").read[Long] and
-      (__ \ "name").read[String] and
-      (__ \ "children").lazyRead(Reads.seq[Folder](folderReads))
+    (JsPath \ "id").read[Long] and
+      (JsPath \ "name").read[String] and
+      (JsPath \ "children").lazyRead(Reads.seq[Folder](folderReads))
     )(Folder.apply _)
 
   /**

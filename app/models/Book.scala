@@ -18,22 +18,24 @@ case class Book(id: Long,
 object Book {
 
   // Implicit conversions for Json Serialisation / Deserialisation
-  implicit val bookWrites: Writes[Book] = (
-    (__ \ "id").write[Long] and
-      (__ \ "identifier").write[String] and
-      (__ \ "name").write[String] and
-      (__ \ "format").write[String] and
-      (__ \ "pages").write[Int] and
-      (__ \ "currentPage").write[Int]
-    )(unlift(Book.unapply))
+  implicit val bookWrites: Writes[Book] = new Writes[Book] {
+    def writes(book: Book) = Json.obj(
+      "id" -> book.id,
+      "identifier" -> book.identifier,
+      "name" -> book.name,
+      "format" -> book.format,
+      "pages" -> book.totalPages,
+      "currentPage" -> book.currentPage
+    )
+  }
 
   implicit val bookReads: Reads[Book] = (
-    (__ \ "id").read[Long] and
-      (__ \ "identifier").read[String] and
-      (__ \ "name").read[String] and
-      (__ \ "format").read[String] and
-      (__ \ "pages").read[Int] and
-      (__ \ "currentPage").read[Int]
+    (JsPath \ "id").read[Long] and
+      (JsPath \ "identifier").read[String] and
+      (JsPath \ "name").read[String] and
+      (JsPath \ "format").read[String] and
+      (JsPath \ "pages").read[Int] and
+      (JsPath \ "currentPage").read[Int]
     )(Book.apply _)
 
 
