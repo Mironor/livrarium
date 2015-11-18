@@ -45,17 +45,30 @@ class Cloud(implicit inj: Injector)
 
   implicit val uploadBookReads = (__ \ 'idFolder).read[Long]
 
+  /**
+    * Handles cloud's index action.
+    * As the application is an SPA, this is the only non-api method that should be called in Cloud controller
+    * @return cloud index page if user is authenticated. Login page otherwise
+    */
   def index = authenticatedAction { user =>
        Ok(views.html.index(Json.obj(
          "user" -> Json.toJson(user)
        ).toString()))
   }
 
+  /**
+    * Fetches user's folder tree structure
+    * @return json with user's folder tree
+    */
   def getFolderTree = authenticatedActionAsync { user =>
     val rootFolder: Future[Folder] = folderService.retrieveFolderTree(user)
     rootFolder.map(folder => Ok(Json.toJson(folder)))
   }
 
+  /**
+    * Fetches user's root content
+    * @return json with user's root content
+    */
   def getRootContent = authenticatedActionAsync { user =>
     folderService.retrieveRoot(user).flatMap { rootFolderOption =>
       // TODO: create root if not present
@@ -76,12 +89,21 @@ class Cloud(implicit inj: Injector)
     } yield FolderContents(folderId, retrievedSubFolders, retrievedBooks)
   }
 
+  /**
+    * Fetches content from a folder with supplied id
+    * @param id folder's id to fetch content from
+    * @return json with content from a folder with supplied id
+    */
   def getContent(id: Long) = authenticatedActionAsync { user =>
     val folderContent: Future[FolderContents] = getFolderContents(user, id)
     folderContent.map(rootContent => Ok(Json.toJson(rootContent)))
 
   }
 
+  /**
+    * Creates new folder from parameters passed in POST (json params): parentId and newName
+    * @return json with new folder
+    */
   def createFolder() = authenticatedActionParseAsync(BodyParsers.parse.json) { (request, user) =>
     request.body.validate[(Long, String)].map {
       case (parentFolderId: Long, name: String) =>
@@ -96,6 +118,12 @@ class Cloud(implicit inj: Injector)
     }
   }
 
+  /**
+    * Uploads file to a folder with supplied id
+    * Also extracts thumbnail from uploaded file
+    * @param uploadFolderId folder's id to upload file to
+    * @return
+    */
   def upload(uploadFolderId: Long) = authenticatedActionParseAsync(BodyParsers.parse.multipartFormData) { (request, user) =>
     uploadForUser(user, uploadFolderId)(request)
   }

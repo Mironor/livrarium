@@ -160,7 +160,6 @@ class Application(implicit inj: Injector)
   }
 
   private def createNewUser(loginInfo: LoginInfo, email: String, password: PasswordInfo)(implicit request: Request[_]) = {
-
     val result = for {
       avatarURL <- avatarService.retrieveURL(email)
       // new user cannot have root folder's id
